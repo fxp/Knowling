@@ -14,13 +14,42 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from . import generic, param_sim, quiz, text
+from . import (
+    animation,
+    callout,
+    code,
+    concept_graph,
+    deep_dive,
+    figure,
+    flashcards,
+    generic,
+    interactive_demo,
+    param_sim,
+    quiz,
+    section,
+    step_through,
+    text,
+    timeline,
+    user_note,
+)
 
-# type → module
+# type → module (all 13 declared block types, design §4.3 / §7)
 REGISTRY = {
     "text": text,
+    "callout": callout,
+    "figure": figure,
+    "code": code,
+    "section": section,
     "quiz": quiz,
+    "flashcards": flashcards,
+    "timeline": timeline,
+    "concept_graph": concept_graph,
+    "interactive_demo": interactive_demo,
     "param_sim": param_sim,
+    "step_through": step_through,
+    "animation": animation,
+    "deep_dive": deep_dive,
+    "user_note": user_note,
 }
 
 IMPLEMENTED = tuple(REGISTRY.keys())

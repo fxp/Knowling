@@ -4,14 +4,14 @@
 
 > 完整设计见 [`knowling-design.md`](knowling-design.md)。本仓库当前实现 **P0 骨架**。
 
-## 已实现（P0 + P1，设计文档 §12）
+## 已实现（P0 + P1 + P2，设计文档 §12）
 
-跑通完整闭环 **`知识点 → 蓝图(KnowlingSpec) → 块编译 → 三维质检 → 自包含 HTML`**：
+跑通完整闭环 **`知识点 →(RAG grounding)→ 蓝图(KnowlingSpec) → 块编译 → 三维质检 → 自包含 HTML`**：
 
 **P0 骨架**
-- **Spec-first 管线**（`knowling/engine.py`）：Plan → Approval(auto) → Compile → QA → Assemble，每阶段发出进度事件。
+- **Spec-first 管线**（`knowling/engine.py`）：Retrieve → Plan → Approval(auto) → Compile → QA → Assemble，每阶段发出进度事件。
 - **KnowlingSpec 蓝图层**（`knowling/schema/`）：唯一可审阅 / diff 的中间表示（approval gate）。
-- **3 个块**（`knowling/blocks/`）：`text` / `quiz` / `param_sim`（滑块驱动、canvas 可视化的 explorable）。未实现的块类型回退到 `generic` 占位，不会让管线崩溃。
+- **全 13 类块**（`knowling/blocks/`）：`text` `callout` `figure` `code` `section` `quiz` `flashcards` `timeline` `concept_graph` `interactive_demo` `param_sim` `step_through` `animation` `deep_dive` `user_note`，均自包含、带 `qa_assertions`；未知类型回退 `generic` 占位。
 - **Provider 抽象**（`knowling/providers/`）：默认 GLM/zhipu（`glm-4.6`），无 API key 时自动回退离线 **MockProvider**，开箱即跑。
 - **CLI 双输出**（`knowling/cli.py`）：`-f rich`（人）/ `-f json`（agent 事件流）。
 - **自包含产物**：单个 `.html`，内联 CSS/JS，无外部运行时依赖。
@@ -22,7 +22,11 @@
 - **回溯 + 选优 + 重编译失败块**（`qa/loop.py`）：连续渲染报错回退最佳前序；选优 peda→interact→render→recency；只重编译失败块并注入质检建议。
 - **状态闸门**：三维全过才标 `status="ready"`，否则 `qa_failed`（未过质检不得 ready）。`--no-qa` 可跳过（停留 `draft`）。
 
-尚未实现（后续阶段）：① 大主题拆解、③ RAG grounding、全 13 类块、React target、Server API、模型驱动 GUI agent。
+**P2 全块 + RAG**
+- **全 13 类块**实现完毕（重心 `step_through` / `interactive_demo`；`concept_graph` 用内联 canvas 保持自包含）。
+- **RAG grounding**（`knowling/capabilities/retriever.py`）：零依赖 `SimpleRetriever`（snippet / 本地文件 + 关键词排序），grounding 注入 plan / compile / 教学评审。CLI `--ground <file>`（可重复）。
+
+尚未实现（后续阶段）：① 大主题拆解、知识图谱导航外壳、React target、Server API、模型驱动 GUI agent、LlamaIndex 向量检索。
 
 ## 快速开始
 

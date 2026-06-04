@@ -110,8 +110,8 @@ def test_param_sim_validation_requires_params():
 def test_unknown_block_falls_back_to_generic():
     from knowling.blocks import render_block_template
 
-    html = render_block_template({"type": "timeline", "block_id": "t1", "content_spec": {}})
-    assert "未实现块类型" in html and "timeline" in html
+    html = render_block_template({"type": "holo_deck", "block_id": "t1", "content_spec": {}})
+    assert "未实现块类型" in html and "holo_deck" in html
 
 
 def test_difficulty_validation():

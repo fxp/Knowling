@@ -19,7 +19,7 @@ from typing import Optional
 
 from . import __version__, blocks
 from .engine import Config, compile_spec, generate_knowling, plan_spec
-from .schema import KnowledgePoint, KnowlingSpec
+from .schema import KnowledgePoint, KnowlingSpec, SourceRef
 
 # ─────────────────────────── output helpers ───────────────────────────
 
@@ -106,6 +106,11 @@ def make_emitter(fmt: str):
 
 def _kp_from_args(args) -> KnowledgePoint:
     kp_id = args.id or _slug(args.title)
+    import os
+
+    refs = []
+    for g in (getattr(args, "ground", None) or []):
+        refs.append(SourceRef(id=os.path.basename(g), uri=g))
     return KnowledgePoint(
         id=kp_id,
         title=args.title,
@@ -115,6 +120,7 @@ def _kp_from_args(args) -> KnowledgePoint:
         audience=args.audience,
         prerequisites=[p.strip() for p in (args.prerequisites or "").split(",") if p.strip()],
         followups=[p.strip() for p in (args.followups or "").split(",") if p.strip()],
+        source_refs=refs,
     )
 
 
@@ -197,8 +203,8 @@ def cmd_blocks(args) -> int:
                          ensure_ascii=False))
     else:
         from .schema import BLOCK_TYPES
-        print("implemented (P0):", ", ".join(blocks.IMPLEMENTED))
-        print("declared:        ", ", ".join(BLOCK_TYPES))
+        print("implemented:", ", ".join(blocks.IMPLEMENTED))
+        print("declared:   ", ", ".join(BLOCK_TYPES))
     return 0
 
 
@@ -223,6 +229,8 @@ def _add_common(p: argparse.ArgumentParser, with_kp: bool = True) -> None:
         p.add_argument("--audience", default=None)
         p.add_argument("--prerequisites", default=None, help="comma-separated kp ids")
         p.add_argument("--followups", default=None, help="comma-separated kp ids")
+        p.add_argument("--ground", action="append", default=None,
+                       help="grounding source (local text/md file path); repeatable")
         p.add_argument("--approval", choices=["auto", "human"], default="auto")
 
 

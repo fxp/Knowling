@@ -20,6 +20,9 @@ python3 -m knowling.cli gen "链式法则" \
   --difficulty core --audience "高中生" \
   --format-render html -o ./out/
 
+# 带 RAG grounding（本地文件，可重复 --ground 锚定事实，防幻觉）
+python3 -m knowling.cli gen "欧姆定律" --description "V=IR" --ground ./notes/ohm.md -o ./out/
+
 # 仅产蓝图给人/agent 审阅（不编译）
 python3 -m knowling.cli plan "梯度下降" -o ./out/gd.spec.json
 
@@ -44,10 +47,12 @@ python3 -m knowling.cli blocks
   blocks:[ { block_id, type, intent, content_spec, interaction_spec? } ],
   render_target:"html"|"react", version }
 ```
-content_spec 约定：
+全部 13 类块均已实现（`text` `callout` `figure` `code` `section` `quiz` `flashcards` `timeline` `concept_graph` `interactive_demo` `param_sim` `step_through` `animation` `deep_dive` `user_note`），content_spec 见设计文档 §7。常用：
 - `text`     → `{ md }`
 - `quiz`     → `{ question, options[], answer:int, explain }`
 - `param_sim`→ `{ params:[{name,label,min,max,step,default}], outputs:[{name,label,expr}], explain }`（`expr` 是关于 param 名的 JS 表达式，如 `"x*x"`）
+- `interactive_demo` → `{ controls:[{name,label,kind}], outputs:[{name,label,expr}] }`（kind ∈ slider/number/select/checkbox/text）
+- `step_through` → `{ steps:[{state,explain}] }`
 
 ## 风格档（后续）
 计划提供 `knowling-minimal` / `knowling-rich-explorable` / `knowling-exam-prep` 多风格 skill，通过 triggers 区分。P0 暂为单一默认风格。

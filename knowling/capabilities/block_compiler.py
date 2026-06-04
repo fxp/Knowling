@@ -75,6 +75,14 @@ def compile(
 
     # real provider: LLM generates the block code
     hint = blocks.compile_prompt(block_dict, kp.to_dict())
+    if grounding:
+        from .retriever import format_grounding, GroundingChunk
+
+        gtext = grounding if isinstance(grounding, str) else format_grounding(
+            [g for g in grounding if isinstance(g, GroundingChunk)]
+        )
+        if gtext:
+            hint += "\n\n依据材料(事实须与此一致):\n" + gtext
     if suggestions:
         hint += "\n\n质检反馈(请据此修复):\n- " + "\n- ".join(suggestions)
     user = PROMPT_TEMPLATE.format(

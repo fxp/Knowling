@@ -57,7 +57,15 @@ def plan(
 ) -> Tuple[KnowlingSpec, ModelCall]:
     grounding_txt = ""
     if grounding:
-        grounding_txt = "依据材料(grounding):\n" + "\n".join(str(g) for g in grounding)
+        from .retriever import format_grounding, GroundingChunk
+
+        if isinstance(grounding, str):
+            body = grounding
+        else:
+            chunks = [g for g in grounding if isinstance(g, GroundingChunk)]
+            body = format_grounding(chunks) if chunks else "\n".join(str(g) for g in grounding)
+        if body:
+            grounding_txt = "依据材料(grounding):\n" + body
 
     user = PROMPT_TEMPLATE.format(
         title=kp.title,

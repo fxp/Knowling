@@ -8,7 +8,7 @@
 |------|------|------|
 | **P0 骨架** | 跑通「知识点→蓝图→单块→渲染」最小闭环 | ✅ 完成 |
 | **P1 质检** | 三维质检闭环 + 回溯选优 | ✅ 完成 |
-| **P2 全块** | 13 类块全实现 + RAG grounding | ⬜ 未开始 |
+| **P2 全块** | 13 类块全实现 + RAG grounding | ✅ 完成（React target 顺延）|
 | **P3 拆解+导航** | 大主题自动拆解 + 知识图谱外壳 | ⬜ 未开始 |
 | **P4 接口化** | MCP Tool + SKILL.md + Server API + IM 触发 | 🟡 部分（SKILL.md / CLI 已就绪）|
 | **P5 自训(可选)** | Step-GRPO 训练块编译小模型 | ⬜ 未开始 |
@@ -51,14 +51,17 @@
 
 ---
 
-## P2 · 全块 + RAG
+## P2 · 全块 + RAG（已完成；React target 顺延）
 
-- [ ] 补齐 13 类块：`callout` `figure` `code` `section` `flashcards` `timeline` `concept_graph` `interactive_demo` `step_through` `animation` `deep_dive` `user_note`
-  - 重心：`step_through`（逐步推演）、`interactive_demo`（通用可调演示）
-  - 每块实现 `schema` + `prompt` + `renderer` + `qa_assertions`（§7）
-- [ ] **Retriever**（`capabilities/retriever.py`）：RAG grounding（LlamaIndex），每块记录 `grounding` 供质检核对事实
-- [ ] React 单组件 target（`render_target="react"`）+ 对应渲染器
-- [ ] 块级单元 + 渲染回归测试扩展
+- [x] 补齐 13 类块：`callout` `figure` `code` `section` `flashcards` `timeline` `concept_graph` `interactive_demo` `step_through` `animation` `deep_dive` `user_note`
+  - 重心已实现：`step_through`（逐步推演）、`interactive_demo`（通用 slider/number/select/checkbox/text → 表达式输出）
+  - 每块实现 `validate` + `compile_prompt` + `template`(自包含渲染) + `qa_assertions`（§7）
+  - `concept_graph` 用内联 canvas 实现（非 ECharts CDN），保持自包含
+- [x] **Retriever**（`capabilities/retriever.py`）：grounding 接入 plan / compile / pedagogy；零依赖 `SimpleRetriever`（snippet / 本地文件 + 关键词排序）；LlamaIndex 为可选 `[rag]` extra
+- [x] CLI `--ground <file>`（可重复）注入 grounding；engine 新增 ③ Retrieve 阶段
+- [x] 块级单元 + 渲染回归测试（`tests/test_blocks.py` 参数化覆盖全部 13 类 + 真实浏览器零 console 错误验证）
+- [ ] **顺延**：React 单组件 target（`render_target="react"`）+ 渲染器（需构建环境，与「自包含单文件」原则有张力，单独评估）
+- [ ] **顺延**：LlamaIndex 向量检索 adapter 实装（接口已留）
 
 ---
 

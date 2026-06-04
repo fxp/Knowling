@@ -20,6 +20,8 @@ dev = ["pytest>=7"]
 # QA loop's real browser backend (screenshots + console capture). Without it,
 # the QA loop transparently falls back to the static (no-browser) sandbox.
 qa = ["playwright>=1.40"]
+# Optional vector-store RAG backend. The default SimpleRetriever is stdlib-only.
+rag = ["llama-index>=0.10"]
 
 [project.scripts]
 knowling = "knowling.cli:main"

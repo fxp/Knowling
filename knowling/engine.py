@@ -13,7 +13,7 @@ from typing import Any, Callable, List, Optional
 
 from . import blocks as block_registry
 from .assembler import assemble_html
-from .capabilities import block_compiler, spec_planner
+from .capabilities import block_compiler, retriever as retriever_mod, spec_planner
 from .capabilities.qa import QAConfig, qa_loop
 from .providers import LLMProvider, get_provider
 from .schema import (
@@ -41,6 +41,7 @@ class Config:
     render_target: str = "html"
     approval: str = "auto"  # "auto" | "human"
     quiet: bool = False
+    retriever_name: str = "auto"  # P2: RAG grounding backend
     qa_enabled: bool = True  # P1: run the three-dimensional QA loop
     qa: QAConfig = field(default_factory=QAConfig)
     approval_cb: Optional[Callable[[KnowlingSpec], KnowlingSpec]] = None
@@ -73,18 +74,30 @@ def _now() -> str:
 
 
 def plan_spec(
-    kp: KnowledgePoint, cfg: Config, emit: EventSink = _noop_sink
+    kp: KnowledgePoint, cfg: Config, emit: EventSink = _noop_sink, grounding=None
 ) -> "tuple[KnowlingSpec, ModelCall]":
     """Stage ② — produce the blueprint (no code)."""
     emit("stage", {"stage": "plan", "status": "start", "kp": kp.id})
     provider = cfg.planner_provider()
-    spec, call = spec_planner.plan(kp, None, provider, render_target=cfg.render_target)
+    spec, call = spec_planner.plan(kp, grounding, provider, render_target=cfg.render_target)
     emit("cost", {"stage": "plan", **call.to_dict()})
     emit(
         "stage",
         {"stage": "plan", "status": "done", "blocks": [b.type for b in spec.blocks]},
     )
     return spec, call
+
+
+def retrieve(kp: KnowledgePoint, cfg: Config, emit: EventSink = _noop_sink):
+    """Stage ③ — optional RAG grounding from kp.source_refs (design §5 ③)."""
+    if not kp.source_refs:
+        return None
+    emit("stage", {"stage": "retrieve", "status": "start", "refs": len(kp.source_refs)})
+    r = retriever_mod.get_retriever(cfg.retriever_name)
+    query = f"{kp.title} {kp.description}"
+    chunks = r.fetch(kp.source_refs, query=query)
+    emit("stage", {"stage": "retrieve", "status": "done", "chunks": len(chunks)})
+    return chunks or None
 
 
 def approval_gate(spec: KnowlingSpec, cfg: Config, emit: EventSink = _noop_sink) -> KnowlingSpec:
@@ -97,7 +110,8 @@ def approval_gate(spec: KnowlingSpec, cfg: Config, emit: EventSink = _noop_sink)
 
 
 def compile_blocks(
-    spec: KnowlingSpec, kp: KnowledgePoint, cfg: Config, emit: EventSink = _noop_sink
+    spec: KnowlingSpec, kp: KnowledgePoint, cfg: Config, emit: EventSink = _noop_sink,
+    grounding=None,
 ) -> "tuple[List[str], List[ModelCall]]":
     """Stage ④ — compile each block to a self-contained fragment."""
     provider = cfg.compiler_provider()
@@ -110,7 +124,7 @@ def compile_blocks(
              "i": i + 1, "n": len(spec.blocks)},
         )
         try:
-            html, call = block_compiler.compile(b, kp, None, provider)
+            html, call = block_compiler.compile(b, kp, grounding, provider)
         except Exception as e:  # block-level failure shouldn't kill the run in P0
             emit("warn", {"stage": "compile", "block_id": b.block_id, "error": str(e)})
             html = block_registry.render_block_template(b.to_dict())
@@ -178,10 +192,11 @@ def compile_spec(
     out_path: Optional[str] = None,
     emit: EventSink = _noop_sink,
     base_trace: Optional[List[ModelCall]] = None,
+    grounding=None,
 ) -> Knowling:
     """Stages ④ Compile → ⑤ QA → ⑥ Assemble (shared by gen and compile)."""
     trace = list(base_trace or [])
-    fragments, compile_calls = compile_blocks(spec, kp, cfg, emit)
+    fragments, compile_calls = compile_blocks(spec, kp, cfg, emit, grounding=grounding)
     trace += compile_calls
 
     qa_report: Optional[QAReport] = None
@@ -195,7 +210,7 @@ def compile_spec(
             "judge": cfg.provider("judge"),
         }
         best_html, qa_report, fragments = qa_loop(
-            spec, kp, fragments, providers, cfg.qa, grounding=None,
+            spec, kp, fragments, providers, cfg.qa, grounding=grounding,
             emit=emit, model_trace=trace,
         )
         status = "ready" if qa_report.passed else "qa_failed"
@@ -220,6 +235,8 @@ def generate_knowling(
     """Full pipeline: Plan → Approve → Compile → QA → Assemble."""
     cfg = cfg or Config()
     emit("info", {"msg": "generate_knowling start", "kp": kp.id, "provider": cfg.provider_name})
-    spec, plan_call = plan_spec(kp, cfg, emit)
+    grounding = retrieve(kp, cfg, emit)
+    spec, plan_call = plan_spec(kp, cfg, emit, grounding=grounding)
     spec = approval_gate(spec, cfg, emit)
-    return compile_spec(spec, kp, cfg, out_path=out_path, emit=emit, base_trace=[plan_call])
+    return compile_spec(spec, kp, cfg, out_path=out_path, emit=emit,
+                        base_trace=[plan_call], grounding=grounding)
