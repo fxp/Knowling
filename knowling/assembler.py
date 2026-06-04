@@ -128,6 +128,27 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-usernote-area { width: 100%; border: 1px solid var(--kl-border); border-radius: 8px; padding: 10px; font: inherit; resize: vertical; }
 /* deep_dive */
 .kl-deepdive summary { cursor: pointer; font-weight: 600; }
+/* ── card deck (one block at a time) ── */
+.kl-deck { margin: 20px 0 4px; }
+.kl-deck-viewport { overflow: hidden; transition: height .35s ease; }
+.kl-deck-track { display: flex; align-items: flex-start; transition: transform .38s cubic-bezier(.4,0,.2,1); will-change: transform; }
+.kl-card { flex: 0 0 100%; width: 100%; padding: 2px; }
+.kl-card > .kl-block, .kl-card > details.kl-block { margin: 0; }
+.kl-deck-nav { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 18px; }
+.kl-deck-prev, .kl-deck-next {
+  font: inherit; padding: 9px 18px; border: 1px solid var(--kl-border);
+  border-radius: 999px; background: var(--kl-bg); color: var(--kl-fg); cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.kl-deck-next { border-color: var(--kl-accent); background: var(--kl-accent); color: #fff; }
+.kl-deck-prev:hover { background: var(--kl-soft); }
+.kl-deck-prev:disabled, .kl-deck-next:disabled { opacity: .4; cursor: default; }
+.kl-deck-center { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.kl-deck-progress { color: var(--kl-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.kl-deck-dots { display: flex; gap: 7px; }
+.kl-deck-dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--kl-border); background: transparent; cursor: pointer; transition: background .15s, transform .15s; }
+.kl-deck-dot.is-active { background: var(--kl-accent); border-color: var(--kl-accent); transform: scale(1.15); }
+.kl-deck-done { text-align: center; color: var(--kl-ok); font-size: 14px; margin-top: 10px; }
 /* generic fallback */
 .kl-generic-tag { color: var(--kl-accent-2); font-size: 14px; }
 .kl-generic pre { background: var(--kl-soft); padding: 12px; border-radius: 8px; overflow: auto; font-size: 13px; }
@@ -135,9 +156,67 @@ button:disabled { opacity: .45; cursor: default; }
 """
 
 
+# Knowledge-card deck: shows one block at a time with prev/next + dots.
+# A horizontal track (each card 100% wide) is translated into view, so every
+# card keeps real layout width — canvas/clientWidth-based blocks render correctly
+# even before they're shown. A ResizeObserver keeps the viewport height matched
+# to the active card (so quiz feedback / disclosures grow it smoothly).
+_DECK_JS = """
+(function () {
+  var deck = document.querySelector('[data-deck]');
+  if (!deck) return;
+  var track = deck.querySelector('.kl-deck-track');
+  var viewport = deck.querySelector('.kl-deck-viewport');
+  var cards = Array.prototype.slice.call(track.children);
+  var prev = deck.querySelector('.kl-deck-prev');
+  var next = deck.querySelector('.kl-deck-next');
+  var prog = deck.querySelector('.kl-deck-progress');
+  var dotsBox = deck.querySelector('.kl-deck-dots');
+  var nav = deck.querySelector('.kl-deck-nav');
+  var n = cards.length, idx = 0;
+  if (n <= 1) { if (nav) nav.style.display = 'none'; return; }
+
+  var dots = cards.map(function (_, i) {
+    var d = document.createElement('button');
+    d.className = 'kl-deck-dot'; d.type = 'button';
+    d.setAttribute('aria-label', '第 ' + (i + 1) + ' 张');
+    d.addEventListener('click', function () { go(i); });
+    dotsBox.appendChild(d); return d;
+  });
+
+  function setHeight() { viewport.style.height = cards[idx].offsetHeight + 'px'; }
+  function render() {
+    track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+    prog.textContent = (idx + 1) + ' / ' + n;
+    prev.disabled = idx === 0;
+    next.textContent = idx === n - 1 ? '完成 ✓' : '下一张 ›';
+    dots.forEach(function (d, i) { d.classList.toggle('is-active', i === idx); });
+    setHeight();
+  }
+  function go(i) { idx = Math.max(0, Math.min(n - 1, i)); render(); }
+
+  prev.addEventListener('click', function () { go(idx - 1); });
+  next.addEventListener('click', function () { if (idx < n - 1) go(idx + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') go(idx - 1);
+    else if (e.key === 'ArrowRight') go(idx + 1);
+  });
+  window.addEventListener('resize', setHeight);
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function () { setHeight(); });
+    cards.forEach(function (c) { ro.observe(c); });
+  }
+  render();
+  setTimeout(setHeight, 60); setTimeout(setHeight, 320);
+})();
+"""
+
+
 def assemble_html(spec: KnowlingSpec, fragments: List[str], title: str) -> str:
+    """Assemble block fragments into a single self-contained knowledge-card deck."""
     hook = spec.pedagogy.hook if spec.pedagogy else ""
-    body = "\n".join(fragments)
+    cards = "\n".join(f'<div class="kl-card">{frag}</div>' for frag in fragments)
+    hook_html = f'<p class="kl-hook">{_html.escape(hook)}</p>' if hook else ""
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -150,10 +229,25 @@ def assemble_html(spec: KnowlingSpec, fragments: List[str], title: str) -> str:
 <main class="kl-doc">
   <header class="kl-header">
     <h1>{_html.escape(title)}</h1>
-    {f'<p class="kl-hook">{_html.escape(hook)}</p>' if hook else ''}
+    {hook_html}
   </header>
-{body}
-  <footer class="kl-footer">Generated by Knowling · 自包含交互学习组件</footer>
+  <div class="kl-deck" data-deck>
+    <div class="kl-deck-viewport">
+      <div class="kl-deck-track">
+{cards}
+      </div>
+    </div>
+    <nav class="kl-deck-nav">
+      <button class="kl-deck-prev" type="button">‹ 上一张</button>
+      <div class="kl-deck-center">
+        <div class="kl-deck-dots"></div>
+        <span class="kl-deck-progress"></span>
+      </div>
+      <button class="kl-deck-next" type="button">下一张 ›</button>
+    </nav>
+  </div>
+  <footer class="kl-footer">Generated by Knowling · 自包含交互学习卡片</footer>
 </main>
+<script>{_DECK_JS}</script>
 </body>
 </html>"""

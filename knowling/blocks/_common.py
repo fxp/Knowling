@@ -41,9 +41,11 @@ def count_tag(seg: str, tag: str) -> int:
 def scope(html: str, block_id: str) -> str:
     """Return the substring of ``html`` belonging to one block (by data-block-id).
 
-    From the block's opening tag to the next *different* block's tag (or EOF).
-    A block's own id recurs inside its <script>, so we must skip same-id markers
-    when locating the boundary. Used by static QA assertions.
+    From the block's opening tag to the next boundary: a *different* block's tag,
+    or the deck chrome (nav/footer) that follows the last card. A block's own id
+    recurs inside its <script>, so same-id markers are skipped. Bounding at the
+    deck chrome prevents the trailing deck <script> from leaking into the last
+    block's scope. Used by static QA assertions.
     """
     if not block_id:
         return html
@@ -52,12 +54,21 @@ def scope(html: str, block_id: str) -> str:
     if start == -1:
         return ""
     tag_start = html.rfind("<", 0, start)
-    for m in re.finditer(r'data-block-id="([^"]*)"', html[start + len(marker):]):
+    after = start + len(marker)
+    rest = html[after:]
+
+    boundary = len(rest)  # default: EOF
+    for m in re.finditer(r'data-block-id="([^"]*)"', rest):
         if m.group(1) != block_id:
-            nxt = start + len(marker) + m.start()
-            end = html.rfind("<", 0, nxt)
-            return html[tag_start:end]
-    return html[tag_start:]
+            boundary = min(boundary, m.start())
+            break
+    # also stop at the deck shell that trails the final card
+    for sentinel in ('class="kl-deck-nav"', "class='kl-deck-nav'", "<footer"):
+        p = rest.find(sentinel)
+        if p != -1:
+            boundary = min(boundary, p)
+    end = html.rfind("<", 0, after + boundary)
+    return html[tag_start:end] if end > tag_start else html[tag_start:after + boundary]
 
 
 def mini_markdown(md: str) -> str:

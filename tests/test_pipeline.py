@@ -117,3 +117,24 @@ def test_unknown_block_falls_back_to_generic():
 def test_difficulty_validation():
     with pytest.raises(ValueError):
         KnowledgePoint(id="x", title="t", difficulty="impossible")
+
+
+def test_assemble_is_a_card_deck():
+    """Each block becomes one card; the deck shows one at a time (not flat)."""
+    from knowling.assembler import assemble_html
+    from knowling.schema import BlockSpec, KnowlingSpec
+
+    spec = KnowlingSpec(knowledge_point_id="k", blocks=[
+        BlockSpec(block_id="b1", type="text", content_spec={"md": "a"}),
+        BlockSpec(block_id="b2", type="text", content_spec={"md": "b"}),
+        BlockSpec(block_id="b3", type="text", content_spec={"md": "c"}),
+    ])
+    frags = ['<section data-block-id="b1">A</section>',
+             '<section data-block-id="b2">B</section>',
+             '<section data-block-id="b3">C</section>']
+    html = assemble_html(spec, frags, "T")
+    assert html.count('class="kl-card"') == 3
+    assert "data-deck" in html and "kl-deck-track" in html
+    assert "kl-deck-prev" in html and "kl-deck-next" in html
+    # the deck script drives navigation
+    assert "translateX" in html
