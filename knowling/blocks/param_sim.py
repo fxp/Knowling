@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit
+from ._common import esc, jslit, scope as _scope
 
 TYPE = "param_sim"
 
@@ -39,6 +39,31 @@ def validate(content_spec: Dict[str, Any]) -> None:
         for k in ("name", "expr"):
             if k not in o:
                 raise ValueError(f"param_sim output missing '{k}': {o}")
+
+
+def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Explorable invariant (design §7): slider drives observable output."""
+    bid = block.get("block_id", "")
+
+    def has_slider(html: str) -> bool:
+        seg = _scope(html, bid)
+        return 'type="range"' in seg and "data-param" in seg
+
+    def has_output(html: str) -> bool:
+        return "data-out=" in _scope(html, bid)
+
+    def wired_to_change(html: str) -> bool:
+        seg = _scope(html, bid)
+        return "addEventListener('input'" in seg or 'addEventListener("input"' in seg or "oninput" in seg
+
+    return [
+        {"id": f"{bid}.slider", "description": "渲染出可拖动滑块", "check": has_slider,
+         "gui_hint": "页面应有 range 滑块控件"},
+        {"id": f"{bid}.output", "description": "存在可观察输出", "check": has_output,
+         "gui_hint": "页面应展示随参数变化的输出数值/曲线"},
+        {"id": f"{bid}.reactive", "description": "拖动滑块输出即时更新", "check": wired_to_change,
+         "gui_hint": "拖动滑块后输出数值与曲线应立即变化"},
+    ]
 
 
 def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:

@@ -20,19 +20,34 @@ def _kp():
     )
 
 
-def test_full_loop_mock(tmp_path):
+def _cfg(qa=True):
+    from knowling.capabilities.qa import QAConfig
+
+    return Config(provider_name="mock", quiet=True, qa_enabled=qa,
+                  qa=QAConfig(sandbox_name="static"))
+
+
+def test_full_loop_no_qa(tmp_path):
     out = tmp_path / "k.html"
-    cfg = Config(provider_name="mock", quiet=True)
-    k = generate_knowling(_kp(), cfg, out_path=str(out))
-    assert k.status == "draft"  # no QA in P0 → never "ready"
+    k = generate_knowling(_kp(), _cfg(qa=False), out_path=str(out))
+    assert k.status == "draft"  # QA skipped → never "ready"
     assert out.exists()
     html = out.read_text(encoding="utf-8")
     assert "<!DOCTYPE html>" in html
     assert "kl-paramsim" in html and "kl-quiz" in html
-    # self-contained: no external src/href to http(s)
     assert "http://" not in html.replace("http://www.w3.org", "")
     assert k.spec.knowledge_point_id == "calc.derivative.chain-rule"
     assert len(k.model_trace) >= 2
+
+
+def test_full_loop_with_qa_ready(tmp_path):
+    out = tmp_path / "k.html"
+    k = generate_knowling(_kp(), _cfg(qa=True), out_path=str(out))
+    # mock templates satisfy all three dimensions → ready
+    assert k.status == "ready"
+    assert k.qa.passed is True
+    assert k.qa.score_interact == 5.0
+    assert k.qa.score_render is not None and k.qa.score_peda is not None
 
 
 def test_spec_roundtrips():

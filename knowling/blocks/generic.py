@@ -18,6 +18,10 @@ def validate(content_spec: Dict[str, Any]) -> None:
     return None
 
 
+def qa_assertions(block: Dict[str, Any]):
+    return []  # unimplemented placeholder — nothing to assert
+
+
 def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:
     return (
         f"Render block type '{block.get('type')}' as a self-contained HTML "

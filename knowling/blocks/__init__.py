@@ -46,6 +46,13 @@ def validate(block: Dict[str, Any]) -> None:
     mod.validate(block.get("content_spec", {}))
 
 
+def qa_assertions(block: Dict[str, Any]):
+    """Return this block's interaction invariants (design §7 qa_assertions)."""
+    mod = get_block(block.get("type", "text"))
+    fn = getattr(mod, "qa_assertions", None)
+    return fn(block) if fn else []
+
+
 __all__ = [
     "REGISTRY",
     "IMPLEMENTED",
@@ -53,4 +60,5 @@ __all__ = [
     "render_block_template",
     "compile_prompt",
     "validate",
+    "qa_assertions",
 ]

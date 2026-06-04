@@ -52,6 +52,11 @@ content_spec 约定：
 ## 风格档（后续）
 计划提供 `knowling-minimal` / `knowling-rich-explorable` / `knowling-exam-prep` 多风格 skill，通过 triggers 区分。P0 暂为单一默认风格。
 
+## 质检（P1，已接入）
+- `gen` / `compile` 默认跑三维质检闭环：渲染分 → 交互分 → 教学分，三维全过才标 `status="ready"`，否则 `qa_failed`。
+- 沙箱优先用 Playwright（真实浏览器截图+console），缺省自动回退结构化静态沙箱（仍可离线跑）。
+- `--no-qa` 跳过质检（产物停留 `draft`）；QA 进度/分数进入 rich/json 事件流。
+
 ## 注意
-- 产物 `status` 在 P0 恒为 `draft`（未过质检不得标 `ready`，见设计文档 §3.1）。
+- 未过质检不得标 `ready`（设计文档 §3.1）。
 - 编译产物为单个自包含 `.html`，可直接嵌入/分发。

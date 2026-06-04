@@ -47,6 +47,7 @@ def compile(
     kp: KnowledgePoint,
     grounding: Optional[List[Any]],
     provider: LLMProvider,
+    suggestions: Optional[List[str]] = None,
 ) -> Tuple[str, ModelCall]:
     block_dict = block.to_dict()
 
@@ -73,11 +74,14 @@ def compile(
         return (comp.text or html), call
 
     # real provider: LLM generates the block code
+    hint = blocks.compile_prompt(block_dict, kp.to_dict())
+    if suggestions:
+        hint += "\n\n质检反馈(请据此修复):\n- " + "\n- ".join(suggestions)
     user = PROMPT_TEMPLATE.format(
         type=block.type,
         block_id=block.block_id,
         kp_title=kp.title,
-        compile_hint=blocks.compile_prompt(block_dict, kp.to_dict()),
+        compile_hint=hint,
     )
     comp = provider.complete(
         [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],

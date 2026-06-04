@@ -14,6 +14,7 @@ from typing import Any, Callable, List, Optional
 from . import blocks as block_registry
 from .assembler import assemble_html
 from .capabilities import block_compiler, spec_planner
+from .capabilities.qa import QAConfig, qa_loop
 from .providers import LLMProvider, get_provider
 from .schema import (
     Artifact,
@@ -40,25 +41,28 @@ class Config:
     render_target: str = "html"
     approval: str = "auto"  # "auto" | "human"
     quiet: bool = False
-    # P1+: qa thresholds etc.
+    qa_enabled: bool = True  # P1: run the three-dimensional QA loop
+    qa: QAConfig = field(default_factory=QAConfig)
     approval_cb: Optional[Callable[[KnowlingSpec], KnowlingSpec]] = None
-    _planner_provider: Optional[LLMProvider] = None
-    _compiler_provider: Optional[LLMProvider] = None
+    _providers: dict = field(default_factory=dict)
 
-    def planner_provider(self) -> LLMProvider:
-        if self._planner_provider is None:
-            self._planner_provider = get_provider(
-                self.provider_name, role="plan", model=self.model, quiet=self.quiet
+    def provider(self, role: str) -> LLMProvider:
+        """Cached per-role provider (cost separation, design §6.3)."""
+        if role not in self._providers:
+            # model override only applies to plan/compile; QA roles use defaults
+            mdl = self.model if role in ("plan", "compile") else None
+            self._providers[role] = get_provider(
+                self.provider_name, role=role, model=mdl,
+                quiet=(self.quiet or role != "plan"),
             )
-        return self._planner_provider
+        return self._providers[role]
+
+    # back-compat accessors
+    def planner_provider(self) -> LLMProvider:
+        return self.provider("plan")
 
     def compiler_provider(self) -> LLMProvider:
-        if self._compiler_provider is None:
-            # reuse planner provider if same binding (keeps mock fallback aligned)
-            self._compiler_provider = get_provider(
-                self.provider_name, role="compile", model=self.model, quiet=True
-            )
-        return self._compiler_provider
+        return self.provider("compile")
 
 
 def _now() -> str:
@@ -126,6 +130,8 @@ def finalize(
     cfg: Config,
     out_path: Optional[str] = None,
     emit: EventSink = _noop_sink,
+    qa_report: Optional[QAReport] = None,
+    status: str = "draft",
 ) -> Knowling:
     """Stage ⑥ — assemble artifact, build graph links, finalize record."""
     emit("stage", {"stage": "assemble", "status": "start"})
@@ -141,15 +147,18 @@ def finalize(
         entry = out_path
 
     artifact = Artifact(format=spec.render_target, entry=entry, self_contained=True)
-    # P0 has no QA loop → status is "draft" (not "ready"; design §3.1 #2).
+    if qa_report is None:
+        # QA skipped → never "ready" (design §3.1 #2)
+        qa_report = QAReport(passed=False, notes=["QA loop skipped"])
+        status = "draft"
     knowling = Knowling(
         id=f"knowling.{kp.id}",
         knowledge_point_id=kp.id,
         spec=spec,
         artifact=artifact,
-        qa=QAReport(passed=False, notes=["P0: QA loop not yet run"]),
+        qa=qa_report,
         graph_links=GraphLinks(prerequisites=kp.prerequisites, followups=kp.followups),
-        status="draft",
+        status=status,
         created_at=_now(),
         model_trace=model_trace,
     )
@@ -162,23 +171,55 @@ def finalize(
 # ─────────────────────────── orchestrator ───────────────────────────
 
 
+def compile_spec(
+    spec: KnowlingSpec,
+    kp: KnowledgePoint,
+    cfg: Config,
+    out_path: Optional[str] = None,
+    emit: EventSink = _noop_sink,
+    base_trace: Optional[List[ModelCall]] = None,
+) -> Knowling:
+    """Stages ④ Compile → ⑤ QA → ⑥ Assemble (shared by gen and compile)."""
+    trace = list(base_trace or [])
+    fragments, compile_calls = compile_blocks(spec, kp, cfg, emit)
+    trace += compile_calls
+
+    qa_report: Optional[QAReport] = None
+    status = "draft"
+    if cfg.qa_enabled:
+        emit("stage", {"stage": "qa", "status": "start"})
+        providers = {
+            "compile": cfg.provider("compile"),
+            "render": cfg.provider("render_vlm"),
+            "gui": cfg.provider("gui"),
+            "judge": cfg.provider("judge"),
+        }
+        best_html, qa_report, fragments = qa_loop(
+            spec, kp, fragments, providers, cfg.qa, grounding=None,
+            emit=emit, model_trace=trace,
+        )
+        status = "ready" if qa_report.passed else "qa_failed"
+        emit("stage", {"stage": "qa", "status": "done", "passed": qa_report.passed,
+                       "ready": status == "ready"})
+
+    knowling = finalize(spec, kp, fragments, trace, cfg, out_path=out_path, emit=emit,
+                        qa_report=qa_report, status=status)
+
+    total_cost = round(sum(c.cost_usd for c in trace), 6)
+    emit("done", {"id": knowling.id, "status": knowling.status, "cost_usd": total_cost,
+                  "entry": knowling.artifact.entry, "qa": knowling.qa.to_dict()})
+    return knowling
+
+
 def generate_knowling(
     kp: KnowledgePoint,
     cfg: Optional[Config] = None,
     out_path: Optional[str] = None,
     emit: EventSink = _noop_sink,
 ) -> Knowling:
-    """Full P0 pipeline: Plan → Approve → Compile → Assemble."""
+    """Full pipeline: Plan → Approve → Compile → QA → Assemble."""
     cfg = cfg or Config()
     emit("info", {"msg": "generate_knowling start", "kp": kp.id, "provider": cfg.provider_name})
-
     spec, plan_call = plan_spec(kp, cfg, emit)
     spec = approval_gate(spec, cfg, emit)
-    fragments, compile_calls = compile_blocks(spec, kp, cfg, emit)
-    trace = [plan_call] + compile_calls
-    knowling = finalize(spec, kp, fragments, trace, cfg, out_path=out_path, emit=emit)
-
-    total_cost = round(sum(c.cost_usd for c in trace), 6)
-    emit("done", {"id": knowling.id, "status": knowling.status, "cost_usd": total_cost,
-                  "entry": knowling.artifact.entry})
-    return knowling
+    return compile_spec(spec, kp, cfg, out_path=out_path, emit=emit, base_trace=[plan_call])

@@ -17,6 +17,28 @@ def jslit(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False).replace("</", "<\\/")
 
 
+def scope(html: str, block_id: str) -> str:
+    """Return the substring of ``html`` belonging to one block (by data-block-id).
+
+    From the block's opening tag to the next *different* block's tag (or EOF).
+    A block's own id recurs inside its <script>, so we must skip same-id markers
+    when locating the boundary. Used by static QA assertions.
+    """
+    if not block_id:
+        return html
+    marker = f'data-block-id="{block_id}"'
+    start = html.find(marker)
+    if start == -1:
+        return ""
+    tag_start = html.rfind("<", 0, start)
+    for m in re.finditer(r'data-block-id="([^"]*)"', html[start + len(marker):]):
+        if m.group(1) != block_id:
+            nxt = start + len(marker) + m.start()
+            end = html.rfind("<", 0, nxt)
+            return html[tag_start:end]
+    return html[tag_start:]
+
+
 def mini_markdown(md: str) -> str:
     """Intentionally tiny MD→HTML: headings, bold, italic, inline code, lists,
     paragraphs. Enough for P0 text/callout blocks without a Markdown dep."""

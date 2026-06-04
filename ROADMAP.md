@@ -7,7 +7,7 @@
 | 阶段 | 目标 | 状态 |
 |------|------|------|
 | **P0 骨架** | 跑通「知识点→蓝图→单块→渲染」最小闭环 | ✅ 完成 |
-| **P1 质检** | 三维质检闭环 + 回溯选优 | ⬜ 未开始 |
+| **P1 质检** | 三维质检闭环 + 回溯选优 | ✅ 完成 |
 | **P2 全块** | 13 类块全实现 + RAG grounding | ⬜ 未开始 |
 | **P3 拆解+导航** | 大主题自动拆解 + 知识图谱外壳 | ⬜ 未开始 |
 | **P4 接口化** | MCP Tool + SKILL.md + Server API + IM 触发 | 🟡 部分（SKILL.md / CLI 已就绪）|
@@ -33,21 +33,21 @@
 
 ---
 
-## P1 · 质检闭环（下一步，护城河）
+## P1 · 质检闭环（已完成，护城河）
 
 > 来源：WebGen-Agent 三动作 `code gen → execution → feedback`，本设计扩展教学维。
 
-- [ ] **沙箱**（`sandbox/`）：headless 浏览器渲染组件 + 截图 + 注入交互探针
-  - 选型：Playwright（Python）；产物为单文件 HTML，`file://` 直接加载
-- [ ] **F1 渲染质检**（`capabilities/qa/render_vlm.py`）：小 VLM 看截图 → `{description, score_render(0-5), suggestions[]}`
-- [ ] **F2 交互质检**（`capabilities/qa/gui_agent.py`）：达标后启动，真实操作控件，校验 `interaction_spec.invariants`
-- [ ] **F3 教学质检**（`capabilities/qa/pedagogy_judge.py`）：强 LLM 锚定 Explorable Explanations 准则（§10.3）
-- [ ] **QA loop**（`capabilities/qa/loop.py`）：回溯（连续 5 步报错回退最佳前序）+ 选优（peda→interact→render→recency）
-- [ ] 失败块定位 + 只重编译失败块（不整体重来）
-- [ ] 三维全过才标 `status="ready"`，写入 `QAReport`
-- [ ] 块级 `qa_assertions` 生成器（每块产出可执行断言）
+- [x] **沙箱**（`sandbox/`）：Playwright headless Chromium 渲染 + 截图 + console 捕获；无 Playwright 时自动回退 `StaticSandbox`（结构校验，QA 仍可离线跑）
+- [x] **F1 渲染质检**（`capabilities/qa/render_vlm.py`）：GLM-4V 看截图 → `{description, score(0-5), suggestions[]}`；离线走结构启发式
+- [x] **F2 交互质检**（`capabilities/qa/gui_agent.py`）：达标后校验每块 `qa_assertions`（即 `interaction_spec.invariants`）
+- [x] **F3 教学质检**（`capabilities/qa/pedagogy_judge.py`）：强 LLM 锚定 Explorable Explanations 准则（§10.3）；离线走覆盖度启发式
+- [x] **QA loop**（`capabilities/qa/loop.py`）：回溯（连续 5 步渲染报错回退最佳前序）+ 选优（peda→interact→render→recency）
+- [x] 失败块定位 + 只重编译失败块（带质检建议注入 prompt）
+- [x] 三维全过才标 `status="ready"`，否则 `qa_failed`，写入 `QAReport`
+- [x] 块级 `qa_assertions` 生成器（quiz/param_sim 各产出可执行断言）
+- [x] CLI `--no-qa` 开关；QA 事件进入 rich/json 双输出流
 
-**验收**：对 3 个知识点生成的 Knowling 走完质检；准确率/外观分较 P0 有可量化提升。
+**待补强（P2 一并做）**：模型驱动的 GUI agent（真实点击控件的语义 `gui_hint` 校验，当前为结构断言）；GLM-4V 视觉路径的端到端联调（需带 key + 浏览器环境）。
 
 ---
 

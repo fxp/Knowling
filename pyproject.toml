@@ -17,6 +17,9 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
+# QA loop's real browser backend (screenshots + console capture). Without it,
+# the QA loop transparently falls back to the static (no-browser) sandbox.
+qa = ["playwright>=1.40"]
 
 [project.scripts]
 knowling = "knowling.cli:main"

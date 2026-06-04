@@ -18,7 +18,7 @@ import sys
 from typing import Optional
 
 from . import __version__, blocks
-from .engine import Config, compile_blocks, finalize, generate_knowling, plan_spec
+from .engine import Config, compile_spec, generate_knowling, plan_spec
 from .schema import KnowledgePoint, KnowlingSpec
 
 # ─────────────────────────── output helpers ───────────────────────────
@@ -61,16 +61,40 @@ def make_emitter(fmt: str):
                 if st == "assemble" and payload.get("entry"):
                     detail = c("dim", "  → " + payload["entry"])
                 print(c("green", f"  ✓ {st}") + detail)
+        elif kind == "qa":
+            ev = payload.get("name")
+            if ev == "sandbox":
+                print(c("dim", f"    sandbox: {payload.get('backend')}"))
+            elif ev == "step":
+                s = payload.get("scores", {})
+                def fnum(v):
+                    return "—" if v is None else f"{v:.1f}"
+                print(c("dim", f"    qa step {payload.get('i')}: stage={payload.get('stage')} "
+                               f"render={fnum(s.get('render'))} interact={fnum(s.get('interact'))} "
+                               f"peda={fnum(s.get('peda'))}"))
+            elif ev == "recompile":
+                print(c("yellow", f"    ↻ recompile {payload.get('blocks')} ({payload.get('stage')})"))
+            elif ev == "backtrack":
+                print(c("yellow", f"    ⟲ backtrack → step {payload.get('to_step')}"))
+            elif ev == "pass":
+                print(c("green", f"    ✓ qa passed @ step {payload.get('step')}"))
         elif kind == "warn":
             print(c("yellow", f"  ! {payload.get('stage')} {payload.get('block_id','')}: {payload.get('error','')}"))
         elif kind == "error":
             print(c("red", f"  ✗ {payload.get('msg','')}"))
         elif kind == "done":
+            statc = "green" if payload.get("status") == "ready" else "yellow"
             print(
                 c("bold", "✓ done ")
                 + c("cyan", payload.get("id", ""))
-                + c("dim", f"  status={payload.get('status')}  cost=${payload.get('cost_usd')}")
+                + "  " + c(statc, f"status={payload.get('status')}")
+                + c("dim", f"  cost=${payload.get('cost_usd')}")
             )
+            qa = payload.get("qa") or {}
+            if qa.get("score_render") is not None or qa.get("score_peda") is not None:
+                print(c("dim", f"  qa: render={qa.get('score_render')} "
+                               f"interact={qa.get('score_interact')} peda={qa.get('score_peda')} "
+                               f"passed={qa.get('passed')}"))
             if payload.get("entry"):
                 print(c("dim", "  artifact: ") + payload["entry"])
 
@@ -108,6 +132,7 @@ def _cfg_from_args(args, quiet: bool = False) -> Config:
         model=getattr(args, "model", None),
         render_target=getattr(args, "format_render", "html"),
         approval=getattr(args, "approval", "auto"),
+        qa_enabled=getattr(args, "qa_enabled", True),
         quiet=quiet,
     )
 
@@ -144,11 +169,7 @@ def cmd_compile(args) -> int:
     cfg.render_target = spec.render_target
     # reconstruct a minimal kp for the compiler context
     kp = KnowledgePoint(id=spec.knowledge_point_id, title=args.title or spec.knowledge_point_id)
-    fragments, calls = compile_blocks(spec, kp, cfg, emit)
-    knowling = finalize(spec, kp, fragments, calls, cfg, out_path=args.output, emit=emit)
-    total = round(sum(c.cost_usd for c in calls), 6)
-    emit("done", {"id": knowling.id, "status": knowling.status, "cost_usd": total,
-                  "entry": knowling.artifact.entry})
+    knowling = compile_spec(spec, kp, cfg, out_path=args.output, emit=emit)
     if not args.output:
         print(knowling._html)  # type: ignore[attr-defined]
     return 0
@@ -191,6 +212,8 @@ def _add_common(p: argparse.ArgumentParser, with_kp: bool = True) -> None:
                    default="html", help="artifact render target")
     p.add_argument("--provider", default="auto", help="auto | zhipu | mock")
     p.add_argument("--model", default=None, help="override model id")
+    p.add_argument("--no-qa", dest="qa_enabled", action="store_false", default=True,
+                   help="skip the three-dimensional QA loop (status stays draft)")
     p.add_argument("-o", "--output", default=None, help="output path (file or dir/)")
     if with_kp:
         p.add_argument("--id", default=None, help="stable knowledge-point id")

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit
+from ._common import esc, jslit, scope as _scope
 
 TYPE = "quiz"
 
@@ -23,6 +23,31 @@ def validate(content_spec: Dict[str, Any]) -> None:
     ans = content_spec["answer"]
     if not isinstance(ans, int) or not (0 <= ans < len(opts)):
         raise ValueError("quiz answer must be a valid option index")
+
+
+def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Interaction invariants (design §7): wrong→explain, right→mark correct."""
+    bid = block.get("block_id", "")
+    explain = block.get("content_spec", {}).get("explain", "")
+
+    def has_options(html: str) -> bool:
+        return f'data-block-id="{bid}"' in html and "kl-quiz-opt" in html
+
+    def wrong_shows_explain(html: str) -> bool:
+        seg = _scope(html, bid)
+        return "is-wrong" in seg and (not explain or explain[:12] in seg)
+
+    def right_marks_correct(html: str) -> bool:
+        return "is-correct" in _scope(html, bid)
+
+    return [
+        {"id": f"{bid}.options", "description": "渲染出可点击的选项", "check": has_options,
+         "gui_hint": "页面应展示该 quiz 的全部选项按钮"},
+        {"id": f"{bid}.wrong_explains", "description": "选错时给出解释", "check": wrong_shows_explain,
+         "gui_hint": "点击一个错误选项，应高亮为错并显示解释文本"},
+        {"id": f"{bid}.right_correct", "description": "选对时标记正确", "check": right_marks_correct,
+         "gui_hint": "点击正确选项，应高亮为正确"},
+    ]
 
 
 def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:

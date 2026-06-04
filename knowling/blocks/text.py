@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from ._common import mini_markdown
+from ._common import esc, mini_markdown
 
 TYPE = "text"
 
@@ -12,6 +12,10 @@ TYPE = "text"
 def validate(content_spec: Dict[str, Any]) -> None:
     if "md" not in content_spec:
         raise ValueError("text block requires content_spec.md")
+
+
+def qa_assertions(block: Dict[str, Any]):
+    return []  # static narrative — no interaction invariants
 
 
 def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:
@@ -28,4 +32,5 @@ def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:
 def template(block: Dict[str, Any]) -> str:
     cs = block.get("content_spec", {})
     body = mini_markdown(cs.get("md", ""))
-    return f'<section class="kl-block kl-text">\n{body}\n</section>'
+    bid = esc(block.get("block_id", "text"))
+    return f'<section class="kl-block kl-text" data-block-id="{bid}">\n{body}\n</section>'
