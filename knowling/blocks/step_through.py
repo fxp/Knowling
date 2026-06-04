@@ -3,6 +3,8 @@
 content_spec: { steps: [{state, explain}] }. Prev/Next walks proof/algorithm
 states; the explanation updates with each step.
 Invariant: next/prev changes the displayed state.
+
+Tolerant of LLM field-name synonyms (title/describe/… → state/explain).
 """
 
 from __future__ import annotations
@@ -13,14 +15,29 @@ from ._common import esc, jslit, count_tag, has_wiring, scope as _scope
 
 TYPE = "step_through"
 
+# LLMs name these fields with synonyms; accept the common ones (design §10.1).
+_STATE_KEYS = ("state", "title", "label", "name", "heading")
+_EXPLAIN_KEYS = ("explain", "describe", "description", "detail", "content", "text", "note")
+
+
+def _norm_step(s: Dict[str, Any]) -> Dict[str, str]:
+    state = next((str(s[k]) for k in _STATE_KEYS if s.get(k)), "")
+    explain = next((str(s[k]) for k in _EXPLAIN_KEYS if s.get(k)), "")
+    return {"state": state, "explain": explain}
+
+
+def _steps(content_spec: Dict[str, Any]) -> List[Dict[str, str]]:
+    raw = content_spec.get("steps") or []
+    return [_norm_step(s) for s in raw if isinstance(s, dict)]
+
 
 def validate(content_spec: Dict[str, Any]) -> None:
     steps = content_spec.get("steps")
     if not isinstance(steps, list) or not steps:
         raise ValueError("step_through requires non-empty content_spec.steps")
-    for s in steps:
-        if "state" not in s:
-            raise ValueError("each step needs a 'state'")
+    for s in _steps(content_spec):
+        if not s["state"]:
+            raise ValueError(f"each step needs a state/title (one of {_STATE_KEYS})")
 
 
 def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -49,7 +66,7 @@ def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:
 def template(block: Dict[str, Any]) -> str:
     cs = block.get("content_spec", {})
     bid = esc(block.get("block_id", "st"))
-    steps = cs.get("steps", [])
+    steps = _steps(cs)
     return f'''<section class="kl-block kl-stepthrough" data-block-id="{bid}">
   <div class="kl-st-state"></div>
   <p class="kl-st-explain"></p>

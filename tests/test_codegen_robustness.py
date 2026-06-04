@@ -66,6 +66,24 @@ def test_semantic_param_sim_passes_with_foreign_markup():
     assert _passes(block, foreign).passed
 
 
+def test_step_through_accepts_llm_synonyms():
+    """GLM emitted {title, describe}; we must accept it as {state, explain}."""
+    from knowling.blocks import step_through as st
+
+    cs = {"steps": [{"title": "S0", "describe": "first"},
+                    {"title": "S1", "describe": "second"}]}
+    st.validate(cs)  # no raise
+    norm = st._steps(cs)
+    assert norm[0] == {"state": "S0", "explain": "first"}
+    frag = st.template({"block_id": "st", "type": "step_through", "content_spec": cs})
+    assert "S0" in frag and "first" in frag
+
+    # a step with no state-like key at all is still rejected
+    import pytest
+    with pytest.raises(ValueError):
+        st.validate({"steps": [{"foo": "bar"}]})
+
+
 def test_semantic_quiz_fails_without_wiring():
     """A static, non-interactive quiz must still fail interaction."""
     block = {"block_id": "qz", "type": "quiz",
