@@ -6,3 +6,6 @@ build/
 dist/
 out/
 .DS_Store
+
+# demo build artifacts (keep index.html + components, ignore preview shots)
+demo/_shot-*.png

@@ -1,0 +1,63 @@
+[
+  {
+    "title": "正弦函数 y = A·sin(ωx + φ)",
+    "file": "sine-real.html",
+    "source": "GLM-5",
+    "kp": "振幅 A、角频率 ω、相位 φ 各自如何改变正弦波形",
+    "audience": "高一学生",
+    "blocks": [
+      "text",
+      "param_sim",
+      "param_sim",
+      "param_sim",
+      "step_through",
+      "quiz"
+    ],
+    "qa": {
+      "render": 4.0,
+      "interact": 5.0,
+      "peda": 4.0,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": true
+  },
+  {
+    "title": "链式法则",
+    "file": "calc_derivative_chain-rule.html",
+    "source": "离线模板",
+    "kp": "复合函数的求导：外层导数 × 内层导数",
+    "audience": "高中生",
+    "blocks": [
+      "text",
+      "param_sim",
+      "quiz"
+    ],
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 5.0,
+      "passed": true
+    },
+    "status": "ready"
+  },
+  {
+    "title": "欧姆定律 V = IR",
+    "file": "phys_ohm.html",
+    "source": "离线模板",
+    "kp": "电压、电流、电阻三者的关系",
+    "audience": "初中生",
+    "blocks": [
+      "text",
+      "param_sim",
+      "quiz"
+    ],
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 5.0,
+      "passed": true
+    },
+    "status": "ready"
+  }
+]

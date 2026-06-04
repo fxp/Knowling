@@ -5,6 +5,8 @@
 **范围（精炼 focus）**：只做「单个知识点的学习 + Quiz」组件——叙述 + explorable 演示 + 测验。**不做**大主题拆解、知识图谱导航、整课/整书生成。
 
 > 完整设计见 [`knowling-design.md`](knowling-design.md)，开发进度见 [`ROADMAP.md`](ROADMAP.md)。
+>
+> **演示画廊**：用浏览器打开 [`demo/index.html`](demo/index.html) 即可交互体验生成的组件（含一个真实 GLM-5 生成并通过三维质检的「正弦函数」组件）。
 
 ## 已实现（P0 + P1 + P2，设计文档 §12）
 
