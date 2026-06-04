@@ -15,7 +15,7 @@ from __future__ import annotations
 import html
 import json
 import os
-import shutil
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -23,9 +23,39 @@ ROOT = os.path.dirname(HERE)
 COMPONENTS = os.path.join(HERE, "components")
 sys.path.insert(0, ROOT)
 
+from knowling.assembler import assemble_html  # noqa: E402
 from knowling.capabilities.qa import QAConfig  # noqa: E402
 from knowling.engine import Config, generate_knowling  # noqa: E402
-from knowling.schema import KnowledgePoint  # noqa: E402
+from knowling.schema import KnowledgePoint, KnowlingSpec, Pedagogy  # noqa: E402
+
+
+def _redeck(flat_html: str) -> str:
+    """Re-assemble a previously-flat artifact into the card deck — no model call.
+
+    Extracts each block fragment by its data-block-id and feeds them back through
+    assemble_html (which now produces the deck). Lets us upgrade an existing GLM
+    artifact to card form without regenerating it.
+    """
+    if "data-deck" in flat_html:  # already a deck
+        return flat_html
+    ids = []
+    for m in re.finditer(r'data-block-id="([^"]+)"', flat_html):
+        if m.group(1) not in ids:
+            ids.append(m.group(1))
+    starts = [flat_html.rfind("<", 0, flat_html.find(f'data-block-id="{b}"')) for b in ids]
+    end = flat_html.find("<footer")
+    if end == -1:
+        end = flat_html.find("</main>")
+    frags = []
+    for k, s in enumerate(starts):
+        e = starts[k + 1] if k + 1 < len(starts) else end
+        frags.append(flat_html[s:e].strip())
+    title_m = re.search(r"<h1>(.*?)</h1>", flat_html, re.DOTALL)
+    hook_m = re.search(r'<p class="kl-hook">(.*?)</p>', flat_html, re.DOTALL)
+    title = html.unescape(title_m.group(1).strip()) if title_m else "Knowling"
+    hook = html.unescape(hook_m.group(1).strip()) if hook_m else ""
+    spec = KnowlingSpec(knowledge_point_id="redeck", pedagogy=Pedagogy(hook=hook))
+    return assemble_html(spec, frags, title)
 
 
 # ── examples generated offline (mock provider, deterministic) ──────────
@@ -66,7 +96,10 @@ def _fold_real(manifest: list) -> None:
     if not os.path.exists(src):
         print("(skip real GLM example — out/sine-real.html not found)")
         return
-    shutil.copy(src, os.path.join(COMPONENTS, "sine-real.html"))
+    with open(src, encoding="utf-8") as f:
+        deck = _redeck(f.read())  # upgrade to card form without re-calling GLM
+    with open(os.path.join(COMPONENTS, "sine-real.html"), "w", encoding="utf-8") as f:
+        f.write(deck)
     qa = {"render": 4.0, "interact": 5.0, "peda": 4.0, "passed": True}
     blocks = ["text", "param_sim", "param_sim", "param_sim", "step_through", "quiz"]
     jl = os.path.join(ROOT, "out", "sine-real.jsonl")
