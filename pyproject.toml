@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowling"
+version = "0.1.0"
+description = "Knowling — generate self-contained, interactive learning components from a single knowledge point."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Knowling" }]
+dependencies = []
+
+# P0 has zero runtime deps on purpose: stdlib-only so the skeleton runs out of
+# the box. HTTP to GLM uses urllib; CLI rendering is hand-rolled.
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+knowling = "knowling.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["knowling*"]

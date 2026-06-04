@@ -1,0 +1,95 @@
+"""Spec planner (design §5 ②, §10.1) — KnowledgePoint → KnowlingSpec.
+
+Produces a structured blueprint *only* (no code). This is the approval-gate
+layer. Strong LLM by default; mock provider returns a canned 3-block spec.
+"""
+
+from __future__ import annotations
+
+from typing import Any, List, Optional, Tuple
+
+from ..providers.base import LLMProvider
+from ..schema import KnowledgePoint, KnowlingSpec, ModelCall
+from ._extract import extract_json
+
+SYSTEM = "你是学习组件的教学设计师。只产出结构化蓝图（JSON），绝不写任何代码。"
+
+PROMPT_TEMPLATE = """针对单个知识点产出 KnowlingSpec（严格 JSON），不要写任何代码。
+
+知识点: {title} — {description}
+学习目标: {objectives}
+受众/难度: {audience} / {difficulty}
+渲染目标: {render_target}
+{grounding}
+
+要求:
+1. 先定 pedagogy: hook(抓手)、central_phenomenon(要引导注意的中心现象)、
+   misconceptions(常见误解, 数组)、aha_moment(期望顿悟点)。
+2. 选 ≤6 个 block 并排序。优先 param_sim/step_through/interactive_demo——
+   让读者能"动手改变某个量并观察结果", 而非只读文字。
+3. 每个 block 写明 block_id、type、intent(教学意图) 与 content_spec(结构化内容, 非代码)。
+4. 交互块写 interaction_spec.invariants(交互后必须成立的属性, 供测试断言)。
+
+可用 block type: text, callout, figure, code, section, quiz, flashcards,
+timeline, concept_graph, interactive_demo, param_sim, step_through, animation,
+deep_dive, user_note。
+
+content_spec 约定:
+- text:     {{ "md": "markdown" }}
+- quiz:     {{ "question": str, "options": [str], "answer": int, "explain": str }}
+- param_sim:{{ "params": [{{"name","label","min","max","step","default"}}],
+              "outputs": [{{"name","label","expr"}}], "explain": str }}
+  expr 为关于 param 名的 JS 表达式, 例如 "x * x"。
+
+输出严格符合 KnowlingSpec schema 的 JSON, 顶层字段:
+knowledge_point_id, pedagogy, blocks, render_target, version。"""
+
+
+def _format_objectives(kp: KnowledgePoint) -> str:
+    return "；".join(kp.learning_objectives) if kp.learning_objectives else "（未指定）"
+
+
+def plan(
+    kp: KnowledgePoint,
+    grounding: Optional[List[Any]],
+    provider: LLMProvider,
+    render_target: str = "html",
+) -> Tuple[KnowlingSpec, ModelCall]:
+    grounding_txt = ""
+    if grounding:
+        grounding_txt = "依据材料(grounding):\n" + "\n".join(str(g) for g in grounding)
+
+    user = PROMPT_TEMPLATE.format(
+        title=kp.title,
+        description=kp.description or kp.title,
+        objectives=_format_objectives(kp),
+        audience=kp.audience or "通用",
+        difficulty=kp.difficulty,
+        render_target=render_target,
+        grounding=grounding_txt,
+    )
+    comp = provider.complete(
+        [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],
+        task="plan",
+        temperature=0.5,
+        meta={"kp": kp.to_dict()},
+    )
+    data = extract_json(comp.text)
+    if not isinstance(data, dict):
+        raise ValueError(
+            "spec planner did not return valid JSON. Raw head:\n"
+            + comp.text[:400]
+        )
+    data.setdefault("knowledge_point_id", kp.id)
+    data.setdefault("render_target", render_target)
+    spec = KnowlingSpec.from_dict(data)
+
+    call = ModelCall(
+        stage="plan",
+        provider=comp.provider,
+        model=comp.model,
+        prompt_tokens=comp.prompt_tokens,
+        completion_tokens=comp.completion_tokens,
+        cost_usd=comp.cost_usd,
+    )
+    return spec, call

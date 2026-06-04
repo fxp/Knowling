@@ -1,0 +1,92 @@
+{
+  "knowledge_point_id": "calc.derivative.chain-rule",
+  "pedagogy": {
+    "hook": "为什么「链式法则」会这样？先动手试试。",
+    "central_phenomenon": "调整参数时，链式法则 的结果如何随之变化。",
+    "misconceptions": [
+      "以为结果与输入无关",
+      "把相关当成因果"
+    ],
+    "aha_moment": "亲眼看到改变输入立刻改变了 链式法则 的输出。"
+  },
+  "blocks": [
+    {
+      "block_id": "b1-intro",
+      "type": "text",
+      "intent": "用一段话点明知识点与中心现象",
+      "content_spec": {
+        "md": "## 链式法则\n\n链式法则\n\n**学完后你能：** 能对复合函数求导"
+      }
+    },
+    {
+      "block_id": "b2-sim",
+      "type": "param_sim",
+      "intent": "让读者拖动滑块，观察输出随输入连续变化",
+      "content_spec": {
+        "params": [
+          {
+            "name": "x",
+            "label": "输入 x",
+            "min": 0,
+            "max": 10,
+            "step": 0.1,
+            "default": 2
+          }
+        ],
+        "outputs": [
+          {
+            "name": "y",
+            "label": "输出 y = x²",
+            "expr": "x * x"
+          }
+        ],
+        "explain": "拖动 x，观察 y 如何变化——这就是该知识点的核心现象。"
+      },
+      "interaction_spec": {
+        "controls": [
+          {
+            "kind": "slider",
+            "param": "x"
+          }
+        ],
+        "invariants": [
+          "拖动滑块后输出数值立即更新"
+        ],
+        "guided_steps": [
+          "把 x 拖到最小",
+          "再拖到最大",
+          "观察 y 的变化速度"
+        ]
+      }
+    },
+    {
+      "block_id": "b3-quiz",
+      "type": "quiz",
+      "intent": "检验是否理解中心现象",
+      "content_spec": {
+        "question": "关于「链式法则」，下列哪项正确？",
+        "options": [
+          "输出随输入变化",
+          "输出恒定不变",
+          "二者无关",
+          "无法判断"
+        ],
+        "answer": 0,
+        "explain": "输出确实随输入而变化——这正是本知识点的中心现象。"
+      },
+      "interaction_spec": {
+        "controls": [
+          {
+            "kind": "radio"
+          }
+        ],
+        "invariants": [
+          "选错显示解释",
+          "选对标记正确"
+        ]
+      }
+    }
+  ],
+  "render_target": "html",
+  "version": 1
+}

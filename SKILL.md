@@ -1,0 +1,57 @@
+---
+name: knowling
+description: 为单个细小知识点生成自包含、可交互的精品学习组件（Knowling）。当用户说「给这个知识点做个可交互组件」「把XX讲清楚做成可玩的演示」「生成一个 explorable 学习卡片」「knowling」或类似表达时触发。SKIP 整门课程/整本书生成、纯静态文章写作。
+---
+
+# Knowling — 知识点 → 可交互学习组件
+
+输入**一个细小、明确的知识点**，输出一个经过结构化蓝图规划、自包含（单文件、无外部依赖）的可交互学习组件。当前为 **P0**：跑通 `知识点 → 蓝图(KnowlingSpec) → 块编译 → 自包含 HTML` 闭环；质检闭环（QA）、RAG、大主题拆解、全 13 类块在后续阶段加入。
+
+## 何时触发
+- 用户给出一个具体知识点（如「链式法则」「TCP 三次握手」「二次函数系数 a 的作用」）并希望得到可交互的学习产物。
+- 优先做 `param_sim`（滑块驱动模拟）/ `step_through` / `interactive_demo` 这类「动手改变某个量并观察结果」的 explorable 组件。
+
+## 如何调用（CLI，双输出）
+
+```bash
+# 完整闭环：plan → compile → assemble，产出单个 .html
+python3 -m knowling.cli gen "链式法则" \
+  --objectives "能对复合函数求导,能解释为何相乘" \
+  --difficulty core --audience "高中生" \
+  --format-render html -o ./out/
+
+# 仅产蓝图给人/agent 审阅（不编译）
+python3 -m knowling.cli plan "梯度下降" -o ./out/gd.spec.json
+
+# 从审批后的蓝图编译
+python3 -m knowling.cli compile ./out/gd.spec.json --title "梯度下降" -o ./out/gd.html
+
+# 列出已实现 / 已声明的块类型
+python3 -m knowling.cli blocks
+```
+
+**输出模式**（仿 DeepTutor）：
+- `-f rich`（默认）：彩色人类可读进度。
+- `-f json`：行分隔 JSON 事件流（`stage` / `cost` / `done` / `info`），供 agent 解析进度、成本、最终 Knowling 对象。
+
+## Provider（模型层）
+- 默认 `--provider auto`：检测到 `ZHIPU_API_KEY` / `GLM_API_KEY` 则走 GLM（zhipu，`glm-4.6`），否则自动回退到离线 **MockProvider**（模板渲染，零成本，开箱即跑）。
+- 真实 GLM 路径下：规划产结构化 `KnowlingSpec`，块编译由 LLM 直接生成 HTML/JS；生成不可用时回退到确定性模板。
+
+## KnowlingSpec 摘要（审批门 / 唯一可 diff 层）
+```
+{ knowledge_point_id, pedagogy:{hook, central_phenomenon, misconceptions[], aha_moment},
+  blocks:[ { block_id, type, intent, content_spec, interaction_spec? } ],
+  render_target:"html"|"react", version }
+```
+content_spec 约定：
+- `text`     → `{ md }`
+- `quiz`     → `{ question, options[], answer:int, explain }`
+- `param_sim`→ `{ params:[{name,label,min,max,step,default}], outputs:[{name,label,expr}], explain }`（`expr` 是关于 param 名的 JS 表达式，如 `"x*x"`）
+
+## 风格档（后续）
+计划提供 `knowling-minimal` / `knowling-rich-explorable` / `knowling-exam-prep` 多风格 skill，通过 triggers 区分。P0 暂为单一默认风格。
+
+## 注意
+- 产物 `status` 在 P0 恒为 `draft`（未过质检不得标 `ready`，见设计文档 §3.1）。
+- 编译产物为单个自包含 `.html`，可直接嵌入/分发。
