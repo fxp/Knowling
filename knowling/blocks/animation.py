@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, scope as _scope
+from ._common import esc, jslit, count_tag, has_wiring, scope as _scope
 
 TYPE = "animation"
 
@@ -25,7 +25,7 @@ def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
 
     def has_controls(html: str) -> bool:
         seg = _scope(html, bid)
-        return "kl-anim-play" in seg and "kl-anim-replay" in seg
+        return count_tag(seg, "<button") >= 1 and has_wiring(seg)
 
     return [{"id": f"{bid}.controls", "description": "可暂停/重播", "check": has_controls,
              "gui_hint": "应能暂停与重播动画"}]

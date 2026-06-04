@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, scope as _scope
+from ._common import esc, jslit, count_tag, has_wiring, scope as _scope
 
 TYPE = "timeline"
 
@@ -23,10 +23,11 @@ def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
     bid = block.get("block_id", "")
 
     def has_nodes(html: str) -> bool:
-        return "kl-tl-node" in _scope(html, bid)
+        seg = _scope(html, bid)
+        return count_tag(seg, "<button") >= 1 or count_tag(seg, "<li") >= 1
 
     def expandable(html: str) -> bool:
-        return "addEventListener('click'" in _scope(html, bid)
+        return has_wiring(_scope(html, bid))
 
     return [
         {"id": f"{bid}.nodes", "description": "渲染时间线节点", "check": has_nodes,

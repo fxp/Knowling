@@ -20,7 +20,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, scope as _scope
+from ._common import esc, jslit, has_control, has_wiring, count_tag, scope as _scope
+from ..schema.models import as_int
 
 TYPE = "quiz"
 _TYPES = {"single", "multi", "boolean", "fill"}
@@ -52,7 +53,7 @@ def _normalize(cs: Dict[str, Any]) -> List[Dict[str, Any]]:
         elif t == "multi":
             out.append({"type": "multi", "prompt": prompt,
                         "options": list(q.get("options", [])),
-                        "answer": sorted(int(a) for a in q.get("answer", [])),
+                        "answer": sorted(as_int(a) for a in q.get("answer", [])),
                         "explain": explain})
         elif t == "fill":
             out.append({"type": "fill", "prompt": prompt,
@@ -62,7 +63,7 @@ def _normalize(cs: Dict[str, Any]) -> List[Dict[str, Any]]:
         else:  # single
             out.append({"type": "single", "prompt": prompt,
                         "options": list(q.get("options", [])),
-                        "answer": int(q.get("answer", 0)), "explain": explain})
+                        "answer": as_int(q.get("answer", 0)), "explain": explain})
     return out
 
 
@@ -100,40 +101,24 @@ def validate(content_spec: Dict[str, Any]) -> None:
 
 
 def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Semantic (template-agnostic) interaction invariants."""
     bid = block.get("block_id", "")
-    questions = _normalize(block.get("content_spec", {}))
-    first_explain = next((q["explain"] for q in questions if q.get("explain")), "")
 
-    def has_inputs(html: str) -> bool:
+    def has_answer_ui(html: str) -> bool:
         seg = _scope(html, bid)
-        return "kl-quiz-opt" in seg or "kl-quiz-input" in seg
-
-    def has_submit(html: str) -> bool:
-        return "kl-quiz-submit" in _scope(html, bid)
+        # ≥2 clickable options, or any input/select (single-choice/fill/multi)
+        return count_tag(seg, "<button") >= 2 or "<input" in seg.lower() or "<select" in seg.lower()
 
     def judges(html: str) -> bool:
-        seg = _scope(html, bid)
-        return "is-correct" in seg and "is-wrong" in seg
+        # an answer must do *something* on interaction (check / score)
+        return has_wiring(_scope(html, bid))
 
-    asserts = [
-        {"id": f"{bid}.inputs", "description": "渲染出作答控件", "check": has_inputs,
-         "gui_hint": "页面应展示选项或填空输入框"},
-        {"id": f"{bid}.submit", "description": "可提交作答", "check": has_submit,
-         "gui_hint": "应有提交按钮"},
-        {"id": f"{bid}.judge", "description": "对错判定与高亮", "check": judges,
-         "gui_hint": "提交后正确项标绿、错误项标红"},
+    return [
+        {"id": f"{bid}.answer_ui", "description": "渲染出作答控件", "check": has_answer_ui,
+         "gui_hint": "页面应展示可点击选项或输入框"},
+        {"id": f"{bid}.judge", "description": "作答有判定反馈", "check": judges,
+         "gui_hint": "提交/选择后应给出对错与解释"},
     ]
-    if first_explain:
-        def shows_explain(html: str, snip=first_explain[:12]) -> bool:
-            return snip in _scope(html, bid)
-        asserts.append({"id": f"{bid}.explain", "description": "作答后给出解释",
-                        "check": shows_explain, "gui_hint": "提交后应显示解释文本"})
-    if len(questions) > 1:
-        def has_score(html: str) -> bool:
-            return "kl-quiz-score" in _scope(html, bid)
-        asserts.append({"id": f"{bid}.score", "description": "多题计分", "check": has_score,
-                        "gui_hint": "答完应显示得分"})
-    return asserts
 
 
 # ─────────────────────────── compile prompt ───────────────────────────

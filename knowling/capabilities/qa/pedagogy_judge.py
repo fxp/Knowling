@@ -69,7 +69,7 @@ def _assess_llm(artifact_html, spec, kp, provider) -> Optional[DimensionFeedback
     try:
         comp = provider.complete(
             [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],
-            task="qa_pedagogy", temperature=0.2, max_tokens=800,
+            task="qa_pedagogy", temperature=0.2, max_tokens=3000,
         )
     except Exception:
         return None

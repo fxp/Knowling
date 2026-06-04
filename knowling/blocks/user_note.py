@@ -20,7 +20,8 @@ def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
     bid = block.get("block_id", "")
 
     def has_input(html: str) -> bool:
-        return "<textarea" in _scope(html, bid)
+        seg = _scope(html, bid).lower()
+        return "<textarea" in seg or "<input" in seg
 
     return [{"id": f"{bid}.input", "description": "可输入笔记", "check": has_input,
              "gui_hint": "应能在文本框中输入文字"}]

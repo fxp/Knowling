@@ -80,6 +80,8 @@ def plan(
         [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],
         task="plan",
         temperature=0.5,
+        max_tokens=8000,
+        thinking="disabled",
         meta={"kp": kp.to_dict()},
     )
     data = extract_json(comp.text)

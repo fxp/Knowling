@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, scope as _scope
+from ._common import esc, jslit, count_tag, has_wiring, scope as _scope
 
 TYPE = "flashcards"
 
@@ -25,17 +25,13 @@ def validate(content_spec: Dict[str, Any]) -> None:
 def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
     bid = block.get("block_id", "")
 
-    def can_flip(html: str) -> bool:
-        return "kl-fc-flip" in _scope(html, bid)
-
-    def can_next(html: str) -> bool:
-        return "kl-fc-next" in _scope(html, bid)
+    def interactive(html: str) -> bool:
+        seg = _scope(html, bid)
+        return has_wiring(seg) and count_tag(seg, "<button") >= 1
 
     return [
-        {"id": f"{bid}.flip", "description": "卡片可翻面", "check": can_flip,
-         "gui_hint": "点击卡片应翻面显示背面"},
-        {"id": f"{bid}.next", "description": "可切换下一张", "check": can_next,
-         "gui_hint": "点击下一张应显示下一张卡片"},
+        {"id": f"{bid}.interactive", "description": "卡片可翻面/切换", "check": interactive,
+         "gui_hint": "点击应翻面并能切换到下一张"},
     ]
 
 

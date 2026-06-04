@@ -45,7 +45,7 @@ def _assess_vlm(render: RenderResult, provider: LLMProvider) -> Optional[Dimensi
         {
             "role": "user",
             "content": [
-                {"type": "text", "content": (
+                {"type": "text", "text": (
                     "评估这张学习组件截图。输出 JSON: "
                     "{\"score\": 0-5, \"description\": str, \"suggestions\": [str]}"
                 )},
@@ -54,10 +54,14 @@ def _assess_vlm(render: RenderResult, provider: LLMProvider) -> Optional[Dimensi
         },
     ]
     try:
-        comp = provider.complete(messages, task="qa_render", temperature=0.2, max_tokens=600)
+        # GLM-5V-Turbo is a reasoning model — needs headroom so the JSON answer
+        # isn't starved by reasoning tokens (else content comes back empty).
+        comp = provider.complete(messages, task="qa_render", temperature=0.2, max_tokens=2048)
     except Exception:
         return None
-    data = extract_json(comp.text) or {}
+    data = extract_json(comp.text)
+    if not isinstance(data, dict) or "score" not in data:
+        return None  # unparseable → let caller fall back to the heuristic
     return DimensionFeedback(
         stage="render",
         score=float(data.get("score", 0)),

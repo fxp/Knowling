@@ -18,11 +18,11 @@ from .zhipu import ZhipuProvider
 # default model per pipeline role (design §6.3 cost separation)
 DEFAULT_MODELS = {
     "zhipu": {
-        "plan": "glm-4.6",
-        "compile": "glm-4.6",
-        "render_vlm": "glm-4v",
-        "gui": "glm-4-air",
-        "judge": "glm-4.6",
+        "plan": "glm-5.1",          # strong LLM: blueprint planning
+        "compile": "glm-5.1",       # strong coding LLM: block codegen
+        "render_vlm": "glm-5v-turbo",  # vision QA on screenshots
+        "gui": "glm-5.1",           # interaction check (mostly static assertions)
+        "judge": "glm-5.1",         # pedagogy review
     },
     "mock": {k: "mock-1" for k in ("plan", "compile", "render_vlm", "gui", "judge")},
 }

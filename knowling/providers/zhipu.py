@@ -20,6 +20,8 @@ DEFAULT_BASE_URL = "https://open.bigmodel.cn/api/paas/v4"
 
 # Rough public list price (USD per 1K tokens) for cost estimation only.
 _PRICE_PER_1K = {
+    "glm-5.1": (0.0006, 0.0022),
+    "glm-5v-turbo": (0.0002, 0.0002),
     "glm-4.6": (0.0006, 0.0022),
     "glm-4-air": (0.00007, 0.00007),
     "glm-4v": (0.0006, 0.0006),
@@ -35,16 +37,16 @@ class ZhipuProvider(LLMProvider):
 
     def __init__(
         self,
-        model: str = "glm-4.6",
+        model: str = "glm-5.1",
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
-        timeout: float = 120.0,
+        timeout: Optional[float] = None,
         **opts: Any,
     ) -> None:
         super().__init__(model, **opts)
         self.api_key = api_key or os.environ.get("ZHIPU_API_KEY") or os.environ.get("GLM_API_KEY")
         self.base_url = (base_url or os.environ.get("ZHIPU_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
-        self.timeout = timeout
+        self.timeout = timeout if timeout is not None else float(os.environ.get("ZHIPU_TIMEOUT", "300"))
 
     @classmethod
     def available(cls) -> bool:
@@ -61,6 +63,7 @@ class ZhipuProvider(LLMProvider):
         task: str = "generic",
         temperature: float = 0.6,
         max_tokens: int = 4096,
+        thinking: Optional[str] = None,  # "disabled" | "enabled"
         **kwargs: Any,
     ) -> Completion:
         if not self.api_key:
@@ -74,6 +77,10 @@ class ZhipuProvider(LLMProvider):
             "temperature": temperature,
             "max_tokens": max_tokens,
         }
+        # GLM-5 are reasoning models; for structured/code output we disable
+        # thinking so reasoning tokens don't starve & truncate the answer.
+        if thinking:
+            payload["thinking"] = {"type": thinking}
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
             f"{self.base_url}/chat/completions",
@@ -93,7 +100,10 @@ class ZhipuProvider(LLMProvider):
         except urllib.error.URLError as e:  # pragma: no cover - network
             raise ProviderError(f"GLM connection failed: {e.reason}") from e
 
-        choice = body["choices"][0]["message"]["content"]
+        msg = body["choices"][0]["message"]
+        # GLM-5 reasoning models may leave content empty and put text in
+        # reasoning_content; fall back so JSON extraction still has something.
+        choice = msg.get("content") or msg.get("reasoning_content") or ""
         usage = body.get("usage", {})
         pt = int(usage.get("prompt_tokens", 0))
         ct = int(usage.get("completion_tokens", 0))

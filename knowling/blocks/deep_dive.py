@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, mini_markdown, scope as _scope
+from ._common import esc, mini_markdown, has_wiring, scope as _scope
 
 TYPE = "deep_dive"
 
@@ -21,7 +21,8 @@ def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
     bid = block.get("block_id", "")
 
     def toggles(html: str) -> bool:
-        return "<details" in _scope(html, bid)
+        seg = _scope(html, bid).lower()
+        return "<details" in seg or has_wiring(seg)
 
     return [{"id": f"{bid}.toggle", "description": "可展开/收起", "check": toggles,
              "gui_hint": "点击摘要应展开/收起详情"}]

@@ -7,6 +7,7 @@ back to the block's deterministic template so the loop always closes.
 
 from __future__ import annotations
 
+import re
 from typing import Any, List, Optional, Tuple
 
 from .. import blocks
@@ -40,6 +41,22 @@ def _looks_usable(html: str, block: BlockSpec) -> bool:
     if "<section" not in low and "<div" not in low:
         return False
     return True
+
+
+def _ensure_block_id(html: str, block_id: str, btype: str) -> str:
+    """Guarantee the fragment's outer element carries data-block-id.
+
+    LLM codegen doesn't always honor the wrapper instruction; scope(),
+    qa_assertions and the render heuristic all key off data-block-id, so we
+    inject it rather than trust compliance (design §3.1 #3 — traceable blocks)."""
+    if not block_id or f'data-block-id="{block_id}"' in html:
+        return html
+    m = re.search(r"<([a-zA-Z][\w-]*)", html)
+    if not m:
+        return (f'<section class="kl-block kl-{btype}" data-block-id="{block_id}">\n'
+                f'{html}\n</section>')
+    insert_at = m.end(1)
+    return html[:insert_at] + f' data-block-id="{block_id}"' + html[insert_at:]
 
 
 def compile(
@@ -95,12 +112,16 @@ def compile(
         [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],
         task="compile_block",
         temperature=0.3,
+        max_tokens=8000,
+        thinking="disabled",
         meta={"block": block_dict, "kp": kp.to_dict()},
     )
     html = extract_html(comp.text)
     if not _looks_usable(html, block):
         # resilience: fall back to the deterministic template
         html = blocks.render_block_template(block_dict)
+    else:
+        html = _ensure_block_id(html, block.block_id, block.type)
 
     call = ModelCall(
         stage="compile",

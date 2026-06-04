@@ -21,11 +21,12 @@ def validate(content_spec: Dict[str, Any]) -> None:
 def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
     bid = block.get("block_id", "")
 
-    def has_copy(html: str) -> bool:
-        return "kl-code-copy" in _scope(html, bid)
+    def shows_code(html: str) -> bool:
+        seg = _scope(html, bid).lower()
+        return "<pre" in seg or "<code" in seg
 
-    return [{"id": f"{bid}.copy", "description": "提供复制按钮", "check": has_copy,
-             "gui_hint": "点击复制按钮应复制代码"}]
+    return [{"id": f"{bid}.code", "description": "展示代码", "check": shows_code,
+             "gui_hint": "应以等宽字体展示代码块"}]
 
 
 def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:

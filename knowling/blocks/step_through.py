@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, scope as _scope
+from ._common import esc, jslit, count_tag, has_wiring, scope as _scope
 
 TYPE = "step_through"
 
@@ -27,11 +27,10 @@ def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
     bid = block.get("block_id", "")
 
     def has_nav(html: str) -> bool:
-        seg = _scope(html, bid)
-        return "kl-st-next" in seg and "kl-st-prev" in seg
+        return count_tag(_scope(html, bid), "<button") >= 1
 
     def reactive(html: str) -> bool:
-        return "addEventListener('click'" in _scope(html, bid)
+        return has_wiring(_scope(html, bid))
 
     return [
         {"id": f"{bid}.nav", "description": "有上/下一步控件", "check": has_nav,

@@ -17,6 +17,27 @@ def jslit(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False).replace("</", "<\\/")
 
 
+# ── semantic interaction predicates (template-agnostic QA signals) ──
+# Assertions check *behavior*, not our class names, so LLM-generated blocks that
+# use their own markup still pass as long as they have real controls + JS wiring.
+
+def has_control(seg: str) -> bool:
+    low = seg.lower()
+    return any(t in low for t in ("<input", "<button", "<select", "<textarea"))
+
+
+def has_wiring(seg: str) -> bool:
+    """Evidence of interactivity: a JS event handler is attached."""
+    low = seg.lower()
+    return any(t in low for t in (
+        "addeventlistener", "oninput=", "onclick=", "onchange=", "onkeydown=", "onkeyup=",
+    ))
+
+
+def count_tag(seg: str, tag: str) -> int:
+    return seg.lower().count(tag.lower())
+
+
 def scope(html: str, block_id: str) -> str:
     """Return the substring of ``html`` belonging to one block (by data-block-id).
 

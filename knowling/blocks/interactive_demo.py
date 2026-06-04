@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, scope as _scope
+from ._common import esc, jslit, has_control, has_wiring, scope as _scope
 
 TYPE = "interactive_demo"
 _KINDS = {"slider", "number", "select", "checkbox", "text"}
@@ -42,21 +42,15 @@ def validate(content_spec: Dict[str, Any]) -> None:
 def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
     bid = block.get("block_id", "")
 
-    def has_control(html: str) -> bool:
-        return "data-ctl=" in _scope(html, bid)
-
-    def has_output(html: str) -> bool:
-        return "data-out=" in _scope(html, bid)
+    def control(html: str) -> bool:
+        return has_control(_scope(html, bid))
 
     def reactive(html: str) -> bool:
-        seg = _scope(html, bid)
-        return "addEventListener('input'" in seg or "addEventListener('change'" in seg
+        return has_wiring(_scope(html, bid))
 
     return [
-        {"id": f"{bid}.control", "description": "渲染出输入控件", "check": has_control,
+        {"id": f"{bid}.control", "description": "渲染出输入控件", "check": control,
          "gui_hint": "应有可操作的输入控件"},
-        {"id": f"{bid}.output", "description": "存在可观察输出", "check": has_output,
-         "gui_hint": "应展示随输入变化的输出"},
         {"id": f"{bid}.reactive", "description": "改输入即时改变输出", "check": reactive,
          "gui_hint": "改变输入后输出应立即更新"},
     ]

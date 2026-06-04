@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, scope as _scope
+from ._common import esc, jslit, has_wiring, scope as _scope
 
 TYPE = "concept_graph"
 
@@ -28,10 +28,11 @@ def qa_assertions(block: Dict[str, Any]) -> List[Dict[str, Any]]:
     bid = block.get("block_id", "")
 
     def has_canvas(html: str) -> bool:
-        return "kl-cg-canvas" in _scope(html, bid)
+        seg = _scope(html, bid).lower()
+        return "<canvas" in seg or "<svg" in seg
 
     def clickable(html: str) -> bool:
-        return "addEventListener('click'" in _scope(html, bid)
+        return has_wiring(_scope(html, bid))
 
     return [
         {"id": f"{bid}.canvas", "description": "渲染概念图", "check": has_canvas,

@@ -36,6 +36,18 @@ def _strip_none(d: Dict[str, Any]) -> Dict[str, Any]:
     return {k: v for k, v in d.items() if v is not None and v != [] and v != {}}
 
 
+def as_int(v: Any, default: int = 0) -> int:
+    """Tolerant int coercion — LLMs often emit '1.0', 1.0, or ' 2 '."""
+    if isinstance(v, bool):
+        return int(v)
+    if isinstance(v, int):
+        return v
+    try:
+        return int(float(str(v).strip()))
+    except (ValueError, TypeError):
+        return default
+
+
 @dataclass
 class SourceRef:
     """A grounding reference (RAG / uploaded material). P0: metadata only."""
@@ -204,7 +216,7 @@ class KnowlingSpec:
             blocks=[BlockSpec.from_dict(b) for b in d.get("blocks", [])],
             render_target=d.get("render_target", "html"),
             est_cost_usd=d.get("est_cost_usd"),
-            version=int(d.get("version", 1)),
+            version=as_int(d.get("version", 1), 1),
         )
 
     def to_dict(self) -> Dict[str, Any]:
