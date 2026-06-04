@@ -2,7 +2,9 @@
 
 输入一个**细小、明确的知识点**，输出一个自包含、可交互的高质量学习组件（Knowling）。
 
-> 完整设计见 [`knowling-design.md`](knowling-design.md)。本仓库当前实现 **P0 骨架**。
+**范围（精炼 focus）**：只做「单个知识点的学习 + Quiz」组件——叙述 + explorable 演示 + 测验。**不做**大主题拆解、知识图谱导航、整课/整书生成。
+
+> 完整设计见 [`knowling-design.md`](knowling-design.md)，开发进度见 [`ROADMAP.md`](ROADMAP.md)。
 
 ## 已实现（P0 + P1 + P2，设计文档 §12）
 

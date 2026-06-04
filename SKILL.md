@@ -49,7 +49,7 @@ python3 -m knowling.cli blocks
 ```
 全部 13 类块均已实现（`text` `callout` `figure` `code` `section` `quiz` `flashcards` `timeline` `concept_graph` `interactive_demo` `param_sim` `step_through` `animation` `deep_dive` `user_note`），content_spec 见设计文档 §7。常用：
 - `text`     → `{ md }`
-- `quiz`     → `{ question, options[], answer:int, explain }`
+- `quiz`     → 单题 `{ question, options[], answer:int, explain }`；或多题测验 `{ title?, questions:[{type,prompt,...,explain}] }`，type ∈ `single`/`multi`(answer:int[])/`boolean`(answer:bool)/`fill`(answer:str, accept?:str[])，多题自动计分+重做
 - `param_sim`→ `{ params:[{name,label,min,max,step,default}], outputs:[{name,label,expr}], explain }`（`expr` 是关于 param 名的 JS 表达式，如 `"x*x"`）
 - `interactive_demo` → `{ controls:[{name,label,kind}], outputs:[{name,label,expr}] }`（kind ∈ slider/number/select/checkbox/text）
 - `step_through` → `{ steps:[{state,explain}] }`
