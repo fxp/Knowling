@@ -51,6 +51,19 @@ python3 -m knowling.cli compile ./out/gd.spec.json --title "梯度下降" -o ./o
 python3 -m knowling.cli blocks          # 列出块类型
 ```
 
+### AI Chat / Studio（学习卡之外的改写层）
+
+每张学习卡是一个**确定状态**（自包含 HTML，不内嵌 chat）。Studio 在卡片之外提供一个 AI 聊天层：输入当前卡内容 + 你的诉求 → 生成一张新卡。
+
+```bash
+export ZHIPU_API_KEY=...
+python3 -m knowling.cli serve "链式法则" --objectives "能对复合函数求导" --audience 高中生
+# 浏览器打开 → 左边学习卡，右边聊天。说「太难了」「讲深点」「和导数的关系」即重新生成换卡。
+
+# 或命令行单次改写：
+python3 -m knowling.cli refine ./out/gd.spec.json "太难了，给初中生版本" --title 梯度下降 -o ./out/gd2.html
+```
+
 安装为命令（可选）：`pip install -e .` 后可直接用 `knowling gen ...`。
 
 ## 测试

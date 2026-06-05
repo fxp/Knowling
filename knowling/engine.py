@@ -13,7 +13,7 @@ from typing import Any, Callable, List, Optional
 
 from . import blocks as block_registry
 from .assembler import assemble_html
-from .capabilities import block_compiler, retriever as retriever_mod, spec_planner
+from .capabilities import block_compiler, refine as refine_mod, retriever as retriever_mod, spec_planner
 from .capabilities.qa import QAConfig, qa_loop
 from .providers import LLMProvider, get_provider
 from .schema import (
@@ -241,3 +241,26 @@ def generate_knowling(
     spec = approval_gate(spec, cfg, emit)
     return compile_spec(spec, kp, cfg, out_path=out_path, emit=emit,
                         base_trace=[plan_call], grounding=grounding)
+
+
+def refine_knowling(
+    spec: KnowlingSpec,
+    kp: KnowledgePoint,
+    instruction: str,
+    cfg: Optional[Config] = None,
+    out_path: Optional[str] = None,
+    emit: EventSink = _noop_sink,
+) -> "tuple[Knowling, str]":
+    """Chat-driven: current card spec + user instruction → a NEW card.
+
+    The card itself is a fixed state; this turns one fixed state into the next.
+    Returns (new_knowling, summary-of-changes).
+    """
+    cfg = cfg or Config()
+    emit("stage", {"stage": "refine", "status": "start", "instruction": instruction})
+    provider = cfg.provider("plan")
+    new_spec, call, summary = refine_mod.refine(spec, kp, instruction, provider)
+    emit("stage", {"stage": "refine", "status": "done", "summary": summary,
+                   "blocks": [b.type for b in new_spec.blocks]})
+    knowling = compile_spec(new_spec, kp, cfg, out_path=out_path, emit=emit, base_trace=[call])
+    return knowling, summary

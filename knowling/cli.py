@@ -197,6 +197,47 @@ def cmd_gen(args) -> int:
     return 0
 
 
+def cmd_refine(args) -> int:
+    """Chat-style: current card spec + instruction → a new card."""
+    emit = make_emitter(args.format)
+    with open(args.spec, "r", encoding="utf-8") as f:
+        spec = KnowlingSpec.from_dict(json.load(f))
+    cfg = _cfg_from_args(args, quiet=(args.format == "json"))
+    cfg.render_target = spec.render_target
+    kp = KnowledgePoint(
+        id=spec.knowledge_point_id,
+        title=args.title or spec.knowledge_point_id,
+        description=args.description or "",
+        learning_objectives=[o.strip() for o in (args.objectives or "").split(",") if o.strip()],
+        difficulty=args.difficulty, audience=args.audience,
+    )
+    from .engine import refine_knowling
+
+    knowling, summary = refine_knowling(spec, kp, args.instruction, cfg,
+                                        out_path=args.output, emit=emit)
+    total = round(sum(c.cost_usd for c in knowling.model_trace), 6)
+    emit("done", {"id": knowling.id, "status": knowling.status, "cost_usd": total,
+                  "entry": knowling.artifact.entry, "qa": knowling.qa.to_dict()})
+    if args.format == "rich":
+        print("  调整：" + summary)
+    if args.output and args.spec_out:
+        with open(args.spec_out, "w", encoding="utf-8") as f:
+            f.write(json.dumps(knowling.spec.to_dict(), ensure_ascii=False, indent=2))
+    if not args.output:
+        print(knowling._html)  # type: ignore[attr-defined]
+    return 0
+
+
+def cmd_serve(args) -> int:
+    """Launch Knowling Studio: a card + an AI chat to refine it."""
+    from .studio import serve
+
+    cfg = _cfg_from_args(args, quiet=True)
+    kp = _kp_from_args(args)
+    serve(kp, cfg, port=args.port, open_browser=not args.no_open)
+    return 0
+
+
 def cmd_blocks(args) -> int:
     if args.format == "json":
         print(json.dumps({"implemented": list(blocks.IMPLEMENTED),
@@ -258,6 +299,27 @@ def build_parser() -> argparse.ArgumentParser:
     p_gen.add_argument("title")
     _add_common(p_gen)
     p_gen.set_defaults(func=cmd_gen)
+
+    p_ref = sub.add_parser("refine", help="revise a card from a chat instruction → new card")
+    p_ref.add_argument("spec", help="path to the current KnowlingSpec JSON")
+    p_ref.add_argument("instruction", help='e.g. "太难了" / "讲深点" / "和导数的关系"')
+    p_ref.add_argument("--title", default=None)
+    p_ref.add_argument("--description", default=None)
+    p_ref.add_argument("--objectives", default=None)
+    p_ref.add_argument("--audience", default=None)
+    p_ref.add_argument("--difficulty", choices=["intro", "core", "advanced"], default="core")
+    p_ref.add_argument("--spec-out", dest="spec_out", default=None,
+                       help="also write the revised spec JSON here")
+    _add_common(p_ref, with_kp=False)
+    p_ref.set_defaults(func=cmd_refine)
+
+    p_srv = sub.add_parser("serve", help="launch Knowling Studio (card + AI chat to refine)")
+    p_srv.add_argument("title")
+    p_srv.add_argument("--port", type=int, default=8799)
+    p_srv.add_argument("--no-open", dest="no_open", action="store_true", default=False,
+                       help="do not auto-open the browser")
+    _add_common(p_srv)
+    p_srv.set_defaults(func=cmd_serve)
 
     p_blk = sub.add_parser("blocks", help="list block types")
     p_blk.add_argument("-f", "--format", choices=["rich", "json"], default="rich")

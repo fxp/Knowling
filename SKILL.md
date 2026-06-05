@@ -31,7 +31,19 @@ python3 -m knowling.cli compile ./out/gd.spec.json --title "梯度下降" -o ./o
 
 # 列出已实现 / 已声明的块类型
 python3 -m knowling.cli blocks
+
+# 用一句话诉求改写一张卡 → 生成新卡（学习卡之外的 AI 改写层）
+python3 -m knowling.cli refine ./out/gd.spec.json "太难了，给初中生版本" --title 梯度下降 -o ./out/gd2.html
+
+# Knowling Studio：左边学习卡 + 右边 AI Chat，对话式改写并实时换卡
+python3 -m knowling.cli serve "链式法则" --objectives "能对复合函数求导" --audience 高中生
 ```
+
+## AI Chat / Studio（学习卡之外的改写层）
+- 每张学习卡是一个**确定状态**（自包含、不内嵌 chat）。`refine` / Studio 把「当前卡的 spec + 用户诉求」喂给模型，**生成一张新卡**。
+- 诉求示例：「太难了」「讲深点」「举个例子」「和导数是什么关系？」。
+- `knowling serve` 启动本地 Studio（key 留在服务端）：左侧卡片、右侧聊天 + 快捷诉求；发消息即重新生成、重跑质检、换卡。
+- 编程接口：`engine.refine_knowling(spec, kp, instruction, cfg) -> (new_knowling, summary)`。
 
 **输出模式**（仿 DeepTutor）：
 - `-f rich`（默认）：彩色人类可读进度。
