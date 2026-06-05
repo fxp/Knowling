@@ -141,6 +141,15 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-deck-dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--kl-border); background: transparent; cursor: pointer; transition: background .15s, transform .15s; }
 .kl-deck-dot.is-active { background: var(--kl-accent); border-color: var(--kl-accent); transform: scale(1.15); }
 .kl-deck-done { text-align: center; color: var(--kl-ok); font-size: 14px; margin-top: 10px; }
+/* inline math (self-contained, no KaTeX) */
+.kl-math { font-family: "Latin Modern Math", "Cambria Math", "Times New Roman", Georgia, serif; font-style: italic; white-space: nowrap; }
+.kl-math .kl-mathrm { font-style: normal; }
+.kl-math-display { display: block; text-align: center; font-size: 1.15em; margin: 10px 0; }
+.kl-frac { display: inline-flex; flex-direction: column; vertical-align: -0.55em; text-align: center; font-size: .88em; margin: 0 .12em; }
+.kl-frac .kl-num { border-bottom: 1px solid currentColor; padding: 0 .3em; }
+.kl-frac .kl-den { padding: 0 .3em; }
+.kl-sqrt-arg { border-top: 1px solid currentColor; padding: 0 .15em; margin-left: .05em; }
+.kl-math sup, .kl-math sub { font-size: .72em; font-style: italic; }
 /* generic fallback */
 .kl-generic-tag { color: var(--kl-accent-2); font-size: 14px; }
 .kl-generic pre { background: var(--kl-soft); padding: 12px; border-radius: 8px; overflow: auto; font-size: 13px; }
@@ -151,35 +160,30 @@ button:disabled { opacity: .45; cursor: default; }
 <main class="kl-doc">
   <header class="kl-header">
     <h1>正弦函数 y = A·sin(ωx + φ)</h1>
-    <p class="kl-hook">一条简单的 y=sin(x) 曲线，如何像捏橡皮泥一样被拉高、压扁、左右平移？掌握三个参数，你就掌握了波形的&#x27;基因&#x27;。</p>
+    <p class="kl-hook">声音的高低与大小、潮汐的涨落，背后都是正弦波。为什么同一个正弦函数，稍微改个字母，波形就千变万化？</p>
   </header>
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
-<div class="kl-card"><section class="kl-block kl-text" data-block-id="intro_text">
-<p>正弦函数 $y = A\sin(\omega x + \phi)$ 中，三个参数各自掌控着波形的一种&#x27;基因&#x27;：</p>
-<ul>
-<li><strong>A (振幅)</strong>：控制波浪的<strong>高度</strong>（纵向拉伸）；</li>
-<li><strong>ω (角频率)</strong>：控制波浪的<strong>疏密</strong>（横向压缩/拉伸，决定周期 $T = \frac{2\pi}{\omega}$）；</li>
-<li><strong>φ (初相)</strong>：控制波浪的<strong>起跑位置</strong>（左右平移）。</li>
-</ul>
-<p>接下来，请亲手改变它们，观察曲线的响应。</p>
+<div class="kl-card"><section class="kl-block kl-text" data-block-id="bk_1_hook">
+<p>我们早就认识了 <span class="kl-math">y = <span class="kl-mathrm">sin</span>(x)</span>，它是如此完美对称。但在现实与工程中，纯正弦波几乎不存在——声音有大小（振幅），频率有高低（周期），起点有先后（相位）。</p>
+<p>这三个维度的变化，被精妙地编码进了三个希腊字母：<strong><span class="kl-math">A</span>、<span class="kl-math">ω</span>、<span class="kl-math">φ</span></strong>。接下来，由你亲手拆解它们的魔力。</p>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="param_explore">
+<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bk_2_param_sim">
   <div class="kl-ps-controls">
   <label class="kl-ps-ctl">
     <span class="kl-ps-name">振幅 A</span>
     <input type="range" data-param="A"
-           min="0.5" max="3" step="0.1"
+           min="-3" max="3" step="0.1"
            value="1">
     <output class="kl-ps-val" data-for="A"></output>
   </label>
   <label class="kl-ps-ctl">
     <span class="kl-ps-name">角频率 ω</span>
-    <input type="range" data-param="w"
-           min="0.5" max="3" step="0.1"
+    <input type="range" data-param="omega"
+           min="0.5" max="5" step="0.1"
            value="1">
-    <output class="kl-ps-val" data-for="w"></output>
+    <output class="kl-ps-val" data-for="omega"></output>
   </label>
   <label class="kl-ps-ctl">
     <span class="kl-ps-name">初相 φ</span>
@@ -190,18 +194,18 @@ button:disabled { opacity: .45; cursor: default; }
   </label>
   </div>
   <div class="kl-ps-outputs">
-  <div class="kl-ps-out"><span>周期 T</span><strong data-out="T">—</strong></div>
-  <div class="kl-ps-out"><span>平移量</span><strong data-out="shift">—</strong></div>
+  <div class="kl-ps-out"><span>周期 T = 2π/|ω|</span><strong data-out="T">—</strong></div>
+  <div class="kl-ps-out"><span>振幅 |A|</span><strong data-out="amp">—</strong></div>
   </div>
   <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
-  <p class="kl-ps-explain">拖动滑块改变参数。观察：只改 A，曲线如何伸缩？只改 ω，周期 T 如何变化？只改 φ，图像往哪边平移？</p>
+  <p class="kl-ps-explain">拖动滑块改变参数，观察正弦曲线的形态变化。右侧标量输出会实时计算当前的周期与振幅绝对值。注意：当 A&lt;0 时，观察曲线发生了什么翻转。</p>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="param_explore"]');
-    var params = [{"name": "A", "label": "振幅 A", "min": 0.5, "max": 3, "step": 0.1, "default": 1}, {"name": "w", "label": "角频率 ω", "min": 0.5, "max": 3, "step": 0.1, "default": 1}, {"name": "phi", "label": "初相 φ", "min": -3.14, "max": 3.14, "step": 0.1, "default": 0}];
+    var root = document.querySelector('[data-block-id="bk_2_param_sim"]');
+    var params = [{"name": "A", "label": "振幅 A", "min": -3, "max": 3, "step": 0.1, "default": 1}, {"name": "omega", "label": "角频率 ω", "min": 0.5, "max": 5, "step": 0.1, "default": 1}, {"name": "phi", "label": "初相 φ", "min": -3.14, "max": 3.14, "step": 0.1, "default": 0}];
     var sweep = {"name": "x", "min": -6.28, "max": 6.28};
-    var curves = [{"name": "y", "label": "y = A·sin(ωx + φ)", "expr": "A*Math.sin(w*x+phi)"}];
-    var scalars = [{"name": "T", "label": "周期 T", "expr": "2*Math.PI/w"}, {"name": "shift", "label": "平移量", "expr": "-phi/w"}];
+    var curves = [{"name": "y", "label": "y = A·sin(ωx + φ)", "expr": "A*Math.sin(omega*x+phi)"}];
+    var scalars = [{"name": "T", "label": "周期 T = 2π/|ω|", "expr": "2*Math.PI/Math.abs(omega)"}, {"name": "amp", "label": "振幅 |A|", "expr": "Math.abs(A)"}];
     var legacy = false;
     var sliders = {};
     params.forEach(function(p) { sliders[p.name] = root.querySelector('input[data-param="' + p.name + '"]'); });
@@ -284,7 +288,7 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="step_omega">
+<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_3_step_omega">
   <div class="kl-st-state"></div>
   <p class="kl-st-explain"></p>
   <div class="kl-st-nav">
@@ -294,8 +298,8 @@ button:disabled { opacity: .45; cursor: default; }
   </div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="step_omega"]');
-    var steps = [{"state": "A=1, w=1, phi=0", "explain": "基准状态：y=sin(x)，一个完整的波形在 [0, 2π] 上完成，周期 T = 2π。"}, {"state": "A=1, w=2, phi=0", "explain": "将 ω 增大到 2：y=sin(2x)。自变量 x 只需走过 π，2x 就走过了 2π，完成一个周期。周期缩短为 T = 2π/2 = π，曲线变得更密集。"}, {"state": "A=1, w=0.5, phi=0", "explain": "将 ω 减小到 0.5：y=sin(0.5x)。自变量 x 需要走完 4π，0.5x 才能到达 2π。周期拉长为 T = 2π/0.5 = 4π，曲线变得更舒展。"}];
+    var root = document.querySelector('[data-block-id="bk_3_step_omega"]');
+    var steps = [{"state": "A=1, omega=1, phi=0", "explain": "基准状态：ω=1，此时周期 T=2π/1=2π。曲线在 [-π, π] 恰好完成一个完整的波浪。"}, {"state": "A=1, omega=2, phi=0", "explain": "将 ω 增大到 2：图像在水平方向被&#x27;压缩&#x27;了。因为自变量被乘以 2，x 只需走一半的路程就能完成一个周期。此时 T=2π/2=π。"}, {"state": "A=1, omega=0.5, phi=0", "explain": "将 ω 减小到 0.5：图像在水平方向被&#x27;拉伸&#x27;了。x 需要走两倍的路程才能完成一个周期。此时 T=2π/0.5=4π。"}];
     var i = 0;
     var stateEl = root.querySelector('.kl-st-state');
     var explainEl = root.querySelector('.kl-st-explain');
@@ -303,8 +307,8 @@ button:disabled { opacity: .45; cursor: default; }
     var prev = root.querySelector('.kl-st-prev');
     var next = root.querySelector('.kl-st-next');
     function render() {
-      stateEl.textContent = steps[i].state;
-      explainEl.textContent = steps[i].explain || '';
+      stateEl.innerHTML = steps[i].state;
+      explainEl.innerHTML = steps[i].explain || '';
       prog.textContent = (i + 1) + ' / ' + steps.length;
       prev.disabled = i === 0;
       next.disabled = i === steps.length - 1;
@@ -315,7 +319,7 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="step_phi">
+<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_4_step_phi">
   <div class="kl-st-state"></div>
   <p class="kl-st-explain"></p>
   <div class="kl-st-nav">
@@ -325,8 +329,8 @@ button:disabled { opacity: .45; cursor: default; }
   </div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="step_phi"]');
-    var steps = [{"state": "A=1, w=1, phi=0", "explain": "基准状态：y=sin(x)，曲线过原点 (0,0)。"}, {"state": "A=1, w=1, phi=1.57", "explain": "加入初相 φ=π/2：y=sin(x+π/2)。令 x+π/2=0 得 x=-π/2。原点特征左移到了 x=-π/2 处。口诀'左加右减'：括号内加，图像左移。"}, {"state": "A=1, w=2, phi=1.57", "explain": "保持 φ=π/2，但将 ω 变为 2：y=sin(2x+π/2)。令 2x+π/2=0 得 x=-π/4。此时平移量不再是 -π/2，而是 -π/4！平移量 = -φ/ω，ω 越大，同样的 φ 造成的实际平移越短。"}];
+    var root = document.querySelector('[data-block-id="bk_4_step_phi"]');
+    var steps = [{"state": "A=1, omega=1, phi=0", "explain": "基准状态：φ=0，曲线原点过 (0,0) 且处于上升沿。"}, {"state": "A=1, omega=1, phi=1.57", "explain": "φ=+π/2：代数上加了一个正数，但图像整体向**左**平移了 π/2。记忆口诀：&#x27;加左减右&#x27;（针对 x 本身而言，+π/2 等价于 x 提前达到对应值）。"}, {"state": "A=1, omega=1, phi=-1.57", "explain": "φ=-π/2：代数上减了一个正数，图像整体向**右**平移了 π/2。原点处的上升沿被推到了 x=π/2 的位置。"}];
     var i = 0;
     var stateEl = root.querySelector('.kl-st-state');
     var explainEl = root.querySelector('.kl-st-explain');
@@ -334,8 +338,8 @@ button:disabled { opacity: .45; cursor: default; }
     var prev = root.querySelector('.kl-st-prev');
     var next = root.querySelector('.kl-st-next');
     function render() {
-      stateEl.textContent = steps[i].state;
-      explainEl.textContent = steps[i].explain || '';
+      stateEl.innerHTML = steps[i].state;
+      explainEl.innerHTML = steps[i].explain || '';
       prog.textContent = (i + 1) + ' / ' + steps.length;
       prev.disabled = i === 0;
       next.disabled = i === steps.length - 1;
@@ -346,59 +350,13 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-interactivedemo" data-block-id="scalar_relations">
-  <div class="kl-id-controls">
-    <label class="kl-id-ctl"><span>振幅 A</span><input type="range" data-ctl="A" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="A"></output></label>
-    <label class="kl-id-ctl"><span>角频率 ω</span><input type="range" data-ctl="w" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="w"></output></label>
-    <label class="kl-id-ctl"><span>初相 φ</span><input type="range" data-ctl="phi" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="phi"></output></label>
-  </div>
-  <div class="kl-id-outputs">
-    <div class="kl-id-out"><span>最大值</span><strong data-out="ymax">—</strong></div>
-    <div class="kl-id-out"><span>周期 T = 2π/ω</span><strong data-out="T">—</strong></div>
-    <div class="kl-id-out"><span>平移量 = -φ/ω</span><strong data-out="shift">—</strong></div>
-  </div>
-  <p class="kl-id-explain">观察数值联动：A 独立控制最值；ω 独立控制周期；φ 和 ω 共同决定平移量。</p>
-  <script>
-  (function() {
-    var root = document.querySelector('[data-block-id="scalar_relations"]');
-    var outputs = [{"name": "ymax", "label": "最大值", "expr": "A"}, {"name": "T", "label": "周期 T = 2π/ω", "expr": "2*Math.PI/w"}, {"name": "shift", "label": "平移量 = -φ/ω", "expr": "-phi/w"}];
-    var ctls = Array.prototype.slice.call(root.querySelectorAll('[data-ctl]'));
-    function readVals() {
-      var v = {};
-      ctls.forEach(function(el) {
-        var k = el.dataset.kind, name = el.dataset.ctl;
-        if (k === 'checkbox') v[name] = el.checked;
-        else if (k === 'slider' || k === 'number') v[name] = parseFloat(el.value);
-        else v[name] = el.value;
-        var val = root.querySelector('[data-val="' + name + '"]');
-        if (val) val.textContent = v[name];
-      });
-      return v;
-    }
-    function fmt(n) {
-      return (typeof n === 'number' && isFinite(n)) ? (Math.round(n * 1000) / 1000) : '—';
-    }
-    function update() {
-      var vals = readVals();
-      var keys = Object.keys(vals);
-      outputs.forEach(function(o) {
-        var out = root.querySelector('[data-out="' + o.name + '"]');
-        try {
-          var fn = new Function(keys.join(','), 'with(Math){return (' + o.expr + ');}');
-          out.textContent = fmt(fn.apply(null, keys.map(function(k) { return vals[k]; })));
-        } catch (e) { out.textContent = '—'; }
-      });
-    }
-    ctls.forEach(function(el) {
-      el.addEventListener('input', update);
-      el.addEventListener('change', update);
-    });
-    update();
-  })();
-  </script>
-</section></div>
-<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="quiz_check">
-  <p class="kl-quiz-title">参数与波形检验</p>
+<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_5_callout">
+  <span class="kl-callout-icon">🛈</span>
+  <div class="kl-callout-body"><p><strong>警惕负振幅！</strong></p>
+<p>当 <span class="kl-math">A &lt; 0</span> 时，曲线并非简单下移，而是关于 <span class="kl-math">x</span> 轴发生了<strong>翻转（反射）</strong>。例如 <span class="kl-math">y = -<span class="kl-mathrm">sin</span>(x)</span> 的波峰变成了波谷。在数学严格定义中，振幅始终为正（<span class="kl-math">|A|</span>），负号只代表方向。</p></div>
+</aside></div>
+<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_6_quiz">
+  <p class="kl-quiz-title">参数诊断</p>
   <div class="kl-quiz-head"><span class="kl-quiz-progress"></span></div>
   <p class="kl-quiz-q"></p>
   <div class="kl-quiz-opts"></div>
@@ -410,8 +368,8 @@ button:disabled { opacity: .45; cursor: default; }
   <div class="kl-quiz-score" hidden></div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="quiz_check"]');
-    var questions = [{"type": "single", "prompt": "函数 y = 2sin(3x)，其振幅和周期分别是多少？", "options": ["振幅 2，周期 3", "振幅 2，周期 2π/3", "振幅 3，周期 2π", "振幅 2，周期 6π"], "answer": 1, "explain": "A=2 控制振幅为 2；ω=3 控制周期 T=2π/ω=2π/3。"}, {"type": "single", "prompt": "将 y=sin(x) 的图像变为 y=sin(x + π/4)，图像发生了怎样的变换？", "options": ["向右平移 π/4 个单位", "向左平移 π/4 个单位", "向右平移 π/2 个单位", "纵坐标伸长为原来的 π/4 倍"], "answer": 1, "explain": "遵循'左加右减'原则，括号内加 π/4，等价于图像向左平移 π/4 个单位。"}, {"type": "single", "prompt": "函数 y=sin(2x - π/2) 的图像是由 y=sin(2x) 的图像怎样平移得到的？", "options": ["向左平移 π/2", "向右平移 π/2", "向左平移 π/4", "向右平移 π/4"], "answer": 3, "explain": "y=sin(2x - π/2) = sin[2(x - π/4)]，因此是将 y=sin(2x) 向右平移 π/4 个单位。平移量必须看 x 自身的系数，即 φ/ω。"}];
+    var root = document.querySelector('[data-block-id="bk_6_quiz"]');
+    var questions = [{"type": "single", "answer": 1, "accept": [], "prompt": "要将 y=sin(x) 的图像在水平方向压缩为原来的一半（周期变为 π），应该修改哪个参数，如何修改？", "options": ["将 A 改为 2", "将 ω 改为 2", "将 ω 改为 0.5", "将 φ 改为 π"], "explain": "周期 T=2π/ω，要使周期减半，需将 ω 翻倍，所以 ω 改为 2。"}, {"type": "single", "answer": 0, "accept": [], "prompt": "函数 y=sin(x+π/3) 的图像是由 y=sin(x) 的图像如何变换得到的？", "options": ["向左平移 π/3 个单位", "向右平移 π/3 个单位", "向上平移 π/3 个单位", "向下平移 π/3 个单位"], "explain": "φ=+π/3，代数上加对应几何向左平移，即&#x27;加左减右&#x27;原则。"}, {"type": "single", "answer": 1, "accept": [], "prompt": "振幅 A 决定了正弦波的横向宽窄，而角频率 ω 决定了纵向高低。", "options": ["正确", "错误"], "explain": "恰好说反了。A 控制纵向高低（振幅），ω 控制横向宽窄（周期）。"}];
     var many = questions.length > 1;
     var idx = 0, score = 0, locked = false, selected = null;
     var qBox = root.querySelector('.kl-quiz-q');
@@ -425,7 +383,7 @@ button:disabled { opacity: .45; cursor: default; }
     function render() {
       var q = questions[idx];
       locked = false; selected = q.type === 'multi' ? {} : null;
-      qBox.textContent = q.prompt;
+      qBox.innerHTML = q.prompt;
       fb.hidden = true; fb.className = 'kl-quiz-feedback';
       next.hidden = true; submit.hidden = false; submit.disabled = false;
       scoreBox.hidden = true;
@@ -439,7 +397,7 @@ button:disabled { opacity: .45; cursor: default; }
       } else {
         q.options.forEach(function(o, i) {
           var btn = document.createElement('button');
-          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.textContent = o;
+          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.innerHTML = o;
           btn.addEventListener('click', function() {
             if (locked) return;
             if (q.type === 'multi') {
@@ -484,7 +442,7 @@ button:disabled { opacity: .45; cursor: default; }
       if (correct) score++;
       fb.hidden = false;
       fb.className = 'kl-quiz-feedback ' + (correct ? 'is-correct' : 'is-wrong');
-      fb.textContent = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
+      fb.innerHTML = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
       if (many) { next.hidden = false; next.textContent = idx < questions.length - 1 ? '下一题' : '查看成绩'; }
     }
 

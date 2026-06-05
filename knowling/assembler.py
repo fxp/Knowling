@@ -149,6 +149,15 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-deck-dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--kl-border); background: transparent; cursor: pointer; transition: background .15s, transform .15s; }
 .kl-deck-dot.is-active { background: var(--kl-accent); border-color: var(--kl-accent); transform: scale(1.15); }
 .kl-deck-done { text-align: center; color: var(--kl-ok); font-size: 14px; margin-top: 10px; }
+/* inline math (self-contained, no KaTeX) */
+.kl-math { font-family: "Latin Modern Math", "Cambria Math", "Times New Roman", Georgia, serif; font-style: italic; white-space: nowrap; }
+.kl-math .kl-mathrm { font-style: normal; }
+.kl-math-display { display: block; text-align: center; font-size: 1.15em; margin: 10px 0; }
+.kl-frac { display: inline-flex; flex-direction: column; vertical-align: -0.55em; text-align: center; font-size: .88em; margin: 0 .12em; }
+.kl-frac .kl-num { border-bottom: 1px solid currentColor; padding: 0 .3em; }
+.kl-frac .kl-den { padding: 0 .3em; }
+.kl-sqrt-arg { border-top: 1px solid currentColor; padding: 0 .15em; margin-left: .05em; }
+.kl-math sup, .kl-math sub { font-size: .72em; font-style: italic; }
 /* generic fallback */
 .kl-generic-tag { color: var(--kl-accent-2); font-size: 14px; }
 .kl-generic pre { background: var(--kl-soft); padding: 12px; border-radius: 8px; overflow: auto; font-size: 13px; }

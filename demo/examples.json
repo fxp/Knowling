@@ -10,16 +10,16 @@
       "param_sim",
       "step_through",
       "step_through",
-      "interactive_demo",
+      "callout",
       "quiz"
     ],
     "qa": {
-      "render": 3.0,
+      "render": 4.8,
       "interact": 5.0,
-      "peda": 4.0,
-      "passed": true
+      "peda": 2.0,
+      "passed": false
     },
-    "status": "ready",
+    "status": "qa_failed",
     "featured": true
   },
   {
@@ -32,17 +32,17 @@
       "text",
       "param_sim",
       "step_through",
-      "interactive_demo",
+      "step_through",
       "callout",
       "quiz"
     ],
     "qa": {
-      "render": 2.0,
-      "interact": null,
-      "peda": null,
-      "passed": false
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 4.5,
+      "passed": true
     },
-    "status": "qa_failed",
+    "status": "ready",
     "featured": false
   },
   {
@@ -52,15 +52,15 @@
     "kp": "在有序数组中通过不断对半缩小区间来定位目标值",
     "audience": "编程初学者",
     "blocks": [
-      "callout",
+      "text",
+      "interactive_demo",
       "step_through",
       "param_sim",
-      "interactive_demo",
       "quiz",
-      "flashcards"
+      "callout"
     ],
     "qa": {
-      "render": 4.5,
+      "render": 4.8,
       "interact": 5.0,
       "peda": 4.0,
       "passed": true
@@ -83,9 +83,9 @@
       "quiz"
     ],
     "qa": {
-      "render": 4.8,
+      "render": 5.0,
       "interact": 5.0,
-      "peda": 3.5,
+      "peda": 4.0,
       "passed": true
     },
     "status": "ready",

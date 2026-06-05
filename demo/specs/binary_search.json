@@ -1,0 +1,163 @@
+{
+  "knowledge_point_id": "binary_search_core",
+  "pedagogy": {
+    "hook": "如何在1秒内从1亿个有序数字中找到特定目标？逐个检查太慢了，学会对半砍，20次就能找到！",
+    "central_phenomenon": "每次比较后，搜索区间严格缩小一半，low/high/mid 指针的协同更新驱动区间收敛",
+    "misconceptions": [
+      "认为二分查找不需要数组有序也能工作",
+      "更新边界时写成 low = mid 或 high = mid，导致死循环",
+      "计算 mid 时直接写 (low + high) 可能导致整数溢出"
+    ],
+    "aha_moment": "意识到 mid 已经比较过且不等于目标，所以新区间必须彻底跨过 mid（low=mid+1 或 high=mid-1），这就是为什么区间能绝对减半且不会遗漏"
+  },
+  "blocks": [
+    {
+      "block_id": "bs_hook_text",
+      "type": "text",
+      "intent": "建立直觉：对半排除的威力",
+      "content_spec": {
+        "md": "想象你在翻一本1000页的字典找'Binary'。你会从第1页逐页翻吗？\n当然不会！你会直接翻到中间，发现'Binary'在前面，于是**直接扔掉后半本**。\n每翻一次，剩下的页数就减半。这就是**二分查找**的核心：在有序数组中，每步排除一半元素，极速定位目标。"
+      }
+    },
+    {
+      "block_id": "bs_boundary_sim",
+      "type": "interactive_demo",
+      "intent": "通过标量交互，直观理解 low/high/mid 的数值关系与边界更新规则",
+      "content_spec": {
+        "controls": [
+          {
+            "name": "low",
+            "label": "low 指针",
+            "kind": "slider"
+          },
+          {
+            "name": "high",
+            "label": "high 指针",
+            "kind": "slider"
+          },
+          {
+            "name": "target",
+            "label": "目标值 target",
+            "kind": "number"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "mid",
+            "label": "mid 索引 (向下取整)",
+            "expr": "Math.floor((low + high) / 2)"
+          },
+          {
+            "name": "new_low_if_go_right",
+            "label": "若 target > arr[mid]，新 low",
+            "expr": "mid + 1"
+          },
+          {
+            "name": "new_high_if_go_left",
+            "label": "若 target < arr[mid]，新 high",
+            "expr": "mid - 1"
+          }
+        ],
+        "explain": "拖动 low 和 high，观察 mid 如何计算。当目标值在右侧时，low 必须跳过 mid 变为 mid+1；在左侧时，high 必须跳过 mid 变为 mid-1。这就是彻底排除 mid 的关键！"
+      }
+    },
+    {
+      "block_id": "bs_search_step",
+      "type": "step_through",
+      "intent": "完整追踪一次二分查找过程，展示区间如何一步步对半缩小",
+      "content_spec": {
+        "steps": [
+          {
+            "state": "arr=[2,5,8,12,16,23,38,56,72,91], low=0, high=9, mid=4, target=23",
+            "explain": "初始状态：计算 mid = (0+9)/2 = 4。arr[4]=16 < 23，目标在右半区。"
+          },
+          {
+            "state": "arr=[2,5,8,12,16,23,38,56,72,91], low=5, high=9, mid=7, target=23",
+            "explain": "向右收缩：因为 16 不是目标，low 直接跳到 mid+1=5。新 mid=(5+9)/2=7。arr[7]=56 > 23，目标在左半区。"
+          },
+          {
+            "state": "arr=[2,5,8,12,16,23,38,56,72,91], low=5, high=6, mid=5, target=23",
+            "explain": "向左收缩：因为 56 不是目标，high 直接跳到 mid-1=6。新 mid=(5+6)/2=5。arr[5]=23 == 23，找到目标！"
+          }
+        ]
+      }
+    },
+    {
+      "block_id": "bs_overflow_param",
+      "type": "param_sim",
+      "intent": "可视化大数下 mid 计算的溢出风险及防溢出写法的效果对比",
+      "content_spec": {
+        "params": [
+          {
+            "name": "low",
+            "label": "low 值",
+            "min": 0,
+            "max": 2000000000,
+            "step": 100000000,
+            "default": 1500000000
+          },
+          {
+            "name": "high",
+            "label": "high 值",
+            "min": 0,
+            "max": 2000000000,
+            "step": 100000000,
+            "default": 2000000000
+          }
+        ],
+        "outputs": [
+          {
+            "name": "mid_naive",
+            "label": "普通写法 (low+high)/2",
+            "expr": "Math.floor((low + high) / 2)"
+          },
+          {
+            "name": "mid_safe",
+            "label": "防溢出写法 low+(high-low)/2",
+            "expr": "Math.floor(low + (high - low) / 2)"
+          }
+        ],
+        "x_range": [],
+        "explain": "当 low 和 high 都很大时，(low+high) 会超出整数最大值导致溢出变为负数（曲线突变）。而 low+(high-low)/2 通过先算差值，完美规避了溢出风险。拖动滑块观察两条曲线的分离点！"
+      }
+    },
+    {
+      "block_id": "bs_misconception_quiz",
+      "type": "quiz",
+      "intent": "检验对边界更新和前提条件的理解，纠正常见死循环错误",
+      "content_spec": {
+        "title": "二分查找易错点检测",
+        "questions": [
+          {
+            "type": "single",
+            "prompt": "当发现 arr[mid] < target 时，应该如何更新搜索区间？",
+            "options": [
+              "low = mid",
+              "low = mid + 1",
+              "high = mid",
+              "high = mid - 1"
+            ],
+            "answer": 1,
+            "explain": "arr[mid] 已确认小于 target，mid 自身及左侧所有元素都可排除，因此 low 必须跨过 mid，更新为 mid + 1。若写成 low=mid 会导致死循环。"
+          },
+          {
+            "type": "boolean",
+            "prompt": "二分查找只需要目标数组元素不重复即可，不需要整体有序。",
+            "answer": false,
+            "explain": "二分查找的核心逻辑是'根据中间值判断目标在哪一侧'，如果数组无序，你无法保证右侧一定比中间值大，对半排除法就会遗漏正确答案。"
+          }
+        ]
+      }
+    },
+    {
+      "block_id": "bs_summary_callout",
+      "type": "callout",
+      "intent": "强化核心记忆点：前提、防溢出、边界跳跃",
+      "content_spec": {
+        "md": "**二分查找三大纪律：**\n1. **前提**：数组必须有序！\n2. **防溢出**：计算 mid 用 `low + (high - low) / 2`\n3. **不回头**：更新边界必须跳过 mid（`low = mid + 1` 或 `high = mid - 1`），确保区间严格缩小，避免死循环。"
+      }
+    }
+  ],
+  "render_target": "html",
+  "version": 1
+}

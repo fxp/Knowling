@@ -141,6 +141,15 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-deck-dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--kl-border); background: transparent; cursor: pointer; transition: background .15s, transform .15s; }
 .kl-deck-dot.is-active { background: var(--kl-accent); border-color: var(--kl-accent); transform: scale(1.15); }
 .kl-deck-done { text-align: center; color: var(--kl-ok); font-size: 14px; margin-top: 10px; }
+/* inline math (self-contained, no KaTeX) */
+.kl-math { font-family: "Latin Modern Math", "Cambria Math", "Times New Roman", Georgia, serif; font-style: italic; white-space: nowrap; }
+.kl-math .kl-mathrm { font-style: normal; }
+.kl-math-display { display: block; text-align: center; font-size: 1.15em; margin: 10px 0; }
+.kl-frac { display: inline-flex; flex-direction: column; vertical-align: -0.55em; text-align: center; font-size: .88em; margin: 0 .12em; }
+.kl-frac .kl-num { border-bottom: 1px solid currentColor; padding: 0 .3em; }
+.kl-frac .kl-den { padding: 0 .3em; }
+.kl-sqrt-arg { border-top: 1px solid currentColor; padding: 0 .15em; margin-left: .05em; }
+.kl-math sup, .kl-math sub { font-size: .72em; font-style: italic; }
 /* generic fallback */
 .kl-generic-tag { color: var(--kl-accent-2); font-size: 14px; }
 .kl-generic pre { background: var(--kl-soft); padding: 12px; border-radius: 8px; overflow: auto; font-size: 13px; }
@@ -151,17 +160,20 @@ button:disabled { opacity: .45; cursor: default; }
 <main class="kl-doc">
   <header class="kl-header">
     <h1>复利 A = P(1 + r)ⁿ</h1>
-    <p class="kl-hook">同样的本金，为什么有人只赚了零头，有人却翻了几十倍？时间到底是财富的朋友还是敌人？</p>
+    <p class="kl-hook">同样的本金，放在不同的账户里30年，金额竟然能相差好几倍？时间到底是财富的朋友还是敌人？</p>
   </header>
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
-<div class="kl-card"><section class="kl-block kl-text" data-block-id="hook_text">
-<p>假设你有 10,000 元本金，年利率 8%。30 年后你会拿到多少钱？</p>
-<p>如果你的直觉是加上 24,000 元的利息，那你就错过了理财界最著名的魔法——<strong>复利</strong>。</p>
-<p>在公式 <strong>A = P(1 + r)ⁿ</strong> 中，本金 P、利率 r 和期数 n 共同决定了你的最终金额 A。但它们的作用方式并不平等：r 和 n 的组合，会引发超乎直觉的指数爆炸。</p>
+<div class="kl-card"><section class="kl-block kl-text" data-block-id="bk_1_hook">
+<p>假设你有 10,000 元本金，年利率 8%。</p>
+<ul>
+<li><strong>单利</strong>：每年只算本金的利息，30年后你得到 10,000 + 10,000×8%×30 = <strong>34,000元</strong>。</li>
+<li><strong>复利</strong>：每年把利息加入本金重新计息，30年后你得到 10,000×(1+8%)³⁰ = <strong>100,627元</strong>。</li>
+</ul>
+<p>同样的起点，终点却差了3倍！这就是复利（Compounding）的魔力。复利公式 <strong>A = P(1 + r)ⁿ</strong> 中，本金P、利率r和期数n是如何共同决定最终金额的？让我们动手探索。</p>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="compound_vs_simple_sim">
+<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bk_2_param_sim">
   <div class="kl-ps-controls">
   <label class="kl-ps-ctl">
     <span class="kl-ps-name">本金 P</span>
@@ -182,13 +194,13 @@ button:disabled { opacity: .45; cursor: default; }
 
   </div>
   <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
-  <p class="kl-ps-explain">横轴 x 为期数（年），拖动滑块改变本金 P 和利率 r，观察复利（曲线）与单利（直线）如何随时间推移产生巨大鸿沟。</p>
+  <p class="kl-ps-explain">横轴为期数n（年），纵轴为最终金额。拖动滑块改变本金P和利率r，观察复利（实线）与单利（虚线）随时间推移的差距如何变化。注意曲线在后期是如何&#x27;向上翘起&#x27;的。</p>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="compound_vs_simple_sim"]');
+    var root = document.querySelector('[data-block-id="bk_2_param_sim"]');
     var params = [{"name": "P", "label": "本金 P", "min": 1000, "max": 100000, "step": 1000, "default": 10000}, {"name": "r", "label": "年利率 r", "min": 0.01, "max": 0.2, "step": 0.01, "default": 0.08}];
-    var sweep = {"name": "x", "min": 0.0, "max": 50.0};
-    var curves = [{"name": "compound", "label": "复利 A = P(1+r)^x", "expr": "P*Math.pow(1+r, x)"}, {"name": "simple", "label": "单利 A = P(1+r*x)", "expr": "P*(1+r*x)"}];
+    var sweep = {"name": "x", "min": 0.0, "max": 30.0};
+    var curves = [{"name": "compound", "label": "复利终值 A", "expr": "P * Math.pow(1 + r, x)"}, {"name": "simple", "label": "单利终值", "expr": "P * (1 + r * x)"}];
     var scalars = [];
     var legacy = false;
     var sliders = {};
@@ -272,7 +284,7 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="step_through_growth">
+<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_3_step_through">
   <div class="kl-st-state"></div>
   <p class="kl-st-explain"></p>
   <div class="kl-st-nav">
@@ -282,8 +294,8 @@ button:disabled { opacity: .45; cursor: default; }
   </div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="step_through_growth"]');
-    var steps = [{"state": "第1年初：本金 P=10000，利率 r=8%", "explain": "起点：你投入了1万元，年利率8%。此时利息尚未产生。"}, {"state": "第1年末：A = 10000 × (1+0.08)¹ = 10800", "explain": "第一年结束，产生800元利息。单利和复利在此步结果完全相同。"}, {"state": "第2年末：A = 10000 × (1+0.08)² = 11664", "explain": "关键分叉：如果是单利，利息仍是800元（总额11600）；但复利是以10800为新本金计息，利息变成了864元。多出的64元就是‘利息的利息’。"}, {"state": "第10年末：A = 10000 × (1+0.08)¹⁰ = 21589", "explain": "10年翻倍！此时复利总额比单利（18000）多出近3600元，利滚利效应开始显现。"}, {"state": "第30年末：A = 10000 × (1+0.08)³⁰ = 100627", "explain": "30年增长超10倍！单利仅34000元。复利超出单利6万多，指数增长彻底甩开线性增长。"}];
+    var root = document.querySelector('[data-block-id="bk_3_step_through"]');
+    var steps = [{"state": "第1年初：本金 10,000 元", "explain": "起点：你的初始本金 P = 10,000 元，年利率 r = 8%。"}, {"state": "第1年末：10,000 × (1+8%) = 10,800 元", "explain": "第一年产生利息 800 元。单利和复利在这一年没有区别。"}, {"state": "第2年末：10,800 × (1+8%) = 11,664 元", "explain": "关键转折：第二年的利息是 864 元，比第一年多！因为利息是按 10,800 元算的，那 800 元去年的利息今年也产生了 64 元的利息。这就是&#x27;利滚利&#x27;。"}, {"state": "第3年末：11,664 × (1+8%) = 12,597.12 元", "explain": "利息变为 933.12 元，逐年递增。而单利每年的利息永远是 800 元。差距开始显现。"}, {"state": "第10年末：10,000 × (1+8%)¹⁰ ≈ 21,589 元", "explain": "10年时，复利比单利（18,000元）多出近 3,600 元。基数变大，利息增长加速。"}, {"state": "第20年末：10,000 × (1+8%)²⁰ ≈ 46,610 元", "explain": "20年时，单利仅 26,000 元。复利几乎是单利的1.8倍，指数效应开始发力。"}];
     var i = 0;
     var stateEl = root.querySelector('.kl-st-state');
     var explainEl = root.querySelector('.kl-st-explain');
@@ -291,8 +303,8 @@ button:disabled { opacity: .45; cursor: default; }
     var prev = root.querySelector('.kl-st-prev');
     var next = root.querySelector('.kl-st-next');
     function render() {
-      stateEl.textContent = steps[i].state;
-      explainEl.textContent = steps[i].explain || '';
+      stateEl.innerHTML = steps[i].state;
+      explainEl.innerHTML = steps[i].explain || '';
       prog.textContent = (i + 1) + ' / ' + steps.length;
       prev.disabled = i === 0;
       next.disabled = i === steps.length - 1;
@@ -303,21 +315,22 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-interactivedemo" data-block-id="rate_time_demo">
+<div class="kl-card"><section class="kl-block kl-interactivedemo" data-block-id="bk_4_interactive_demo">
   <div class="kl-id-controls">
-    <label class="kl-id-ctl"><span>本金</span><input type="number" data-ctl="P" data-kind="number" min="0.0" max="10.0" step="any" value="5.0"><output data-val="P"></output></label>
-    <label class="kl-id-ctl"><span>年利率</span><input type="range" data-ctl="r" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="r"></output></label>
-    <label class="kl-id-ctl"><span>投资期数(年)</span><input type="range" data-ctl="n" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="n"></output></label>
+    <label class="kl-id-ctl"><span>投资年数 n</span><input type="range" data-ctl="n" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="n"></output></label>
+    <label class="kl-id-ctl"><span>账户A利率 r1</span><input type="number" data-ctl="r1" data-kind="number" min="0.0" max="10.0" step="any" value="5.0"><output data-val="r1"></output></label>
+    <label class="kl-id-ctl"><span>账户B利率 r2</span><input type="number" data-ctl="r2" data-kind="number" min="0.0" max="10.0" step="any" value="5.0"><output data-val="r2"></output></label>
   </div>
   <div class="kl-id-outputs">
-    <div class="kl-id-out"><span>复利最终金额</span><strong data-out="A">—</strong></div>
-    <div class="kl-id-out"><span>总收益率</span><strong data-out="total_return">—</strong></div>
+    <div class="kl-id-out"><span>账户A终值 (P=10000)</span><strong data-out="A1">—</strong></div>
+    <div class="kl-id-out"><span>账户B终值 (P=10000)</span><strong data-out="A2">—</strong></div>
+    <div class="kl-id-out"><span>终值差额</span><strong data-out="diff">—</strong></div>
   </div>
-  <p class="kl-id-explain">调节利率和期数，观察最终金额和总收益率的标量变化。试着把利率从5%调到10%（翻倍），再把期数从10年调到20年（翻倍），哪个让金额增加得更多？</p>
+  <p class="kl-id-explain">设定两个账户的利率（例如 7% 和 8%），拖动投资年数，观察仅仅 1% 的利率差异，在 30 年后会带来多大的金额鸿沟。</p>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="rate_time_demo"]');
-    var outputs = [{"name": "A", "label": "复利最终金额", "expr": "P * Math.pow(1 + r, n)"}, {"name": "total_return", "label": "总收益率", "expr": "(Math.pow(1 + r, n) - 1) * 100"}];
+    var root = document.querySelector('[data-block-id="bk_4_interactive_demo"]');
+    var outputs = [{"name": "A1", "label": "账户A终值 (P=10000)", "expr": "10000 * Math.pow(1 + r1, n)"}, {"name": "A2", "label": "账户B终值 (P=10000)", "expr": "10000 * Math.pow(1 + r2, n)"}, {"name": "diff", "label": "终值差额", "expr": "Math.abs(10000 * Math.pow(1 + r1, n) - 10000 * Math.pow(1 + r2, n))"}];
     var ctls = Array.prototype.slice.call(root.querySelectorAll('[data-ctl]'));
     function readVals() {
       var v = {};
@@ -353,20 +366,13 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="insight_callout">
+<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_5_callout">
   <span class="kl-callout-icon">🛈</span>
-  <div class="kl-callout-body"><p>💡 <strong>72法则：估算翻倍时间的捷径</strong></p>
-<p>想让资金翻倍，大约需要多少年？用 72 除以年利率即可。</p>
-<ul>
-<li>年利率 8%：72 ÷ 8 = 9 年翻倍</li>
-<li>年利率 6%：72 ÷ 6 = 12 年翻倍</li>
-</ul>
-<p><strong>关键洞察</strong>：在 A = P(1+r)ⁿ 中，指数函数的特性意味着——</p>
-<p>1. <strong>时间的威力大于利率</strong>：期数 n 在指数位置，9%利率持有8年，远不如6%利率持有12年。</p>
-<p>2. <strong>早投资的优势</strong>：哪怕利率稍低，更长的 n 足以弥补 r 的劣势。</p></div>
+  <div class="kl-callout-body"><p><strong>💡 爱因斯坦曾说：&#x27;复利是世界第八大奇迹。&#x27;</strong></p>
+<p>复利的核心在于 <strong>指数增长</strong>：A = P(1+r)ⁿ。当期数 n 足够大时，(1+r)ⁿ 会产生惊人的爆发力。这也解释了为什么理财要<strong>尽早开始</strong>——时间的长度（n）往往比初始本金（P）更能决定最终的财富量级。</p></div>
 </aside></div>
-<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="check_understanding">
-  <p class="kl-quiz-title">理解检验</p>
+<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_6_quiz">
+  <p class="kl-quiz-title">理解复利效应</p>
   <div class="kl-quiz-head"><span class="kl-quiz-progress"></span></div>
   <p class="kl-quiz-q"></p>
   <div class="kl-quiz-opts"></div>
@@ -378,8 +384,8 @@ button:disabled { opacity: .45; cursor: default; }
   <div class="kl-quiz-score" hidden></div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="check_understanding"]');
-    var questions = [{"type": "single", "prompt": "同样的本金和利率，第1年的复利利息与单利利息相比如何？", "options": ["复利利息大于单利利息", "复利利息小于单利利息", "两者完全相等", "取决于利率高低"], "answer": 2, "explain": "第一年的计息本金相同，都是初始本金P，因此利息完全相等。复利的优势从第2年才开始显现。"}, {"type": "single", "prompt": "本金1万元，年利率5%。按复利计算，大约多少年能超过2万元？", "options": ["10年", "14年", "20年", "25年"], "answer": 1, "explain": "根据72法则，72 ÷ 5 = 14.4年。14年时复利金额非常接近2万元，超过单利下的1.7万元。"}];
+    var root = document.querySelector('[data-block-id="bk_6_quiz"]');
+    var questions = [{"type": "single", "answer": 1, "accept": [], "prompt": "在相同的本金和利率下，投资期从10年增加到20年，与从20年增加到30年相比，哪个阶段赚取的利息更多？", "options": ["10年到20年赚得更多", "20年到30年赚得更多", "两个阶段赚得一样多", "取决于利率是否超过10%"], "explain": "由于复利的指数特性，基数在后期已经非常大，因此20年到30年产生的利息远多于10年到20年。这就是时间越久，威力越大的原因。"}, {"type": "single", "answer": 0, "accept": [], "prompt": "只要时间足够长，5%的复利终值一定能追上10%的单利终值。", "options": ["正确", "错误"], "explain": "复利是指数增长，单利是线性增长。指数函数最终总会超越线性函数，因此无论利率多低，只要时间足够长，复利终值必然超过更高利率的单利终值。"}];
     var many = questions.length > 1;
     var idx = 0, score = 0, locked = false, selected = null;
     var qBox = root.querySelector('.kl-quiz-q');
@@ -393,7 +399,7 @@ button:disabled { opacity: .45; cursor: default; }
     function render() {
       var q = questions[idx];
       locked = false; selected = q.type === 'multi' ? {} : null;
-      qBox.textContent = q.prompt;
+      qBox.innerHTML = q.prompt;
       fb.hidden = true; fb.className = 'kl-quiz-feedback';
       next.hidden = true; submit.hidden = false; submit.disabled = false;
       scoreBox.hidden = true;
@@ -407,7 +413,7 @@ button:disabled { opacity: .45; cursor: default; }
       } else {
         q.options.forEach(function(o, i) {
           var btn = document.createElement('button');
-          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.textContent = o;
+          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.innerHTML = o;
           btn.addEventListener('click', function() {
             if (locked) return;
             if (q.type === 'multi') {
@@ -452,7 +458,7 @@ button:disabled { opacity: .45; cursor: default; }
       if (correct) score++;
       fb.hidden = false;
       fb.className = 'kl-quiz-feedback ' + (correct ? 'is-correct' : 'is-wrong');
-      fb.textContent = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
+      fb.innerHTML = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
       if (many) { next.hidden = false; next.textContent = idx < questions.length - 1 ? '下一题' : '查看成绩'; }
     }
 

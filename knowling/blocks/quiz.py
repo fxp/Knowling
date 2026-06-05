@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, has_control, has_wiring, count_tag, scope as _scope
+from ._common import esc, jslit, has_control, has_wiring, count_tag, mathspan, scope as _scope
 from ..schema.models import as_int
 
 TYPE = "quiz"
@@ -142,8 +142,16 @@ def template(block: Dict[str, Any]) -> str:
     bid = esc(block.get("block_id", "quiz"))
     cs = block.get("content_spec", {})
     questions = _normalize(cs)
+    # pre-render learner-facing text → HTML (math), kept separate from the raw
+    # answer/accept used for matching
+    q_js = [{
+        "type": q["type"], "answer": q["answer"], "accept": q.get("accept", []),
+        "prompt": mathspan(q["prompt"]),
+        "options": [mathspan(o) for o in q.get("options", [])],
+        "explain": mathspan(q.get("explain", "")),
+    } for q in questions]
     title = cs.get("title", "")
-    title_html = f'<p class="kl-quiz-title">{esc(title)}</p>' if title else ""
+    title_html = f'<p class="kl-quiz-title">{mathspan(title)}</p>' if title else ""
     return f'''<section class="kl-block kl-quiz" data-block-id="{bid}">
   {title_html}
   <div class="kl-quiz-head"><span class="kl-quiz-progress"></span></div>
@@ -158,7 +166,7 @@ def template(block: Dict[str, Any]) -> str:
   <script>
   (function() {{
     var root = document.querySelector('[data-block-id="{bid}"]');
-    var questions = {jslit(questions)};
+    var questions = {jslit(q_js)};
     var many = questions.length > 1;
     var idx = 0, score = 0, locked = false, selected = null;
     var qBox = root.querySelector('.kl-quiz-q');
@@ -172,7 +180,7 @@ def template(block: Dict[str, Any]) -> str:
     function render() {{
       var q = questions[idx];
       locked = false; selected = q.type === 'multi' ? {{}} : null;
-      qBox.textContent = q.prompt;
+      qBox.innerHTML = q.prompt;
       fb.hidden = true; fb.className = 'kl-quiz-feedback';
       next.hidden = true; submit.hidden = false; submit.disabled = false;
       scoreBox.hidden = true;
@@ -186,7 +194,7 @@ def template(block: Dict[str, Any]) -> str:
       }} else {{
         q.options.forEach(function(o, i) {{
           var btn = document.createElement('button');
-          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.textContent = o;
+          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.innerHTML = o;
           btn.addEventListener('click', function() {{
             if (locked) return;
             if (q.type === 'multi') {{
@@ -231,7 +239,7 @@ def template(block: Dict[str, Any]) -> str:
       if (correct) score++;
       fb.hidden = false;
       fb.className = 'kl-quiz-feedback ' + (correct ? 'is-correct' : 'is-wrong');
-      fb.textContent = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
+      fb.innerHTML = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
       if (many) {{ next.hidden = false; next.textContent = idx < questions.length - 1 ? '下一题' : '查看成绩'; }}
     }}
 

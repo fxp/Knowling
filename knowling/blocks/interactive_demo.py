@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, has_control, has_wiring, scope as _scope
+from ._common import esc, jslit, has_control, has_wiring, mathspan, scope as _scope
 
 TYPE = "interactive_demo"
 _KINDS = {"slider", "number", "select", "checkbox", "text"}
@@ -64,7 +64,7 @@ def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:
 
 def _control_html(c: Dict[str, Any]) -> str:
     name = esc(c["name"])
-    label = esc(c.get("label", c["name"]))
+    label = mathspan(c.get("label", c["name"]))
     kind = c.get("kind", "slider")
     if kind in ("slider", "number"):
         t = "range" if kind == "slider" else "number"
@@ -97,7 +97,7 @@ def template(block: Dict[str, Any]) -> str:
     explain = cs.get("explain", "")
     ctl_html = "\n    ".join(_control_html(c) for c in controls)
     out_html = "\n    ".join(
-        f'<div class="kl-id-out"><span>{esc(o.get("label", o["name"]))}</span>'
+        f'<div class="kl-id-out"><span>{mathspan(o.get("label", o["name"]))}</span>'
         f'<strong data-out="{esc(o["name"])}">—</strong></div>'
         for o in outputs
     )
@@ -108,7 +108,7 @@ def template(block: Dict[str, Any]) -> str:
   <div class="kl-id-outputs">
     {out_html}
   </div>
-  {'<p class="kl-id-explain">' + esc(explain) + '</p>' if explain else ''}
+  {'<p class="kl-id-explain">' + mathspan(explain) + '</p>' if explain else ''}
   <script>
   (function() {{
     var root = document.querySelector('[data-block-id="{bid}"]');

@@ -7,9 +7,41 @@ import json
 import re
 from typing import Any
 
+from ._math import render_math, split_math
+
 
 def esc(s: Any) -> str:
     return html.escape("" if s is None else str(s), quote=True)
+
+
+def _render_with_math(text: str, markdown: bool) -> str:
+    """Render text that may contain $…$ math, optionally with inline markdown.
+
+    Math is rendered first into placeholder tokens, so markdown emphasis that
+    *wraps* a math span (e.g. ``**$a$**``) still works, and escaping never
+    touches the rendered math HTML."""
+    maths = []
+    parts = []
+    for seg, is_math, display in split_math(text):
+        if is_math:
+            maths.append(render_math(seg, display))
+            parts.append(f"\x00{len(maths) - 1}\x00")
+        else:
+            parts.append(seg)
+    s = esc("".join(parts))
+    if markdown:
+        s = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", s)
+        s = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", s)
+        s = re.sub(r"`(.+?)`", r"<code>\1</code>", s)
+    return re.sub("\x00(\\d+)\x00", lambda m: maths[int(m.group(1))], s)
+
+
+def mathspan(s: Any) -> str:
+    """Escape plain text AND render inline/display $…$ math (self-contained).
+
+    Use instead of esc() for any learner-facing field where LLMs may write LaTeX
+    (explanations, labels, quiz text). Plain text with no math just gets escaped."""
+    return _render_with_math("" if s is None else str(s), markdown=False)
 
 
 def jslit(value: Any) -> str:
@@ -85,11 +117,7 @@ def mini_markdown(md: str) -> str:
             in_ul = False
 
     def inline(t: str) -> str:
-        t = esc(t)
-        t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
-        t = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", t)
-        t = re.sub(r"`(.+?)`", r"<code>\1</code>", t)
-        return t
+        return _render_with_math(t, markdown=True)
 
     for raw in lines:
         line = raw.rstrip()

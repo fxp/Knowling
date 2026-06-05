@@ -21,6 +21,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 COMPONENTS = os.path.join(HERE, "components")
+SPECS = os.path.join(HERE, "specs")
 MANIFEST = os.path.join(HERE, "examples.json")
 sys.path.insert(0, ROOT)
 
@@ -52,6 +53,7 @@ def _generate() -> None:
     from knowling.schema import KnowledgePoint
 
     os.makedirs(COMPONENTS, exist_ok=True)
+    os.makedirs(SPECS, exist_ok=True)
     source = "GLM-5" if ZhipuProvider.available() else "离线模板"
     cfg = Config(quiet=True, qa=QAConfig(sandbox_name="auto"))
     manifest = []
@@ -62,6 +64,8 @@ def _generate() -> None:
             difficulty=ex["difficulty"], audience=ex["audience"])
         print(f"[gen] {ex['title']} …")
         k = generate_knowling(kp, cfg, out_path=os.path.join(COMPONENTS, ex["id"] + ".html"))
+        with open(os.path.join(SPECS, ex["id"] + ".json"), "w", encoding="utf-8") as f:
+            json.dump(k.spec.to_dict(), f, ensure_ascii=False, indent=2)
         manifest.append({
             "title": ex["title"], "file": ex["id"] + ".html", "source": source,
             "kp": ex["description"], "audience": ex["audience"],
@@ -191,9 +195,34 @@ code {{ background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; 
 </html>'''
 
 
+def _rerender() -> None:
+    """Re-render components from saved specs (no model) — applies template/CSS
+    changes (e.g. math rendering) to existing examples for free."""
+    from knowling.assembler import assemble_html
+    from knowling.schema import KnowlingSpec
+
+    if not os.path.isdir(SPECS):
+        print("no demo/specs — run --generate first")
+        return
+    for ex in EXAMPLES:
+        sp = os.path.join(SPECS, ex["id"] + ".json")
+        if not os.path.exists(sp):
+            print(f"[rerender] skip {ex['id']} (no saved spec)")
+            continue
+        from knowling import blocks
+        spec = KnowlingSpec.from_dict(json.load(open(sp, encoding="utf-8")))
+        frags = [blocks.render_block_template(b.to_dict()) for b in spec.blocks]
+        html = assemble_html(spec, frags, ex["title"])
+        with open(os.path.join(COMPONENTS, ex["id"] + ".html"), "w", encoding="utf-8") as f:
+            f.write(html)
+        print(f"[rerender] {ex['id']}")
+
+
 def main() -> None:
     if "--generate" in sys.argv:
         _generate()
+    elif "--rerender" in sys.argv:
+        _rerender()
     if not os.path.exists(MANIFEST):
         print("no examples.json — run: python3 demo/build.py --generate")
         return

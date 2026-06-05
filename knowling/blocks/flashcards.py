@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, count_tag, has_wiring, scope as _scope
+from ._common import esc, jslit, count_tag, has_wiring, mathspan, scope as _scope
 
 TYPE = "flashcards"
 
@@ -43,7 +43,8 @@ def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:
 def template(block: Dict[str, Any]) -> str:
     cs = block.get("content_spec", {})
     bid = esc(block.get("block_id", "fc"))
-    cards = cs.get("cards", [])
+    cards = [{"front": mathspan(c.get("front", "")), "back": mathspan(c.get("back", ""))}
+             for c in cs.get("cards", [])]
     return f'''<section class="kl-block kl-flashcards" data-block-id="{bid}">
   <div class="kl-fc-card kl-fc-flip">
     <div class="kl-fc-face kl-fc-front"></div>
@@ -64,8 +65,8 @@ def template(block: Dict[str, Any]) -> str:
     var back = root.querySelector('.kl-fc-back');
     var count = root.querySelector('.kl-fc-count');
     function render() {{
-      front.textContent = cards[i].front;
-      back.textContent = cards[i].back;
+      front.innerHTML = cards[i].front;
+      back.innerHTML = cards[i].back;
       card.classList.toggle('is-flipped', flipped);
       count.textContent = (i + 1) + ' / ' + cards.length;
     }}

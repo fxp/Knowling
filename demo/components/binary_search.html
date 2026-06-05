@@ -141,6 +141,15 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-deck-dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--kl-border); background: transparent; cursor: pointer; transition: background .15s, transform .15s; }
 .kl-deck-dot.is-active { background: var(--kl-accent); border-color: var(--kl-accent); transform: scale(1.15); }
 .kl-deck-done { text-align: center; color: var(--kl-ok); font-size: 14px; margin-top: 10px; }
+/* inline math (self-contained, no KaTeX) */
+.kl-math { font-family: "Latin Modern Math", "Cambria Math", "Times New Roman", Georgia, serif; font-style: italic; white-space: nowrap; }
+.kl-math .kl-mathrm { font-style: normal; }
+.kl-math-display { display: block; text-align: center; font-size: 1.15em; margin: 10px 0; }
+.kl-frac { display: inline-flex; flex-direction: column; vertical-align: -0.55em; text-align: center; font-size: .88em; margin: 0 .12em; }
+.kl-frac .kl-num { border-bottom: 1px solid currentColor; padding: 0 .3em; }
+.kl-frac .kl-den { padding: 0 .3em; }
+.kl-sqrt-arg { border-top: 1px solid currentColor; padding: 0 .15em; margin-left: .05em; }
+.kl-math sup, .kl-math sub { font-size: .72em; font-style: italic; }
 /* generic fallback */
 .kl-generic-tag { color: var(--kl-accent-2); font-size: 14px; }
 .kl-generic pre { background: var(--kl-soft); padding: 12px; border-radius: 8px; overflow: auto; font-size: 13px; }
@@ -151,17 +160,68 @@ button:disabled { opacity: .45; cursor: default; }
 <main class="kl-doc">
   <header class="kl-header">
     <h1>二分查找 Binary Search</h1>
-    <p class="kl-hook">如何在10亿个有序数字中，只用不到30次猜测就找到目标？体验一把&#x27;削去一半&#x27;的降维打击力量。</p>
+    <p class="kl-hook">如何在1秒内从1亿个有序数字中找到特定目标？逐个检查太慢了，学会对半砍，20次就能找到！</p>
   </header>
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
-<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_1_hook">
-  <span class="kl-callout-icon">🛈</span>
-  <div class="kl-callout-body"><p>💡 <strong>猜数游戏</strong>：我在 1 到 1,000,000 之间想了一个数，你每次猜一个数，我只告诉你&#x27;大了&#x27;或&#x27;小了&#x27;。最少几次能保证猜中？</p>
-<p>答案是 <strong>20 次</strong>！这就是对半排除的威力——每次排除一半可能性，2 的 20 次方已经超过 100 万。二分查找就是这个过程的严格实现。</p></div>
-</aside></div>
-<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_2_step">
+<div class="kl-card"><section class="kl-block kl-text" data-block-id="bs_hook_text">
+<p>想象你在翻一本1000页的字典找&#x27;Binary&#x27;。你会从第1页逐页翻吗？</p>
+<p>当然不会！你会直接翻到中间，发现&#x27;Binary&#x27;在前面，于是<strong>直接扔掉后半本</strong>。</p>
+<p>每翻一次，剩下的页数就减半。这就是<strong>二分查找</strong>的核心：在有序数组中，每步排除一半元素，极速定位目标。</p>
+</section></div>
+<div class="kl-card"><section class="kl-block kl-interactivedemo" data-block-id="bs_boundary_sim">
+  <div class="kl-id-controls">
+    <label class="kl-id-ctl"><span>low 指针</span><input type="range" data-ctl="low" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="low"></output></label>
+    <label class="kl-id-ctl"><span>high 指针</span><input type="range" data-ctl="high" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="high"></output></label>
+    <label class="kl-id-ctl"><span>目标值 target</span><input type="number" data-ctl="target" data-kind="number" min="0.0" max="10.0" step="any" value="5.0"><output data-val="target"></output></label>
+  </div>
+  <div class="kl-id-outputs">
+    <div class="kl-id-out"><span>mid 索引 (向下取整)</span><strong data-out="mid">—</strong></div>
+    <div class="kl-id-out"><span>若 target &gt; arr[mid]，新 low</span><strong data-out="new_low_if_go_right">—</strong></div>
+    <div class="kl-id-out"><span>若 target &lt; arr[mid]，新 high</span><strong data-out="new_high_if_go_left">—</strong></div>
+  </div>
+  <p class="kl-id-explain">拖动 low 和 high，观察 mid 如何计算。当目标值在右侧时，low 必须跳过 mid 变为 mid+1；在左侧时，high 必须跳过 mid 变为 mid-1。这就是彻底排除 mid 的关键！</p>
+  <script>
+  (function() {
+    var root = document.querySelector('[data-block-id="bs_boundary_sim"]');
+    var outputs = [{"name": "mid", "label": "mid 索引 (向下取整)", "expr": "Math.floor((low + high) / 2)"}, {"name": "new_low_if_go_right", "label": "若 target > arr[mid]，新 low", "expr": "mid + 1"}, {"name": "new_high_if_go_left", "label": "若 target < arr[mid]，新 high", "expr": "mid - 1"}];
+    var ctls = Array.prototype.slice.call(root.querySelectorAll('[data-ctl]'));
+    function readVals() {
+      var v = {};
+      ctls.forEach(function(el) {
+        var k = el.dataset.kind, name = el.dataset.ctl;
+        if (k === 'checkbox') v[name] = el.checked;
+        else if (k === 'slider' || k === 'number') v[name] = parseFloat(el.value);
+        else v[name] = el.value;
+        var val = root.querySelector('[data-val="' + name + '"]');
+        if (val) val.textContent = v[name];
+      });
+      return v;
+    }
+    function fmt(n) {
+      return (typeof n === 'number' && isFinite(n)) ? (Math.round(n * 1000) / 1000) : '—';
+    }
+    function update() {
+      var vals = readVals();
+      var keys = Object.keys(vals);
+      outputs.forEach(function(o) {
+        var out = root.querySelector('[data-out="' + o.name + '"]');
+        try {
+          var fn = new Function(keys.join(','), 'with(Math){return (' + o.expr + ');}');
+          out.textContent = fmt(fn.apply(null, keys.map(function(k) { return vals[k]; })));
+        } catch (e) { out.textContent = '—'; }
+      });
+    }
+    ctls.forEach(function(el) {
+      el.addEventListener('input', update);
+      el.addEventListener('change', update);
+    });
+    update();
+  })();
+  </script>
+</section></div>
+<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bs_search_step">
   <div class="kl-st-state"></div>
   <p class="kl-st-explain"></p>
   <div class="kl-st-nav">
@@ -171,8 +231,8 @@ button:disabled { opacity: .45; cursor: default; }
   </div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="bk_2_step"]');
-    var steps = [{"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=0, high=9, mid=4", "explain": "初始状态：low 指向首元素(0)，high 指向尾元素(9)。计算 mid = floor((low + high) / 2) = 4，此时 arr[mid] = 16。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=9, mid=4", "explain": "因为 16 < 23，目标在右半部分。16 及其左侧全部排除，更新 low = mid + 1 = 5。注意 mid 位置已被排除，不能写 low = mid。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=9, mid=7", "explain": "重新计算 mid = floor((5 + 9) / 2) = 7，此时 arr[mid] = 56。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=6, mid=7", "explain": "因为 56 > 23，目标在左半部分。56 及其右侧全部排除，更新 high = mid - 1 = 6。注意 mid 位置已被排除，不能写 high = mid。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=6, mid=5", "explain": "重新计算 mid = floor((5 + 6) / 2) = 5，此时 arr[mid] = 23。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=6, mid=5, found=true", "explain": "arr[mid] == target，查找成功！返回索引 5。只用了 3 次比较，区间从 10 缩减到了 1。"}];
+    var root = document.querySelector('[data-block-id="bs_search_step"]');
+    var steps = [{"state": "arr=[2,5,8,12,16,23,38,56,72,91], low=0, high=9, mid=4, target=23", "explain": "初始状态：计算 mid = (0+9)/2 = 4。arr[4]=16 &lt; 23，目标在右半区。"}, {"state": "arr=[2,5,8,12,16,23,38,56,72,91], low=5, high=9, mid=7, target=23", "explain": "向右收缩：因为 16 不是目标，low 直接跳到 mid+1=5。新 mid=(5+9)/2=7。arr[7]=56 &gt; 23，目标在左半区。"}, {"state": "arr=[2,5,8,12,16,23,38,56,72,91], low=5, high=6, mid=5, target=23", "explain": "向左收缩：因为 56 不是目标，high 直接跳到 mid-1=6。新 mid=(5+6)/2=5。arr[5]=23 == 23，找到目标！"}];
     var i = 0;
     var stateEl = root.querySelector('.kl-st-state');
     var explainEl = root.querySelector('.kl-st-explain');
@@ -180,8 +240,8 @@ button:disabled { opacity: .45; cursor: default; }
     var prev = root.querySelector('.kl-st-prev');
     var next = root.querySelector('.kl-st-next');
     function render() {
-      stateEl.textContent = steps[i].state;
-      explainEl.textContent = steps[i].explain || '';
+      stateEl.innerHTML = steps[i].state;
+      explainEl.innerHTML = steps[i].explain || '';
       prog.textContent = (i + 1) + ' / ' + steps.length;
       prev.disabled = i === 0;
       next.disabled = i === steps.length - 1;
@@ -192,28 +252,36 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bk_3_param">
+<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bs_overflow_param">
   <div class="kl-ps-controls">
   <label class="kl-ps-ctl">
-    <span class="kl-ps-name">数组大小 N</span>
-    <input type="range" data-param="N"
-           min="1" max="1000000" step="1"
-           value="1000">
-    <output class="kl-ps-val" data-for="N"></output>
+    <span class="kl-ps-name">low 值</span>
+    <input type="range" data-param="low"
+           min="0" max="2000000000" step="100000000"
+           value="1500000000">
+    <output class="kl-ps-val" data-for="low"></output>
+  </label>
+  <label class="kl-ps-ctl">
+    <span class="kl-ps-name">high 值</span>
+    <input type="range" data-param="high"
+           min="0" max="2000000000" step="100000000"
+           value="2000000000">
+    <output class="kl-ps-val" data-for="high"></output>
   </label>
   </div>
   <div class="kl-ps-outputs">
-  <div class="kl-ps-out"><span>最大比较次数</span><strong data-out="max_steps">—</strong></div>
+  <div class="kl-ps-out"><span>普通写法 (low+high)/2</span><strong data-out="mid_naive">—</strong></div>
+  <div class="kl-ps-out"><span>防溢出写法 low+(high-low)/2</span><strong data-out="mid_safe">—</strong></div>
   </div>
   <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
-  <p class="kl-ps-explain">拖动滑块改变数组大小 N，观察最大比较次数（y轴）如何随 N（x轴）增长。即使 N 增长到 100 万，比较次数也仅为 20 次左右，这就是 O(log N) 的对数级威力。</p>
+  <p class="kl-ps-explain">当 low 和 high 都很大时，(low+high) 会超出整数最大值导致溢出变为负数（曲线突变）。而 low+(high-low)/2 通过先算差值，完美规避了溢出风险。拖动滑块观察两条曲线的分离点！</p>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="bk_3_param"]');
-    var params = [{"name": "N", "label": "数组大小 N", "min": 1, "max": 1000000, "step": 1, "default": 1000}];
-    var sweep = {"name": "N", "min": 1.0, "max": 1000000.0};
-    var curves = [{"name": "max_steps", "label": "最大比较次数", "expr": "Math.ceil(Math.log2(Math.max(1, N)))"}];
-    var scalars = [{"name": "max_steps", "label": "最大比较次数", "expr": "Math.ceil(Math.log2(Math.max(1, N)))"}];
+    var root = document.querySelector('[data-block-id="bs_overflow_param"]');
+    var params = [{"name": "low", "label": "low 值", "min": 0, "max": 2000000000, "step": 100000000, "default": 1500000000}, {"name": "high", "label": "high 值", "min": 0, "max": 2000000000, "step": 100000000, "default": 2000000000}];
+    var sweep = {"name": "low", "min": 0.0, "max": 2000000000.0};
+    var curves = [{"name": "mid_naive", "label": "普通写法 (low+high)/2", "expr": "Math.floor((low + high) / 2)"}];
+    var scalars = [{"name": "mid_naive", "label": "普通写法 (low+high)/2", "expr": "Math.floor((low + high) / 2)"}, {"name": "mid_safe", "label": "防溢出写法 low+(high-low)/2", "expr": "Math.floor(low + (high - low) / 2)"}];
     var legacy = true;
     var sliders = {};
     params.forEach(function(p) { sliders[p.name] = root.querySelector('input[data-param="' + p.name + '"]'); });
@@ -296,57 +364,8 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-interactivedemo" data-block-id="bk_4_interact">
-  <div class="kl-id-controls">
-    <label class="kl-id-ctl"><span>目标值</span><input type="number" data-ctl="target" data-kind="number" min="0.0" max="10.0" step="any" value="5.0"><output data-val="target"></output></label>
-    <label class="kl-id-ctl"><span>边界更新规则</span><select data-ctl="boundary_rule" data-kind="select"><option value="low=mid+1, high=mid-1 (正确)">low=mid+1, high=mid-1 (正确)</option><option value="low=mid, high=mid (错误)">low=mid, high=mid (错误)</option></select></label>
-  </div>
-  <div class="kl-id-outputs">
-    <div class="kl-id-out"><span>所需步数</span><strong data-out="steps_needed">—</strong></div>
-    <div class="kl-id-out"><span>运行状态</span><strong data-out="status">—</strong></div>
-  </div>
-  <p class="kl-id-explain">在长度为10的数组 [2, 5, 8, 12, 16, 23, 38, 56, 72, 91] 中测试。选择正确的边界更新规则，步数是对数级；选择错误的规则（不跳过 mid），观察状态如何陷入死循环。</p>
-  <script>
-  (function() {
-    var root = document.querySelector('[data-block-id="bk_4_interact"]');
-    var outputs = [{"name": "steps_needed", "label": "所需步数", "expr": "boundary_rule === 'low=mid+1, high=mid-1 (正确)' ? Math.ceil(Math.log2(10)) : 999"}, {"name": "status", "label": "运行状态", "expr": "boundary_rule === 'low=mid+1, high=mid-1 (正确)' ? '成功找到' : '死循环溢出'"}];
-    var ctls = Array.prototype.slice.call(root.querySelectorAll('[data-ctl]'));
-    function readVals() {
-      var v = {};
-      ctls.forEach(function(el) {
-        var k = el.dataset.kind, name = el.dataset.ctl;
-        if (k === 'checkbox') v[name] = el.checked;
-        else if (k === 'slider' || k === 'number') v[name] = parseFloat(el.value);
-        else v[name] = el.value;
-        var val = root.querySelector('[data-val="' + name + '"]');
-        if (val) val.textContent = v[name];
-      });
-      return v;
-    }
-    function fmt(n) {
-      return (typeof n === 'number' && isFinite(n)) ? (Math.round(n * 1000) / 1000) : '—';
-    }
-    function update() {
-      var vals = readVals();
-      var keys = Object.keys(vals);
-      outputs.forEach(function(o) {
-        var out = root.querySelector('[data-out="' + o.name + '"]');
-        try {
-          var fn = new Function(keys.join(','), 'with(Math){return (' + o.expr + ');}');
-          out.textContent = fmt(fn.apply(null, keys.map(function(k) { return vals[k]; })));
-        } catch (e) { out.textContent = '—'; }
-      });
-    }
-    ctls.forEach(function(el) {
-      el.addEventListener('input', update);
-      el.addEventListener('change', update);
-    });
-    update();
-  })();
-  </script>
-</section></div>
-<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_5_quiz">
-  <p class="kl-quiz-title">二分查找核心概念检查</p>
+<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bs_misconception_quiz">
+  <p class="kl-quiz-title">二分查找易错点检测</p>
   <div class="kl-quiz-head"><span class="kl-quiz-progress"></span></div>
   <p class="kl-quiz-q"></p>
   <div class="kl-quiz-opts"></div>
@@ -358,8 +377,8 @@ button:disabled { opacity: .45; cursor: default; }
   <div class="kl-quiz-score" hidden></div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="bk_5_quiz"]');
-    var questions = [{"type": "single", "prompt": "当 arr[mid] < target 时，为什么更新 low = mid + 1 而不是 low = mid？", "options": ["因为 mid 位置已经被检查过，不可能等于 target", "因为数组是有序的，mid 及其左侧都小于 target", "为了防止整数溢出", "为了让循环跑得更快"], "answer": 1, "explain": "数组有序时，arr[mid] < target 意味着 mid 及左侧所有元素都小于 target，可以安全排除。如果只赋值 low = mid，区间未严格缩小，会导致死循环。"}, {"type": "single", "prompt": "二分查找可以应用于任何一维数组，无论其是否有序。", "options": ["正确", "错误"], "answer": 1, "explain": "二分查找的核心前提是'有序'。如果数组无序，你无法根据 arr[mid] 与 target 的大小关系来排除另一半，算法失效。"}];
+    var root = document.querySelector('[data-block-id="bs_misconception_quiz"]');
+    var questions = [{"type": "single", "answer": 1, "accept": [], "prompt": "当发现 arr[mid] &lt; target 时，应该如何更新搜索区间？", "options": ["low = mid", "low = mid + 1", "high = mid", "high = mid - 1"], "explain": "arr[mid] 已确认小于 target，mid 自身及左侧所有元素都可排除，因此 low 必须跨过 mid，更新为 mid + 1。若写成 low=mid 会导致死循环。"}, {"type": "single", "answer": 1, "accept": [], "prompt": "二分查找只需要目标数组元素不重复即可，不需要整体有序。", "options": ["正确", "错误"], "explain": "二分查找的核心逻辑是&#x27;根据中间值判断目标在哪一侧&#x27;，如果数组无序，你无法保证右侧一定比中间值大，对半排除法就会遗漏正确答案。"}];
     var many = questions.length > 1;
     var idx = 0, score = 0, locked = false, selected = null;
     var qBox = root.querySelector('.kl-quiz-q');
@@ -373,7 +392,7 @@ button:disabled { opacity: .45; cursor: default; }
     function render() {
       var q = questions[idx];
       locked = false; selected = q.type === 'multi' ? {} : null;
-      qBox.textContent = q.prompt;
+      qBox.innerHTML = q.prompt;
       fb.hidden = true; fb.className = 'kl-quiz-feedback';
       next.hidden = true; submit.hidden = false; submit.disabled = false;
       scoreBox.hidden = true;
@@ -387,7 +406,7 @@ button:disabled { opacity: .45; cursor: default; }
       } else {
         q.options.forEach(function(o, i) {
           var btn = document.createElement('button');
-          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.textContent = o;
+          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.innerHTML = o;
           btn.addEventListener('click', function() {
             if (locked) return;
             if (q.type === 'multi') {
@@ -432,7 +451,7 @@ button:disabled { opacity: .45; cursor: default; }
       if (correct) score++;
       fb.hidden = false;
       fb.className = 'kl-quiz-feedback ' + (correct ? 'is-correct' : 'is-wrong');
-      fb.textContent = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
+      fb.innerHTML = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
       if (many) { next.hidden = false; next.textContent = idx < questions.length - 1 ? '下一题' : '查看成绩'; }
     }
 
@@ -455,42 +474,13 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-flashcards" data-block-id="bk_6_summary">
-  <div class="kl-fc-card kl-fc-flip">
-    <div class="kl-fc-face kl-fc-front"></div>
-    <div class="kl-fc-face kl-fc-back"></div>
-  </div>
-  <div class="kl-fc-nav">
-    <button class="kl-fc-prev" type="button">上一张</button>
-    <span class="kl-fc-count"></span>
-    <button class="kl-fc-next" type="button">下一张</button>
-  </div>
-  <script>
-  (function() {
-    var root = document.querySelector('[data-block-id="bk_6_summary"]');
-    var cards = [{"front": "二分查找的前提条件是什么？", "back": "数组必须**有序**（升序或降序均可，但代码逻辑需对应）。"}, {"front": "如何计算中间索引 mid 以避免整数溢出？", "back": "使用 `low + Math.floor((high - low) / 2)`，而不是 `(low + high) / 2`，防止 low+high 超出整数最大值。"}, {"front": "循环的终止条件是什么？", "back": "当 `low > high` 时终止，说明搜索区间已缩至空集，目标不存在。"}];
-    var i = 0, flipped = false;
-    var card = root.querySelector('.kl-fc-card');
-    var front = root.querySelector('.kl-fc-front');
-    var back = root.querySelector('.kl-fc-back');
-    var count = root.querySelector('.kl-fc-count');
-    function render() {
-      front.textContent = cards[i].front;
-      back.textContent = cards[i].back;
-      card.classList.toggle('is-flipped', flipped);
-      count.textContent = (i + 1) + ' / ' + cards.length;
-    }
-    card.addEventListener('click', function() { flipped = !flipped; render(); });
-    root.querySelector('.kl-fc-prev').addEventListener('click', function() {
-      i = (i - 1 + cards.length) % cards.length; flipped = false; render();
-    });
-    root.querySelector('.kl-fc-next').addEventListener('click', function() {
-      i = (i + 1) % cards.length; flipped = false; render();
-    });
-    render();
-  })();
-  </script>
-</section></div>
+<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bs_summary_callout">
+  <span class="kl-callout-icon">🛈</span>
+  <div class="kl-callout-body"><p><strong>二分查找三大纪律：</strong></p>
+<p>1. <strong>前提</strong>：数组必须有序！</p>
+<p>2. <strong>防溢出</strong>：计算 mid 用 <code>low + (high - low) / 2</code></p>
+<p>3. <strong>不回头</strong>：更新边界必须跳过 mid（<code>low = mid + 1</code> 或 <code>high = mid - 1</code>），确保区间严格缩小，避免死循环。</p></div>
+</aside></div>
       </div>
     </div>
     <nav class="kl-deck-nav">

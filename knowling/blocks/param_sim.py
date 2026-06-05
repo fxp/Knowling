@@ -28,7 +28,7 @@ import math
 import re
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, has_wiring, scope as _scope
+from ._common import esc, jslit, has_wiring, mathspan, scope as _scope
 
 TYPE = "param_sim"
 
@@ -147,7 +147,7 @@ def template(block: Dict[str, Any]) -> str:
 
     slider_html = "\n".join(
         f'''  <label class="kl-ps-ctl">
-    <span class="kl-ps-name">{esc(p["label"])}</span>
+    <span class="kl-ps-name">{mathspan(p["label"])}</span>
     <input type="range" data-param="{esc(p["name"])}"
            min="{esc(p["min"])}" max="{esc(p["max"])}" step="{esc(p["step"])}"
            value="{esc(p["default"])}">
@@ -159,7 +159,7 @@ def template(block: Dict[str, Any]) -> str:
     if legacy and curves:
         readout_outs = curves[:1] + scalars
     out_html = "\n".join(
-        f'  <div class="kl-ps-out"><span>{esc(o.get("label", o["name"]))}</span>'
+        f'  <div class="kl-ps-out"><span>{mathspan(o.get("label", o["name"]))}</span>'
         f'<strong data-out="{esc(o["name"])}">—</strong></div>'
         for o in readout_outs
     )
@@ -172,7 +172,7 @@ def template(block: Dict[str, Any]) -> str:
 {out_html}
   </div>
   <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
-  {'<p class="kl-ps-explain">' + esc(explain) + '</p>' if explain else ''}
+  {'<p class="kl-ps-explain">' + mathspan(explain) + '</p>' if explain else ''}
   <script>
   (function() {{
     var root = document.querySelector('[data-block-id="{bid}"]');

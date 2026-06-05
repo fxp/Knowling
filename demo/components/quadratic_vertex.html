@@ -141,6 +141,15 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-deck-dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--kl-border); background: transparent; cursor: pointer; transition: background .15s, transform .15s; }
 .kl-deck-dot.is-active { background: var(--kl-accent); border-color: var(--kl-accent); transform: scale(1.15); }
 .kl-deck-done { text-align: center; color: var(--kl-ok); font-size: 14px; margin-top: 10px; }
+/* inline math (self-contained, no KaTeX) */
+.kl-math { font-family: "Latin Modern Math", "Cambria Math", "Times New Roman", Georgia, serif; font-style: italic; white-space: nowrap; }
+.kl-math .kl-mathrm { font-style: normal; }
+.kl-math-display { display: block; text-align: center; font-size: 1.15em; margin: 10px 0; }
+.kl-frac { display: inline-flex; flex-direction: column; vertical-align: -0.55em; text-align: center; font-size: .88em; margin: 0 .12em; }
+.kl-frac .kl-num { border-bottom: 1px solid currentColor; padding: 0 .3em; }
+.kl-frac .kl-den { padding: 0 .3em; }
+.kl-sqrt-arg { border-top: 1px solid currentColor; padding: 0 .15em; margin-left: .05em; }
+.kl-math sup, .kl-math sub { font-size: .72em; font-style: italic; }
 /* generic fallback */
 .kl-generic-tag { color: var(--kl-accent-2); font-size: 14px; }
 .kl-generic pre { background: var(--kl-soft); padding: 12px; border-radius: 8px; overflow: auto; font-size: 13px; }
@@ -151,21 +160,23 @@ button:disabled { opacity: .45; cursor: default; }
 <main class="kl-doc">
   <header class="kl-header">
     <h1>二次函数顶点式 y = a(x−h)² + k</h1>
-    <p class="kl-hook">为什么改变一个字母，抛物线就能在坐标系里自由&#x27;飞行&#x27;？掌握这三个参数，你就拥有了控制抛物线的遥控器。</p>
+    <p class="kl-hook">为什么改变方程里的一个数字，抛物线就像被施了魔法一样在坐标系里飞来飞去？掌握这三个&#x27;方向盘&#x27;，你就能精准控制它的轨迹。</p>
   </header>
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
 <div class="kl-card"><section class="kl-block kl-text" data-block-id="bk_1_hook">
-<p>二次函数 $y = a(x-h)^2 + k$ 被称为<strong>顶点式</strong>。在这个公式里，$a$、$h$、$k$ 就像三个独立的遥控器：</p>
+<p>二次函数除了 <span class="kl-math">y=ax<sup>2</sup>+bx+c</span>，还有一个极具操控感的形态——<strong>顶点式</strong>：</p>
+<p><span class="kl-math kl-math-display">y = a(x-h)<sup>2</sup> + k</span></p>
+<p>在这个公式里，<span class="kl-math">a</span>、<span class="kl-math">h</span>、<span class="kl-math">k</span> 就像三个独立的方向盘：</p>
 <ul>
-<li><strong>$a$</strong>：控制开口方向与胖瘦</li>
-<li><strong>$h$</strong>：控制左右平移</li>
-<li><strong>$k$</strong>：控制上下平移</li>
+<li><strong><span class="kl-math">a</span></strong>：掌管开口方向与宽窄</li>
+<li><strong><span class="kl-math">h</span></strong>：掌管左右平移</li>
+<li><strong><span class="kl-math">k</span></strong>：掌管上下平移</li>
 </ul>
-<p>接下来，请亲手转动这三个旋钮，看看抛物线如何响应。</p>
+<p>拖动下方的滑块，亲自驾驶这辆抛物线赛车吧！</p>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bk_2_sim_abc">
+<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bk_2_param_sim">
   <div class="kl-ps-controls">
   <label class="kl-ps-ctl">
     <span class="kl-ps-name">系数 a</span>
@@ -175,14 +186,14 @@ button:disabled { opacity: .45; cursor: default; }
     <output class="kl-ps-val" data-for="a"></output>
   </label>
   <label class="kl-ps-ctl">
-    <span class="kl-ps-name">参数 h</span>
+    <span class="kl-ps-name">系数 h</span>
     <input type="range" data-param="h"
            min="-5" max="5" step="0.5"
            value="0">
     <output class="kl-ps-val" data-for="h"></output>
   </label>
   <label class="kl-ps-ctl">
-    <span class="kl-ps-name">参数 k</span>
+    <span class="kl-ps-name">系数 k</span>
     <input type="range" data-param="k"
            min="-5" max="5" step="0.5"
            value="0">
@@ -193,13 +204,13 @@ button:disabled { opacity: .45; cursor: default; }
 
   </div>
   <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
-  <p class="kl-ps-explain">拖动 a 观察开口方向与宽窄；拖动 h 观察左右平移；拖动 k 观察上下平移。注意顶点坐标的变化。</p>
+  <p class="kl-ps-explain">拖动滑块改变 a、h、k 的值，观察黑色抛物线的形状与位置变化，以及红色顶点 (h, k) 的移动轨迹。注意 a=0 时退化为直线。</p>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="bk_2_sim_abc"]');
-    var params = [{"name": "a", "label": "系数 a", "min": -3, "max": 3, "step": 0.1, "default": 1}, {"name": "h", "label": "参数 h", "min": -5, "max": 5, "step": 0.5, "default": 0}, {"name": "k", "label": "参数 k", "min": -5, "max": 5, "step": 0.5, "default": 0}];
-    var sweep = {"name": "x", "min": -8.0, "max": 8.0};
-    var curves = [{"name": "y", "label": "抛物线 y = a(x-h)² + k", "expr": "a*Math.pow(x-h,2)+k"}];
+    var root = document.querySelector('[data-block-id="bk_2_param_sim"]');
+    var params = [{"name": "a", "label": "系数 a", "min": -3, "max": 3, "step": 0.1, "default": 1}, {"name": "h", "label": "系数 h", "min": -5, "max": 5, "step": 0.5, "default": 0}, {"name": "k", "label": "系数 k", "min": -5, "max": 5, "step": 0.5, "default": 0}];
+    var sweep = {"name": "x", "min": -10.0, "max": 10.0};
+    var curves = [{"name": "y", "label": "抛物线 y", "expr": "a*Math.pow(x-h,2)+k"}];
     var scalars = [];
     var legacy = false;
     var sliders = {};
@@ -294,7 +305,7 @@ button:disabled { opacity: .45; cursor: default; }
   <script>
   (function() {
     var root = document.querySelector('[data-block-id="bk_3_step_h"]');
-    var steps = [{"state": "a=1, h=0, k=0，函数为 y = x²，顶点在原点 (0,0)。", "explain": "这是最基础的抛物线，我们的起点。"}, {"state": "a=1, h=2, k=0，函数变为 y = (x-2)²，顶点移至 (2,0)。", "explain": "h=2，式子中是 x-2，顶点向右移动了 2 个单位。为什么？因为只有当 x=2 时，(x-2)² 才等于 0，达到函数的最小值。"}, {"state": "a=1, h=-2, k=0，函数变为 y = (x+2)²，即 y = (x-(-2))²，顶点移至 (-2,0)。", "explain": "h=-2，式子中是 x-(-2) 即 x+2，顶点向左移动了 2 个单位。规律：h 的符号决定了平移方向，'减右加左'。"}];
+    var steps = [{"state": "a=1, h=0, k=0", "explain": "起点：标准抛物线 y=x²，顶点在原点 (0,0)。"}, {"state": "a=1, h=2, k=0", "explain": "当 h 变为 2 时，方程变为 y=(x-2)²。注意是 x-2，抛物线向右平移了 2 个单位，顶点来到 (2,0)。"}, {"state": "a=1, h=-2, k=0", "explain": "当 h 变为 -2 时，方程变为 y=(x-(-2))² 即 y=(x+2)²。抛物线向左平移了 2 个单位，顶点来到 (-2,0)。"}, {"state": "a=1, h=4, k=0", "explain": "核心规律：y=(x-h)² 中，h 为正则右移，h 为负则左移。顶点的横坐标就是 h！"}];
     var i = 0;
     var stateEl = root.querySelector('.kl-st-state');
     var explainEl = root.querySelector('.kl-st-explain');
@@ -302,8 +313,8 @@ button:disabled { opacity: .45; cursor: default; }
     var prev = root.querySelector('.kl-st-prev');
     var next = root.querySelector('.kl-st-next');
     function render() {
-      stateEl.textContent = steps[i].state;
-      explainEl.textContent = steps[i].explain || '';
+      stateEl.innerHTML = steps[i].state;
+      explainEl.innerHTML = steps[i].explain || '';
       prog.textContent = (i + 1) + ' / ' + steps.length;
       prev.disabled = i === 0;
       next.disabled = i === steps.length - 1;
@@ -314,61 +325,49 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-interactivedemo" data-block-id="bk_4_demo_shape">
-  <div class="kl-id-controls">
-    <label class="kl-id-ctl"><span>|a| 的值</span><input type="range" data-ctl="abs_a" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="abs_a"></output></label>
+<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_4_step_k">
+  <div class="kl-st-state"></div>
+  <p class="kl-st-explain"></p>
+  <div class="kl-st-nav">
+    <button class="kl-st-prev" type="button">‹ 上一步</button>
+    <span class="kl-st-progress"></span>
+    <button class="kl-st-next" type="button">下一步 ›</button>
   </div>
-  <div class="kl-id-outputs">
-    <div class="kl-id-out"><span>开口宽窄程度</span><strong data-out="width_desc">—</strong></div>
-  </div>
-  <p class="kl-id-explain">固定 h=0, k=0，仅改变 |a| 的大小。|a| 越大，抛物线越窄；|a| 越小，抛物线越宽。</p>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="bk_4_demo_shape"]');
-    var outputs = [{"name": "width_desc", "label": "开口宽窄程度", "expr": "abs_a <= 0.5 ? '非常宽' : (abs_a <= 1.5 ? '适中' : '非常窄')"}];
-    var ctls = Array.prototype.slice.call(root.querySelectorAll('[data-ctl]'));
-    function readVals() {
-      var v = {};
-      ctls.forEach(function(el) {
-        var k = el.dataset.kind, name = el.dataset.ctl;
-        if (k === 'checkbox') v[name] = el.checked;
-        else if (k === 'slider' || k === 'number') v[name] = parseFloat(el.value);
-        else v[name] = el.value;
-        var val = root.querySelector('[data-val="' + name + '"]');
-        if (val) val.textContent = v[name];
-      });
-      return v;
+    var root = document.querySelector('[data-block-id="bk_4_step_k"]');
+    var steps = [{"state": "a=1, h=0, k=0", "explain": "起点：标准抛物线 y=x²，顶点在原点 (0,0)。"}, {"state": "a=1, h=0, k=3", "explain": "当 k 变为 3 时，方程变为 y=x²+3。抛物线向上平移了 3 个单位，顶点来到 (0,3)。"}, {"state": "a=1, h=0, k=-3", "explain": "当 k 变为 -3 时，方程变为 y=x²-3。抛物线向下平移了 3 个单位，顶点来到 (0,-3)。"}, {"state": "a=1, h=0, k=-5", "explain": "核心规律：k 为正则上移，k 为负则下移。顶点的纵坐标就是 k！"}];
+    var i = 0;
+    var stateEl = root.querySelector('.kl-st-state');
+    var explainEl = root.querySelector('.kl-st-explain');
+    var prog = root.querySelector('.kl-st-progress');
+    var prev = root.querySelector('.kl-st-prev');
+    var next = root.querySelector('.kl-st-next');
+    function render() {
+      stateEl.innerHTML = steps[i].state;
+      explainEl.innerHTML = steps[i].explain || '';
+      prog.textContent = (i + 1) + ' / ' + steps.length;
+      prev.disabled = i === 0;
+      next.disabled = i === steps.length - 1;
     }
-    function fmt(n) {
-      return (typeof n === 'number' && isFinite(n)) ? (Math.round(n * 1000) / 1000) : '—';
-    }
-    function update() {
-      var vals = readVals();
-      var keys = Object.keys(vals);
-      outputs.forEach(function(o) {
-        var out = root.querySelector('[data-out="' + o.name + '"]');
-        try {
-          var fn = new Function(keys.join(','), 'with(Math){return (' + o.expr + ');}');
-          out.textContent = fmt(fn.apply(null, keys.map(function(k) { return vals[k]; })));
-        } catch (e) { out.textContent = '—'; }
-      });
-    }
-    ctls.forEach(function(el) {
-      el.addEventListener('input', update);
-      el.addEventListener('change', update);
-    });
-    update();
+    prev.addEventListener('click', function() { if (i > 0) { i--; render(); } });
+    next.addEventListener('click', function() { if (i < steps.length - 1) { i++; render(); } });
+    render();
   })();
   </script>
 </section></div>
-<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_5_callout_misconception">
+<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_5_callout_a">
   <span class="kl-callout-icon">🛈</span>
-  <div class="kl-callout-body"><p>⚠️ <strong>避坑指南</strong></p>
-<p>1. <strong>符号陷阱</strong>：$y = (x-3)^2$ 中 $h=3$，向<strong>右</strong>平移！不要被减号误导，记住顶点坐标就是 $(h, k)$，减号正好对应正的 $h$。</p>
-<p>2. <strong>胖瘦陷阱</strong>：$|a|$ 越大，抛物线越<strong>窄</strong>（而不是越宽）！想象拉面，用力越大（$|a|$大），面越细。</p></div>
+  <div class="kl-callout-body"><h3>💡 系数 a 的本质：形状模具</h3>
+<p>无论 a 怎么变，抛物线的顶点始终死死锚定在 <strong>(h, k)</strong>！</p>
+<ul>
+<li><strong>a 的正负</strong>：决定开口朝上还是朝下（正朝上，负朝下）。</li>
+<li><strong>|a| 的大小</strong>：决定抛物线的胖瘦。|a| 越大，抛物线越瘦（开口越窄）；|a| 越小，抛物线越胖（开口越宽）。</li>
+</ul>
+<p>可以把 a 想象成套在顶点 (h,k) 上的一把形状模具，它只管长什么样，不管站在哪里。</p></div>
 </aside></div>
 <div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_6_quiz">
-  <p class="kl-quiz-title">顶点式参数检验</p>
+  <p class="kl-quiz-title">方向盘检验站</p>
   <div class="kl-quiz-head"><span class="kl-quiz-progress"></span></div>
   <p class="kl-quiz-q"></p>
   <div class="kl-quiz-opts"></div>
@@ -381,7 +380,7 @@ button:disabled { opacity: .45; cursor: default; }
   <script>
   (function() {
     var root = document.querySelector('[data-block-id="bk_6_quiz"]');
-    var questions = [{"type": "single", "prompt": "抛物线 y = -2(x+3)² - 4 的顶点坐标是多少？", "options": ["(-3, -4)", "(3, -4)", "(-3, 4)", "(3, 4)"], "answer": 0, "explain": "原式可化为 y = -2(x-(-3))² + (-4)，因此 h=-3，k=-4，顶点为 (-3, -4)。"}, {"type": "single", "prompt": "将抛物线 y = 0.5(x-1)² + 2 与 y = 2(x-1)² + 2 相比，发生了什么变化？", "options": ["开口方向改变，位置不变", "开口变窄，位置不变", "开口变宽，位置不变", "形状不变，位置改变"], "answer": 1, "explain": "两者的 h 和 k 相同，说明位置（顶点）不变。a 从 0.5 变为 2，|a| 变大，所以开口变窄。"}];
+    var questions = [{"type": "single", "answer": 1, "accept": [], "prompt": "将抛物线 y=2x² 向左平移 3 个单位，再向下平移 4 个单位，得到的解析式是？", "options": ["y = 2(x-3)² - 4", "y = 2(x+3)² - 4", "y = 2(x-3)² + 4", "y = 2(x+3)² + 4"], "explain": "向左平移 3 个单位，h 变为 -3，即 (x+3)²；向下平移 4 个单位，k 变为 -4。a 保持 2 不变，因此是 y=2(x+3)²-4。"}, {"type": "single", "answer": 1, "accept": [], "prompt": "在顶点式 y=a(x-h)²+k 中，如果只增大 a 的绝对值，抛物线的顶点位置会发生改变。", "options": ["正确", "错误"], "explain": "顶点坐标始终是 (h, k)，只受 h 和 k 的影响。a 只改变抛物线的开口方向和宽窄（形状），不改变顶点位置（位置）。"}];
     var many = questions.length > 1;
     var idx = 0, score = 0, locked = false, selected = null;
     var qBox = root.querySelector('.kl-quiz-q');
@@ -395,7 +394,7 @@ button:disabled { opacity: .45; cursor: default; }
     function render() {
       var q = questions[idx];
       locked = false; selected = q.type === 'multi' ? {} : null;
-      qBox.textContent = q.prompt;
+      qBox.innerHTML = q.prompt;
       fb.hidden = true; fb.className = 'kl-quiz-feedback';
       next.hidden = true; submit.hidden = false; submit.disabled = false;
       scoreBox.hidden = true;
@@ -409,7 +408,7 @@ button:disabled { opacity: .45; cursor: default; }
       } else {
         q.options.forEach(function(o, i) {
           var btn = document.createElement('button');
-          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.textContent = o;
+          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.innerHTML = o;
           btn.addEventListener('click', function() {
             if (locked) return;
             if (q.type === 'multi') {
@@ -454,7 +453,7 @@ button:disabled { opacity: .45; cursor: default; }
       if (correct) score++;
       fb.hidden = false;
       fb.className = 'kl-quiz-feedback ' + (correct ? 'is-correct' : 'is-wrong');
-      fb.textContent = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
+      fb.innerHTML = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
       if (many) { next.hidden = false; next.textContent = idx < questions.length - 1 ? '下一题' : '查看成绩'; }
     }
 

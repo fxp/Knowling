@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from ._common import esc, jslit, count_tag, has_wiring, scope as _scope
+from ._common import esc, jslit, count_tag, has_wiring, mathspan, scope as _scope
 
 TYPE = "step_through"
 
@@ -66,7 +66,8 @@ def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:
 def template(block: Dict[str, Any]) -> str:
     cs = block.get("content_spec", {})
     bid = esc(block.get("block_id", "st"))
-    steps = _steps(cs)
+    steps = [{"state": mathspan(s["state"]), "explain": mathspan(s["explain"])}
+             for s in _steps(cs)]  # pre-render math → HTML
     return f'''<section class="kl-block kl-stepthrough" data-block-id="{bid}">
   <div class="kl-st-state"></div>
   <p class="kl-st-explain"></p>
@@ -86,8 +87,8 @@ def template(block: Dict[str, Any]) -> str:
     var prev = root.querySelector('.kl-st-prev');
     var next = root.querySelector('.kl-st-next');
     function render() {{
-      stateEl.textContent = steps[i].state;
-      explainEl.textContent = steps[i].explain || '';
+      stateEl.innerHTML = steps[i].state;
+      explainEl.innerHTML = steps[i].explain || '';
       prog.textContent = (i + 1) + ' / ' + steps.length;
       prev.disabled = i === 0;
       next.disabled = i === steps.length - 1;
