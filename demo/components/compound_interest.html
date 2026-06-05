@@ -141,7 +141,12 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-deck-dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--kl-border); background: transparent; cursor: pointer; transition: background .15s, transform .15s; }
 .kl-deck-dot.is-active { background: var(--kl-accent); border-color: var(--kl-accent); transform: scale(1.15); }
 .kl-deck-done { text-align: center; color: var(--kl-ok); font-size: 14px; margin-top: 10px; }
-/* inline math (self-contained, no KaTeX) */
+/* math — native MathML (Temml) and the pure-CSS fallback both styled here */
+.kl-math math { font-size: 1.05em; font-style: normal; white-space: normal; }
+.kl-math-display { display: block; }
+.kl-math-display math { display: block; margin: 10px auto; font-size: 1.18em; }
+math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, serif; }
+/* inline math (pure-CSS fallback when Temml is absent) */
 .kl-math { font-family: "Latin Modern Math", "Cambria Math", "Times New Roman", Georgia, serif; font-style: italic; white-space: nowrap; }
 .kl-math .kl-mathrm { font-style: normal; }
 .kl-math-display { display: block; text-align: center; font-size: 1.15em; margin: 10px 0; }

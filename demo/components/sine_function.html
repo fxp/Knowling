@@ -141,7 +141,12 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-deck-dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--kl-border); background: transparent; cursor: pointer; transition: background .15s, transform .15s; }
 .kl-deck-dot.is-active { background: var(--kl-accent); border-color: var(--kl-accent); transform: scale(1.15); }
 .kl-deck-done { text-align: center; color: var(--kl-ok); font-size: 14px; margin-top: 10px; }
-/* inline math (self-contained, no KaTeX) */
+/* math — native MathML (Temml) and the pure-CSS fallback both styled here */
+.kl-math math { font-size: 1.05em; font-style: normal; white-space: normal; }
+.kl-math-display { display: block; }
+.kl-math-display math { display: block; margin: 10px auto; font-size: 1.18em; }
+math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, serif; }
+/* inline math (pure-CSS fallback when Temml is absent) */
 .kl-math { font-family: "Latin Modern Math", "Cambria Math", "Times New Roman", Georgia, serif; font-style: italic; white-space: nowrap; }
 .kl-math .kl-mathrm { font-style: normal; }
 .kl-math-display { display: block; text-align: center; font-size: 1.15em; margin: 10px 0; }
@@ -166,8 +171,8 @@ button:disabled { opacity: .45; cursor: default; }
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
 <div class="kl-card"><section class="kl-block kl-text" data-block-id="bk_1_hook">
-<p>我们早就认识了 <span class="kl-math">y = <span class="kl-mathrm">sin</span>(x)</span>，它是如此完美对称。但在现实与工程中，纯正弦波几乎不存在——声音有大小（振幅），频率有高低（周期），起点有先后（相位）。</p>
-<p>这三个维度的变化，被精妙地编码进了三个希腊字母：<strong><span class="kl-math">A</span>、<span class="kl-math">ω</span>、<span class="kl-math">φ</span></strong>。接下来，由你亲手拆解它们的魔力。</p>
+<p>我们早就认识了 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mrow><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math></span>，它是如此完美对称。但在现实与工程中，纯正弦波几乎不存在——声音有大小（振幅），频率有高低（周期），起点有先后（相位）。</p>
+<p>这三个维度的变化，被精妙地编码进了三个希腊字母：<strong><span class="kl-math"><math><mi>A</mi></math></span>、<span class="kl-math"><math><mi>ω</mi></math></span>、<span class="kl-math"><math><mi>ϕ</mi></math></span></strong>。接下来，由你亲手拆解它们的魔力。</p>
 </section></div>
 <div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bk_2_param_sim">
   <div class="kl-ps-controls">
@@ -353,7 +358,7 @@ button:disabled { opacity: .45; cursor: default; }
 <div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_5_callout">
   <span class="kl-callout-icon">🛈</span>
   <div class="kl-callout-body"><p><strong>警惕负振幅！</strong></p>
-<p>当 <span class="kl-math">A &lt; 0</span> 时，曲线并非简单下移，而是关于 <span class="kl-math">x</span> 轴发生了<strong>翻转（反射）</strong>。例如 <span class="kl-math">y = -<span class="kl-mathrm">sin</span>(x)</span> 的波峰变成了波谷。在数学严格定义中，振幅始终为正（<span class="kl-math">|A|</span>），负号只代表方向。</p></div>
+<p>当 <span class="kl-math"><math><mrow><mi>A</mi><mo>&lt;</mo><mn>0</mn></mrow></math></span> 时，曲线并非简单下移，而是关于 <span class="kl-math"><math><mi>x</mi></math></span> 轴发生了<strong>翻转（反射）</strong>。例如 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mo form="prefix" stretchy="false">−</mo><mrow><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math></span> 的波峰变成了波谷。在数学严格定义中，振幅始终为正（<span class="kl-math"><math><mrow><mi>|</mi><mi>A</mi><mi>|</mi></mrow></math></span>），负号只代表方向。</p></div>
 </aside></div>
 <div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_6_quiz">
   <p class="kl-quiz-title">参数诊断</p>

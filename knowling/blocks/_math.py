@@ -12,6 +12,7 @@ so a card never displays `\\frac` or `$` literals to a learner.
 from __future__ import annotations
 
 import html as _html
+import os
 import re
 
 
@@ -144,8 +145,25 @@ def _parse(s: str) -> str:
 
 
 def render_math(src: str, display: bool = False) -> str:
+    """Pure-Python fallback renderer (subset of LaTeX → HTML+CSS)."""
     cls = "kl-math kl-math-display" if display else "kl-math"
     return f'<span class="{cls}">{_parse(src)}</span>'
+
+
+def render(src: str, display: bool = False) -> str:
+    """Render one math expression, preferring Temml (full LaTeX → MathML) when
+    available, else the pure-Python fallback. This is the entry point templates
+    use via ``mathspan`` / markdown. ``KNOWLING_MATH=fallback`` forces fallback."""
+    if os.environ.get("KNOWLING_MATH", "auto").lower() != "fallback":
+        try:
+            from . import _temml
+            mathml = _temml.render(src, display)
+            if mathml:
+                cls = "kl-math kl-math-display" if display else "kl-math"
+                return f'<span class="{cls}">{mathml}</span>'
+        except Exception:
+            pass
+    return render_math(src, display)
 
 
 _MATH_RE = re.compile(r"\$\$(.+?)\$\$|\\\[(.+?)\\\]|\$(.+?)\$|\\\((.+?)\\\)", re.DOTALL)

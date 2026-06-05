@@ -79,6 +79,10 @@ python3 -m knowling.cli serve "链式法则" --objectives "能对复合函数求
 - 沙箱优先用 Playwright（真实浏览器截图+console），缺省自动回退结构化静态沙箱（仍可离线跑）。
 - `--no-qa` 跳过质检（产物停留 `draft`）；QA 进度/分数进入 rich/json 事件流。
 
+## 数学公式（自包含，无 CDN）
+- GLM 写的 `$...$` / `\frac` / `\omega` 等会被渲染：默认用**编译期 Temml → 原生 MathML** 内联（完整 LaTeX 覆盖、运行时零 JS/零字体），检测不到 Node/Temml 时**自动回退**到纯 Python 子集渲染器。
+- `KNOWLING_MATH=fallback` 可强制用回退渲染器。Temml 为可选 build-time 工具（已 vendored，MIT），不进产物。
+
 ## 注意
 - 未过质检不得标 `ready`（设计文档 §3.1）。
 - 编译产物为单个自包含 `.html`，可直接嵌入/分发。

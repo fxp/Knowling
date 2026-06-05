@@ -1,10 +1,19 @@
-"""Self-contained LaTeX→HTML math rendering (no KaTeX/MathJax)."""
+"""Pure-Python fallback math rendering (no KaTeX/MathJax/Temml).
+
+These tests pin the pure-Python fallback, so they force KNOWLING_MATH=fallback
+(the dispatcher would otherwise use Temml→MathML when Node is available — see
+test_temml.py for that path)."""
 
 import pytest
 
 from knowling.blocks import quiz, step_through
 from knowling.blocks._common import mathspan, mini_markdown
 from knowling.blocks._math import has_math, render_math
+
+
+@pytest.fixture(autouse=True)
+def _force_fallback(monkeypatch):
+    monkeypatch.setenv("KNOWLING_MATH", "fallback")
 
 
 def test_greek_and_functions():

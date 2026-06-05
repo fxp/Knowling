@@ -141,7 +141,12 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-deck-dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--kl-border); background: transparent; cursor: pointer; transition: background .15s, transform .15s; }
 .kl-deck-dot.is-active { background: var(--kl-accent); border-color: var(--kl-accent); transform: scale(1.15); }
 .kl-deck-done { text-align: center; color: var(--kl-ok); font-size: 14px; margin-top: 10px; }
-/* inline math (self-contained, no KaTeX) */
+/* math — native MathML (Temml) and the pure-CSS fallback both styled here */
+.kl-math math { font-size: 1.05em; font-style: normal; white-space: normal; }
+.kl-math-display { display: block; }
+.kl-math-display math { display: block; margin: 10px auto; font-size: 1.18em; }
+math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, serif; }
+/* inline math (pure-CSS fallback when Temml is absent) */
 .kl-math { font-family: "Latin Modern Math", "Cambria Math", "Times New Roman", Georgia, serif; font-style: italic; white-space: nowrap; }
 .kl-math .kl-mathrm { font-style: normal; }
 .kl-math-display { display: block; text-align: center; font-size: 1.15em; margin: 10px 0; }
@@ -166,13 +171,13 @@ button:disabled { opacity: .45; cursor: default; }
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
 <div class="kl-card"><section class="kl-block kl-text" data-block-id="bk_1_hook">
-<p>二次函数除了 <span class="kl-math">y=ax<sup>2</sup>+bx+c</span>，还有一个极具操控感的形态——<strong>顶点式</strong>：</p>
-<p><span class="kl-math kl-math-display">y = a(x-h)<sup>2</sup> + k</span></p>
-<p>在这个公式里，<span class="kl-math">a</span>、<span class="kl-math">h</span>、<span class="kl-math">k</span> 就像三个独立的方向盘：</p>
+<p>二次函数除了 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mi>a</mi><msup><mi>x</mi><mn class="tml-sml-pad">2</mn></msup><mo>+</mo><mi>b</mi><mi>x</mi><mo>+</mo><mi>c</mi></mrow></math></span>，还有一个极具操控感的形态——<strong>顶点式</strong>：</p>
+<p><span class="kl-math kl-math-display"><math display="block" class="tml-display" style="display:block math;"><mrow><mi>y</mi><mo>=</mo><mi>a</mi><msup><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo>−</mo><mi>h</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mi>k</mi></mrow></math></span></p>
+<p>在这个公式里，<span class="kl-math"><math><mi>a</mi></math></span>、<span class="kl-math"><math><mi>h</mi></math></span>、<span class="kl-math"><math><mi>k</mi></math></span> 就像三个独立的方向盘：</p>
 <ul>
-<li><strong><span class="kl-math">a</span></strong>：掌管开口方向与宽窄</li>
-<li><strong><span class="kl-math">h</span></strong>：掌管左右平移</li>
-<li><strong><span class="kl-math">k</span></strong>：掌管上下平移</li>
+<li><strong><span class="kl-math"><math><mi>a</mi></math></span></strong>：掌管开口方向与宽窄</li>
+<li><strong><span class="kl-math"><math><mi>h</mi></math></span></strong>：掌管左右平移</li>
+<li><strong><span class="kl-math"><math><mi>k</mi></math></span></strong>：掌管上下平移</li>
 </ul>
 <p>拖动下方的滑块，亲自驾驶这辆抛物线赛车吧！</p>
 </section></div>

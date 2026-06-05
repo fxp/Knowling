@@ -30,6 +30,9 @@
 - **全 13 类块**实现完毕（重心 `step_through` / `interactive_demo`；`concept_graph` 用内联 canvas 保持自包含）。
 - **RAG grounding**（`knowling/capabilities/retriever.py`）：零依赖 `SimpleRetriever`（snippet / 本地文件 + 关键词排序），grounding 注入 plan / compile / 教学评审。CLI `--ground <file>`（可重复）。
 
+**数学公式渲染（自包含）**
+- LaTeX（`$…$` / `\frac` / `\omega` …）默认走**编译期 Temml → 原生 MathML** 内联（完整覆盖、运行时零 JS/零字体），无 Node/Temml 时自动回退纯 Python 子集渲染器（`KNOWLING_MATH=fallback` 可强制）。Temml 已 vendored（MIT，build-time only，不进产物）。
+
 尚未实现（后续阶段）：① 大主题拆解、知识图谱导航外壳、React target、Server API、模型驱动 GUI agent、LlamaIndex 向量检索。
 
 ## 快速开始

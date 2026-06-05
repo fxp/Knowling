@@ -7,7 +7,7 @@ import json
 import re
 from typing import Any
 
-from ._math import render_math, split_math
+from ._math import render, split_math
 
 
 def esc(s: Any) -> str:
@@ -24,7 +24,7 @@ def _render_with_math(text: str, markdown: bool) -> str:
     parts = []
     for seg, is_math, display in split_math(text):
         if is_math:
-            maths.append(render_math(seg, display))
+            maths.append(render(seg, display))
             parts.append(f"\x00{len(maths) - 1}\x00")
         else:
             parts.append(seg)
