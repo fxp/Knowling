@@ -38,8 +38,12 @@ python3 -m knowling.cli blocks
 - `-f json`：行分隔 JSON 事件流（`stage` / `cost` / `done` / `info`），供 agent 解析进度、成本、最终 Knowling 对象。
 
 ## Provider（模型层）
-- 默认 `--provider auto`：检测到 `ZHIPU_API_KEY` / `GLM_API_KEY` 则走 GLM（zhipu，`glm-4.6`），否则自动回退到离线 **MockProvider**（模板渲染，零成本，开箱即跑）。
-- 真实 GLM 路径下：规划产结构化 `KnowlingSpec`，块编译由 LLM 直接生成 HTML/JS；生成不可用时回退到确定性模板。
+- 默认 `--provider auto`：检测到 `ZHIPU_API_KEY` / `GLM_API_KEY` 则走 GLM（zhipu，`glm-5.1` + 视觉 `glm-5v-turbo`），否则自动回退到离线 **MockProvider**（零成本，开箱即跑）。
+
+## 渲染一致性（`--compile-mode`）
+- **`template`（默认）**：GLM 负责**规划内容**（KnowlingSpec），所有已知块用统一的 `.kl-*` 设计系统**模板渲染** → 组件风格一致、可靠、便宜。这是「知识点学习+Quiz 组件」的推荐路径。
+- **`codegen`**：GLM 为每块直接写 HTML/JS（视觉更多样，但风格不一致、偶有破损）。仅在需要模板未覆盖的新型交互时使用。
+- 产物为**知识卡片牌组**：一个块一张卡，用户一次只看一张，上一张/下一张/圆点导航。
 
 ## KnowlingSpec 摘要（审批门 / 唯一可 diff 层）
 ```

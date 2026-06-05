@@ -40,11 +40,16 @@ content_spec 约定(严格按字段名输出):
             或多题 {{ "title": str, "questions": [{{"type","prompt","options"?,"answer","explain"}}] }}
             type ∈ single/multi(answer 为 int 数组)/boolean(answer 为 bool)/fill(answer 为 str)
 - param_sim:{{ "params": [{{"name","label","min","max","step","default"}}],
-              "outputs": [{{"name","label","expr"}}], "explain": str }}
-  expr 为关于 param 名的 JS 表达式, 可用 Math, 例如 "A*Math.sin(w*x+phi)"。
+              "outputs": [{{"name","label","expr"}}], "x_range": [min,max], "explain": str }}
+  用于「拖动参数滑块, 观察 y=f(x) 曲线如何变化」。expr 是 JS 表达式, 可用 Math。
+  画函数曲线时, 用自变量 x 作横轴(它不是滑块, 不要放进 params), 滑块只放参数;
+  例如 params=[A,ω,φ], output expr="A*sin(ω*x+φ)", x_range=[-6.28,6.28]。
+  纯标量(无 x)的 output 会显示为数值, 如周期 "2*PI/ω"。
 - interactive_demo: {{ "controls": [{{"name","label","kind"}}],
               "outputs": [{{"name","label","expr"}}], "explain": str }}
-  kind ∈ slider/number/select/checkbox/text; expr 为关于 control 名的 JS 表达式。
+  仅用于「标量关系」: expr 只能用 controls 里定义的 name, 不能出现未定义的自变量(如 x)。
+  需要画 y=f(x) 曲线时请用 param_sim, 不要用 interactive_demo。
+  kind ∈ slider/number/select/checkbox/text。
 - step_through: {{ "steps": [{{"state","explain"}}] }}
   必须用字段名 "state"(本步状态) 与 "explain"(本步说明); 不要用 title/describe 等其它名。
 

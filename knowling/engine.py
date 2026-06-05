@@ -42,6 +42,7 @@ class Config:
     approval: str = "auto"  # "auto" | "human"
     quiet: bool = False
     retriever_name: str = "auto"  # P2: RAG grounding backend
+    compile_mode: str = "template"  # "template" (consistent) | "codegen" (bespoke)
     qa_enabled: bool = True  # P1: run the three-dimensional QA loop
     qa: QAConfig = field(default_factory=QAConfig)
     approval_cb: Optional[Callable[[KnowlingSpec], KnowlingSpec]] = None
@@ -124,7 +125,7 @@ def compile_blocks(
              "i": i + 1, "n": len(spec.blocks)},
         )
         try:
-            html, call = block_compiler.compile(b, kp, grounding, provider)
+            html, call = block_compiler.compile(b, kp, grounding, provider, mode=cfg.compile_mode)
         except Exception as e:  # block-level failure shouldn't kill the run in P0
             emit("warn", {"stage": "compile", "block_id": b.block_id, "error": str(e)})
             html = block_registry.render_block_template(b.to_dict())
@@ -211,7 +212,7 @@ def compile_spec(
         }
         best_html, qa_report, fragments = qa_loop(
             spec, kp, fragments, providers, cfg.qa, grounding=grounding,
-            emit=emit, model_trace=trace,
+            emit=emit, model_trace=trace, compile_mode=cfg.compile_mode,
         )
         status = "ready" if qa_report.passed else "qa_failed"
         emit("stage", {"stage": "qa", "status": "done", "passed": qa_report.passed,

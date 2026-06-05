@@ -139,6 +139,7 @@ def _cfg_from_args(args, quiet: bool = False) -> Config:
         render_target=getattr(args, "format_render", "html"),
         approval=getattr(args, "approval", "auto"),
         qa_enabled=getattr(args, "qa_enabled", True),
+        compile_mode=getattr(args, "compile_mode", "template"),
         quiet=quiet,
     )
 
@@ -220,6 +221,9 @@ def _add_common(p: argparse.ArgumentParser, with_kp: bool = True) -> None:
     p.add_argument("--model", default=None, help="override model id")
     p.add_argument("--no-qa", dest="qa_enabled", action="store_false", default=True,
                    help="skip the three-dimensional QA loop (status stays draft)")
+    p.add_argument("--compile-mode", dest="compile_mode", choices=["template", "codegen"],
+                   default="template",
+                   help="template: consistent .kl-* rendering (default); codegen: LLM writes each block")
     p.add_argument("-o", "--output", default=None, help="output path (file or dir/)")
     if with_kp:
         p.add_argument("--id", default=None, help="stable knowledge-point id")

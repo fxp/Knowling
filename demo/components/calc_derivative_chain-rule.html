@@ -174,85 +174,91 @@ button:disabled { opacity: .45; cursor: default; }
   <div class="kl-ps-outputs">
   <div class="kl-ps-out"><span>输出 y = x²</span><strong data-out="y">—</strong></div>
   </div>
-  <canvas class="kl-ps-canvas" width="640" height="220"></canvas>
+  <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
   <p class="kl-ps-explain">拖动 x，观察 y 如何变化——这就是该知识点的核心现象。</p>
   <script>
   (function() {
     var root = document.querySelector('[data-block-id="b2-sim"]');
     var params = [{"name": "x", "label": "输入 x", "min": 0, "max": 10, "step": 0.1, "default": 2}];
-    var outputs = [{"name": "y", "label": "输出 y = x²", "expr": "x * x"}];
-    var xParam = "x";
-    var yOutput = "y";
+    var sweep = {"name": "x", "min": 0.0, "max": 10.0};
+    var curves = [{"name": "y", "label": "输出 y = x²", "expr": "x * x"}];
+    var scalars = [{"name": "y", "label": "输出 y = x²", "expr": "x * x"}];
+    var legacy = true;
     var sliders = {};
-    params.forEach(function(p) {
-      sliders[p.name] = root.querySelector('input[data-param="' + p.name + '"]');
-    });
+    params.forEach(function(p) { sliders[p.name] = root.querySelector('input[data-param="' + p.name + '"]'); });
 
-    function readVals() {
+    function vals() {
       var v = {};
       params.forEach(function(p) { v[p.name] = parseFloat(sliders[p.name].value); });
       return v;
     }
-    function evalOut(o, vals) {
+    function ev(expr, ctx) {
       try {
-        var fn = new Function(Object.keys(vals).join(','), 'return (' + o.expr + ');');
-        return fn.apply(null, Object.keys(vals).map(function(k) { return vals[k]; }));
+        var ks = Object.keys(ctx);
+        return new Function(ks.join(','), 'with(Math){return (' + expr + ');}')
+          .apply(null, ks.map(function(k) { return ctx[k]; }));
       } catch (e) { return NaN; }
     }
     function fmt(n) {
-      if (typeof n !== 'number' || !isFinite(n)) return String(n);
-      return Math.abs(n) >= 1000 || (n !== 0 && Math.abs(n) < 0.01)
-        ? n.toPrecision(4) : Math.round(n * 1000) / 1000;
+      if (typeof n !== 'number' || !isFinite(n)) return '—';
+      return Math.abs(n) >= 1000 || (n !== 0 && Math.abs(n) < 0.01) ? n.toPrecision(4) : Math.round(n * 1000) / 1000;
     }
 
-    var canvas = root.querySelector('.kl-ps-canvas');
-    var ctx = canvas.getContext('2d');
-    var xp = params.filter(function(p) { return p.name === xParam; })[0] || params[0];
-    var yo = outputs.filter(function(o) { return o.name === yOutput; })[0] || outputs[0];
+    var canvas = root.querySelector('.kl-ps-canvas'), ctx2 = canvas.getContext('2d');
+    var COLORS = ['#3056d3', '#e8590c', '#1a7f37', '#bf3989'];
 
-    function plot(vals) {
-      var W = canvas.width, H = canvas.height, pad = 28;
-      ctx.clearRect(0, 0, W, H);
-      var N = 120, xs = [], ys = [];
-      var lo = parseFloat(xp.min), hi = parseFloat(xp.max);
-      var ymin = Infinity, ymax = -Infinity;
-      for (var i = 0; i <= N; i++) {
-        var xv = lo + (hi - lo) * i / N;
-        var probe = Object.assign({}, vals); probe[xp.name] = xv;
-        var yv = evalOut(yo, probe);
-        xs.push(xv); ys.push(yv);
-        if (isFinite(yv)) { ymin = Math.min(ymin, yv); ymax = Math.max(ymax, yv); }
+    function plot(v) {
+      var W = canvas.width, H = canvas.height, pad = 30, N = 200;
+      ctx2.clearRect(0, 0, W, H);
+      var lo = sweep.min, hi = sweep.max;
+      var series = curves.map(function(c) {
+        var pts = [], ymin = Infinity, ymax = -Infinity;
+        for (var i = 0; i <= N; i++) {
+          var xv = lo + (hi - lo) * i / N;
+          var probe = Object.assign({}, v); probe[sweep.name] = xv;
+          var yv = ev(c.expr, probe);
+          pts.push([xv, yv]);
+          if (isFinite(yv)) { ymin = Math.min(ymin, yv); ymax = Math.max(ymax, yv); }
+        }
+        return { pts: pts, ymin: ymin, ymax: ymax };
+      });
+      var ymin = Math.min.apply(null, series.map(function(s) { return s.ymin; }).filter(isFinite));
+      var ymax = Math.max.apply(null, series.map(function(s) { return s.ymax; }).filter(isFinite));
+      if (!isFinite(ymin) || !isFinite(ymax) || ymin === ymax) { ymin = (ymin || 0) - 1; ymax = (ymax || 0) + 1; }
+      var sx = function(x) { return pad + (x - lo) / (hi - lo) * (W - 2 * pad); };
+      var sy = function(y) { return H - pad - (y - ymin) / (ymax - ymin) * (H - 2 * pad); };
+      // axes (x-axis at y=0 if in range, else bottom)
+      ctx2.strokeStyle = '#d0d7de'; ctx2.lineWidth = 1;
+      var y0 = (ymin <= 0 && ymax >= 0) ? sy(0) : H - pad;
+      ctx2.beginPath(); ctx2.moveTo(pad, y0); ctx2.lineTo(W - pad, y0); ctx2.stroke();
+      var x0 = (lo <= 0 && hi >= 0) ? sx(0) : pad;
+      ctx2.beginPath(); ctx2.moveTo(x0, pad); ctx2.lineTo(x0, H - pad); ctx2.stroke();
+      // curves
+      series.forEach(function(s, ci) {
+        ctx2.strokeStyle = COLORS[ci % COLORS.length]; ctx2.lineWidth = 2; ctx2.beginPath();
+        var started = false;
+        s.pts.forEach(function(pt) {
+          if (!isFinite(pt[1])) { started = false; return; }
+          var px = sx(pt[0]), py = sy(pt[1]);
+          if (!started) { ctx2.moveTo(px, py); started = true; } else { ctx2.lineTo(px, py); }
+        });
+        ctx2.stroke();
+      });
+      // legacy marker at the slider's current value
+      if (legacy && curves.length) {
+        var mx = v[sweep.name], my = ev(curves[0].expr, v);
+        if (isFinite(my)) { ctx2.fillStyle = '#e8590c'; ctx2.beginPath(); ctx2.arc(sx(mx), sy(my), 5, 0, Math.PI * 2); ctx2.fill(); }
       }
-      if (!isFinite(ymin) || !isFinite(ymax) || ymin === ymax) { ymin -= 1; ymax += 1; }
-      function sx(x) { return pad + (x - lo) / (hi - lo) * (W - 2 * pad); }
-      function sy(y) { return H - pad - (y - ymin) / (ymax - ymin) * (H - 2 * pad); }
-      // axes
-      ctx.strokeStyle = '#d0d7de'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(pad, H - pad); ctx.lineTo(W - pad, H - pad); ctx.stroke();
-      // curve
-      ctx.strokeStyle = '#3056d3'; ctx.lineWidth = 2; ctx.beginPath();
-      var started = false;
-      for (var j = 0; j <= N; j++) {
-        if (!isFinite(ys[j])) { started = false; continue; }
-        var px = sx(xs[j]), py = sy(ys[j]);
-        if (!started) { ctx.moveTo(px, py); started = true; } else { ctx.lineTo(px, py); }
-      }
-      ctx.stroke();
-      // current point
-      var cx = sx(vals[xp.name]), cy = sy(evalOut(yo, vals));
-      ctx.fillStyle = '#e8590c';
-      ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2); ctx.fill();
     }
 
     function update() {
-      var vals = readVals();
-      params.forEach(function(p) {
-        root.querySelector('output[data-for="' + p.name + '"]').textContent = fmt(vals[p.name]);
+      var v = vals();
+      params.forEach(function(p) { root.querySelector('output[data-for="' + p.name + '"]').textContent = fmt(v[p.name]); });
+      scalars.forEach(function(o) {
+        var el = root.querySelector('[data-out="' + o.name + '"]');
+        if (el) el.textContent = fmt(ev(o.expr, v));
       });
-      outputs.forEach(function(o) {
-        root.querySelector('[data-out="' + o.name + '"]').textContent = fmt(evalOut(o, vals));
-      });
-      plot(vals);
+      plot(v);
     }
     params.forEach(function(p) { sliders[p.name].addEventListener('input', update); });
     update();

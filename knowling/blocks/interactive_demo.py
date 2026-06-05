@@ -68,10 +68,14 @@ def _control_html(c: Dict[str, Any]) -> str:
     kind = c.get("kind", "slider")
     if kind in ("slider", "number"):
         t = "range" if kind == "slider" else "number"
+        lo, hi = float(c.get("min", 0)), float(c.get("max", 10))
+        default = c.get("default")
+        if default is None:
+            default = round((lo + hi) / 2, 4)  # midpoint avoids divide-by-zero starts
         return (f'<label class="kl-id-ctl"><span>{label}</span>'
                 f'<input type="{t}" data-ctl="{name}" data-kind="{kind}" '
-                f'min="{esc(c.get("min", 0))}" max="{esc(c.get("max", 10))}" '
-                f'step="{esc(c.get("step", "any"))}" value="{esc(c.get("default", 0))}">'
+                f'min="{esc(lo)}" max="{esc(hi)}" '
+                f'step="{esc(c.get("step", "any"))}" value="{esc(default)}">'
                 f'<output data-val="{name}"></output></label>')
     if kind == "select":
         opts = "".join(f'<option value="{esc(o)}">{esc(o)}</option>' for o in c.get("options", []))
@@ -123,7 +127,7 @@ def template(block: Dict[str, Any]) -> str:
       return v;
     }}
     function fmt(n) {{
-      return (typeof n === 'number' && isFinite(n)) ? (Math.round(n * 1000) / 1000) : String(n);
+      return (typeof n === 'number' && isFinite(n)) ? (Math.round(n * 1000) / 1000) : '—';
     }}
     function update() {{
       var vals = readVals();
@@ -131,9 +135,9 @@ def template(block: Dict[str, Any]) -> str:
       outputs.forEach(function(o) {{
         var out = root.querySelector('[data-out="' + o.name + '"]');
         try {{
-          var fn = new Function(keys.join(','), 'return (' + o.expr + ');');
+          var fn = new Function(keys.join(','), 'with(Math){{return (' + o.expr + ');}}');
           out.textContent = fmt(fn.apply(null, keys.map(function(k) {{ return vals[k]; }})));
-        }} catch (e) {{ out.textContent = 'NaN'; }}
+        }} catch (e) {{ out.textContent = '—'; }}
       }});
     }}
     ctls.forEach(function(el) {{

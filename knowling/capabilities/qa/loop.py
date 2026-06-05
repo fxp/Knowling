@@ -103,6 +103,7 @@ def qa_loop(
     grounding: Optional[List[Any]] = None,
     emit: EventSink = _noop,
     model_trace: Optional[list] = None,
+    compile_mode: str = "template",
 ) -> Tuple[str, QAReport, List[str]]:
     """Returns (best_html, QAReport, best_fragments)."""
     sandbox = get_sandbox(cfg.sandbox_name)
@@ -139,19 +140,27 @@ def qa_loop(
         targets = fb.failed_block_ids or block_ids
         suggestions = fb.suggestions
         emit("qa", {"name": "recompile", "blocks": targets, "stage": fb.stage})
+        changed = False
         for bid in targets:
             bspec = next((b for b in spec.blocks if b.block_id == bid), None)
             if bspec is None:
                 continue
             try:
                 new_html, call = block_compiler.compile(
-                    bspec, kp, grounding, compiler, suggestions=suggestions
+                    bspec, kp, grounding, compiler, suggestions=suggestions, mode=compile_mode
                 )
+                if new_html != frag_map.get(bid):
+                    changed = True
                 frag_map[bid] = new_html
                 if model_trace is not None:
                     model_trace.append(call)
             except Exception as e:
                 emit("warn", {"stage": "qa_recompile", "block_id": bid, "error": str(e)})
+        # template mode (and any deterministic recompile) can't improve a block by
+        # re-rendering it — if nothing changed, further steps are wasted.
+        if not changed:
+            emit("qa", {"name": "no_change", "step": step + 1})
+            break
 
     best_i = select_best(memory)
     best_frag, best_fb = memory[best_i]

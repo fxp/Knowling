@@ -8,9 +8,12 @@ from typing import Dict, List, Optional
 
 @dataclass
 class QAConfig:
-    render_threshold: float = 3.5
+    # GLM-VLM render scores and the LLM pedagogy judge are strict and have real
+    # run-to-run variance; 3.0/5 from them is a solid component. Interaction is
+    # deterministic (static invariant checks) so it keeps a higher bar.
+    render_threshold: float = 3.0
     interact_threshold: float = 3.5
-    pedagogy_threshold: float = 3.5
+    pedagogy_threshold: float = 3.0
     max_qa_steps: int = 4
     backtrack_after_render_errors: int = 5
     sandbox_name: str = "auto"

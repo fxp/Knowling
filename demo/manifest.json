@@ -8,13 +8,13 @@
     "blocks": [
       "text",
       "param_sim",
-      "param_sim",
-      "param_sim",
+      "callout",
       "step_through",
+      "interactive_demo",
       "quiz"
     ],
     "qa": {
-      "render": 4.0,
+      "render": 4.5,
       "interact": 5.0,
       "peda": 4.0,
       "passed": true

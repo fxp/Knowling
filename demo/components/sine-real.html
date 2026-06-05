@@ -151,1643 +151,148 @@ button:disabled { opacity: .45; cursor: default; }
 <main class="kl-doc">
   <header class="kl-header">
     <h1>正弦函数 y = A·sin(ωx + φ)</h1>
-    <p class="kl-hook">最基础的 y=sin(x) 就像是一成不变的呼吸，但如果给它加上 A、ω、φ 三个旋钮，它就能变成音乐声波的起伏、摩天轮的转速、甚至是心电图上的跳动。这三个参数究竟施了什么魔法？</p>
+    <p class="kl-hook">摩天轮的旋转高度随时间变化，如何用数学精准控制这座&#x27;摩天轮&#x27;的最高点、旋转快慢和起始位置？</p>
   </header>
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
 <div class="kl-card"><section class="kl-block kl-text" data-block-id="sine_intro_text">
-  <style>
-    .sine-intro-container {
-      font-family: system-ui, -apple-system, sans-serif;
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 1.5rem;
-      color: var(--kl-text, #1a1a2e);
-      line-height: 1.7;
-    }
-    .sine-intro-container .intro-text {
-      font-size: 1.05rem;
-      margin-bottom: 2rem;
-    }
-    .sine-intro-container .intro-text strong {
-      color: var(--kl-primary, #4361ee);
-    }
-    .sine-intro-container .intro-text ul {
-      padding-left: 1.5rem;
-      margin: 0.75rem 0;
-    }
-    .sine-intro-container .intro-text li {
-      margin-bottom: 0.5rem;
-    }
-    .sine-intro-container .intro-text p.hint {
-      margin-top: 1.25rem;
-      padding: 0.75rem 1rem;
-      background: var(--kl-surface, #f8f9fa);
-      border-left: 4px solid var(--kl-primary, #4361ee);
-      border-radius: 0 4px 4px 0;
-      font-size: 0.95rem;
-      color: var(--kl-text-secondary, #555);
-    }
-
-    .sine-section {
-      margin-bottom: 2.5rem;
-      border: 1px solid var(--kl-border, #e0e0e0);
-      border-radius: 8px;
-      overflow: hidden;
-      background: var(--kl-surface, #ffffff);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .sine-section-header {
-      padding: 1rem 1.5rem;
-      background: var(--kl-surface-alt, #f1f3f5);
-      border-bottom: 1px solid var(--kl-border, #e0e0e0);
-      font-weight: 600;
-      font-size: 1.1rem;
-      color: var(--kl-text, #1a1a2e);
-    }
-    .sine-section-body {
-      padding: 1.5rem;
-    }
-    
-    .canvas-wrapper {
-      position: relative;
-      width: 100%;
-      height: 220px;
-      background: #fff;
-      border: 1px solid var(--kl-border, #e0e0e0);
-      border-radius: 4px;
-      margin-bottom: 1.25rem;
-      overflow: hidden;
-    }
-    .canvas-wrapper canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-    /* Skeleton / Loading State */
-    .canvas-wrapper .skeleton-loader {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: skeleton-shimmer 1.5s infinite;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #999;
-      font-size: 0.9rem;
-      transition: opacity 0.3s ease;
-    }
-    .canvas-wrapper.loaded .skeleton-loader {
-      opacity: 0;
-      pointer-events: none;
-    }
-    @keyframes skeleton-shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
-    .controls-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .control-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex: 1;
-      min-width: 200px;
-    }
-    .control-group label {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--kl-text-secondary, #555);
-      white-space: nowrap;
-    }
-    .control-group input[type="range"] {
-      flex: 1;
-      height: 6px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: var(--kl-border, #ddd);
-      border-radius: 3px;
-      outline: none;
-    }
-    .control-group input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--kl-primary, #4361ee);
-      cursor: pointer;
-      border: 2px solid #fff;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .control-group .value-badge {
-      font-family: monospace;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--kl-primary, #4361ee);
-      background: rgba(67, 97, 238, 0.1);
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      min-width: 3.5em;
-      text-align: center;
-    }
-
-    .radio-group {
-      display: flex;
-      gap: 1.5rem;
-      padding-top: 0.5rem;
-    }
-    .radio-group label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      font-size: 0.95rem;
-      padding: 0.5rem 0.75rem; /* Increased padding for click friendliness */
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    .radio-group label:hover {
-      background: var(--kl-surface-alt, #f1f3f5);
-    }
-    .radio-group input[type="radio"] {
-      accent-color: var(--kl-primary, #4361ee);
-      width: 16px;
-      height: 16px;
-    }
-
-    .footer-note {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.9rem; /* Adjusted for accessibility */
-      color: var(--kl-text-muted, #888);
-      border-top: 1px solid var(--kl-border, #e0e0e0);
-      padding-top: 1rem;
-    }
-  </style>
-
-  <div class="sine-intro-container">
-    <div class="intro-text">
-      <p>正弦函数的一般式为 <strong>y = A·sin(ωx + φ)</strong>。其中：</p>
-      <ul>
-        <li><strong>A</strong> (振幅)：控制波峰与波谷的距离</li>
-        <li><strong>ω</strong> (角频率)：控制波动的快慢与周期</li>
-        <li><strong>φ</strong> (初相)：控制波形在 x 轴上的起始位置</li>
-      </ul>
-      <p class="hint">接下来，我们将通过三个独立的控制台，逐一拆解它们对波形的精确影响。</p>
-    </div>
-
-    <!-- Section 1: Amplitude -->
-    <div class="sine-section">
-      <div class="sine-section-header">振幅 A 的作用</div>
-      <div class="sine-section-body">
-        <div class="canvas-wrapper" id="canvas-wrapper-A">
-          <div class="skeleton-loader">图表加载中...</div>
-          <canvas id="canvas-A"></canvas>
-        </div>
-        <div class="controls-row">
-          <div class="control-group">
-            <label for="slider-A">A =</label>
-            <input type="range" id="slider-A" min="0.5" max="3" step="0.1" value="1">
-            <span class="value-badge" id="val-A">1.0</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Section 2: Angular Frequency -->
-    <div class="sine-section">
-      <div class="sine-section-header">角频率 ω 与周期</div>
-      <div class="sine-section-body">
-        <div class="canvas-wrapper" id="canvas-wrapper-omega">
-          <div class="skeleton-loader">图表加载中...</div>
-          <canvas id="canvas-omega"></canvas>
-        </div>
-        <div class="controls-row">
-          <div class="control-group">
-            <label for="slider-omega">ω =</label>
-            <input type="range" id="slider-omega" min="0.5" max="4" step="0.1" value="1">
-            <span class="value-badge" id="val-omega">1.0</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Section 3: Phase Shift -->
-    <div class="sine-section">
-      <div class="sine-section-header">初相 φ 与平移</div>
-      <div class="sine-section-body">
-        <div class="canvas-wrapper" id="canvas-wrapper-phi">
-          <div class="skeleton-loader">图表加载中...</div>
-          <canvas id="canvas-phi"></canvas>
-        </div>
-        <div class="controls-row">
-          <div class="control-group">
-            <label for="slider-phi">φ =</label>
-            <input type="range" id="slider-phi" min="-3.14" max="3.14" step="0.01" value="0">
-            <span class="value-badge" id="val-phi">0.00</span>
-          </div>
-        </div>
-        <div class="radio-group">
-          <label><input type="radio" name="phi-unit" value="rad" checked> 弧度</label>
-          <label><input type="radio" name="phi-unit" value="deg"> 角度</label>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer-note">
-      Generated by Knowling
-    </div>
+<p>正弦函数的一般式为 <strong>y = A·sin(ωx + φ)</strong>。相比最基础的 y = sin(x)，它多了三个&#x27;控制旋钮&#x27;：</p>
+<ul>
+<li><strong>A</strong>（振幅）：控制波浪的高度</li>
+<li><strong>ω</strong>（角频率）：控制波浪的密集程度</li>
+<li><strong>φ</strong>（初相）：控制波浪的起始位置</li>
+</ul>
+<p>接下来，我们将逐一拨动这三个旋钮，看看波形会发生什么变化。</p>
+</section></div>
+<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="sine_param_sim">
+  <div class="kl-ps-controls">
+  <label class="kl-ps-ctl">
+    <span class="kl-ps-name">振幅 A</span>
+    <input type="range" data-param="A"
+           min="0.5" max="3" step="0.1"
+           value="1">
+    <output class="kl-ps-val" data-for="A"></output>
+  </label>
+  <label class="kl-ps-ctl">
+    <span class="kl-ps-name">角频率 ω</span>
+    <input type="range" data-param="omega"
+           min="0.5" max="3" step="0.1"
+           value="1">
+    <output class="kl-ps-val" data-for="omega"></output>
+  </label>
+  <label class="kl-ps-ctl">
+    <span class="kl-ps-name">初相 φ</span>
+    <input type="range" data-param="phi"
+           min="-3.14" max="3.14" step="0.1"
+           value="0">
+    <output class="kl-ps-val" data-for="phi"></output>
+  </label>
   </div>
-
+  <div class="kl-ps-outputs">
+  <div class="kl-ps-out"><span>周期 T = 2π/ω</span><strong data-out="T">—</strong></div>
+  </div>
+  <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
+  <p class="kl-ps-explain">拖动滑块改变 A、ω、φ 的值，观察正弦曲线的振幅、周期和水平位置如何随之变化。特别注意：当 ω 增大时，周期 T 的数值如何变化？</p>
   <script>
-    (function() {
-      // Component state
-      const state = {
-        A: 1.0,
-        omega: 1.0,
-        phi: 0.0,
-        phiUnit: 'rad'
-      };
+  (function() {
+    var root = document.querySelector('[data-block-id="sine_param_sim"]');
+    var params = [{"name": "A", "label": "振幅 A", "min": 0.5, "max": 3, "step": 0.1, "default": 1}, {"name": "omega", "label": "角频率 ω", "min": 0.5, "max": 3, "step": 0.1, "default": 1}, {"name": "phi", "label": "初相 φ", "min": -3.14, "max": 3.14, "step": 0.1, "default": 0}];
+    var sweep = {"name": "x", "min": -6.28, "max": 6.28};
+    var curves = [{"name": "y", "label": "y = A·sin(ωx + φ)", "expr": "A*Math.sin(omega*x+phi)"}];
+    var scalars = [{"name": "T", "label": "周期 T = 2π/ω", "expr": "2*Math.PI/omega"}];
+    var legacy = false;
+    var sliders = {};
+    params.forEach(function(p) { sliders[p.name] = root.querySelector('input[data-param="' + p.name + '"]'); });
 
-      // Chart rendering constants
-      const CHART_COLORS = {
-        axis: '#adb5bd',
-        grid: '#e9ecef',
-        baseline: '#ced4da',
-        active: '#4361ee',
-        activeFill: 'rgba(67, 97, 238, 0.1)'
-      };
-      const X_RANGE = [-2 * Math.PI, 2 * Math.PI];
-      const Y_RANGE = [-3.5, 3.5];
-      const PADDING = { top: 20, right: 20, bottom: 30, left: 40 };
+    function vals() {
+      var v = {};
+      params.forEach(function(p) { v[p.name] = parseFloat(sliders[p.name].value); });
+      return v;
+    }
+    function ev(expr, ctx) {
+      try {
+        var ks = Object.keys(ctx);
+        return new Function(ks.join(','), 'with(Math){return (' + expr + ');}')
+          .apply(null, ks.map(function(k) { return ctx[k]; }));
+      } catch (e) { return NaN; }
+    }
+    function fmt(n) {
+      if (typeof n !== 'number' || !isFinite(n)) return '—';
+      return Math.abs(n) >= 1000 || (n !== 0 && Math.abs(n) < 0.01) ? n.toPrecision(4) : Math.round(n * 1000) / 1000;
+    }
 
-      function initCanvas(canvasId, wrapperId) {
-        const canvas = document.getElementById(canvasId);
-        const wrapper = document.getElementById(wrapperId);
-        if (!canvas || !wrapper) return null;
+    var canvas = root.querySelector('.kl-ps-canvas'), ctx2 = canvas.getContext('2d');
+    var COLORS = ['#3056d3', '#e8590c', '#1a7f37', '#bf3989'];
 
-        const rect = wrapper.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        
-        const ctx = canvas.getContext('2d');
-        ctx.scale(dpr, dpr);
-        
-        // Hide skeleton
-        setTimeout(() => wrapper.classList.add('loaded'), 150);
-
-        return { ctx, width: rect.width, height: rect.height };
-      }
-
-      function mapX(x, width) {
-        return PADDING.left + (x - X_RANGE[0]) / (X_RANGE[1] - X_RANGE[0]) * (width - PADDING.left - PADDING.right);
-      }
-
-      function mapY(y, height) {
-        return PADDING.top + (Y_RANGE[1] - y) / (Y_RANGE[1] - Y_RANGE[0]) * (height - PADDING.top - PADDING.bottom);
-      }
-
-      function drawChart(ctx, width, height, calcY, options = {}) {
-        ctx.clearRect(0, 0, width, height);
-
-        const plotWidth = width - PADDING.left - PADDING.right;
-        const plotHeight = height - PADDING.top - PADDING.bottom;
-
-        // Grid lines
-        ctx.strokeStyle = CHART_COLORS.grid;
-        ctx.lineWidth = 1;
-        
-        // Y grid
-        for (let y = Math.ceil(Y_RANGE[0]); y <= Math.floor(Y_RANGE[1]); y++) {
-          ctx.beginPath();
-          ctx.moveTo(PADDING.left, mapY(y, height));
-          ctx.lineTo(width - PADDING.right, mapY(y, height));
-          ctx.stroke();
+    function plot(v) {
+      var W = canvas.width, H = canvas.height, pad = 30, N = 200;
+      ctx2.clearRect(0, 0, W, H);
+      var lo = sweep.min, hi = sweep.max;
+      var series = curves.map(function(c) {
+        var pts = [], ymin = Infinity, ymax = -Infinity;
+        for (var i = 0; i <= N; i++) {
+          var xv = lo + (hi - lo) * i / N;
+          var probe = Object.assign({}, v); probe[sweep.name] = xv;
+          var yv = ev(c.expr, probe);
+          pts.push([xv, yv]);
+          if (isFinite(yv)) { ymin = Math.min(ymin, yv); ymax = Math.max(ymax, yv); }
         }
-
-        // X grid (Pi intervals)
-        for (let x = Math.ceil(X_RANGE[0] / Math.PI); x <= Math.floor(X_RANGE[1] / Math.PI); x++) {
-          ctx.beginPath();
-          ctx.moveTo(mapX(x * Math.PI, width), PADDING.top);
-          ctx.lineTo(mapX(x * Math.PI, width), height - PADDING.bottom);
-          ctx.stroke();
-        }
-
-        // Axes
-        ctx.strokeStyle = CHART_COLORS.axis;
-        ctx.lineWidth = 1.5;
-        
-        // X Axis
-        ctx.beginPath();
-        ctx.moveTo(PADDING.left, mapY(0, height));
-        ctx.lineTo(width - PADDING.right, mapY(0, height));
-        ctx.stroke();
-        
-        // Y Axis
-        ctx.beginPath();
-        ctx.moveTo(mapX(0, width), PADDING.top);
-        ctx.lineTo(mapX(0, width), height - PADDING.bottom);
-        ctx.stroke();
-
-        // Axis Labels
-        ctx.fillStyle = CHART_COLORS.axis;
-        ctx.font = '11px system-ui';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        
-        const piLabels = {'-2': '-2π', '-1': '-π', '1': 'π', '2': '2π', '0': '0'};
-        for (let x = -2; x <= 2; x++) {
-          if (piLabels[String(x)]) {
-             ctx.fillText(piLabels[String(x)], mapX(x * Math.PI, width), mapY(0, height) + 5);
-          }
-        }
-
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        for (let y = Math.ceil(Y_RANGE[0]); y <= Math.floor(Y_RANGE[1]); y++) {
-          if(y !== 0) {
-            ctx.fillText(y, mapX(0, width) - 5, mapY(y, height));
-          }
-        }
-
-        // Baseline (y = sin(x))
-        if (options.showBaseline) {
-          ctx.beginPath();
-          ctx.strokeStyle = CHART_COLORS.baseline;
-          ctx.lineWidth = 2;
-          ctx.setLineDash([4, 4]);
-          for (let px = 0; px <= plotWidth; px++) {
-            const x = X_RANGE[0] + (px / plotWidth) * (X_RANGE[1] - X_RANGE[0]);
-            const y = Math.sin(x);
-            const cx = mapX(x, width);
-            const cy = mapY(y, height);
-            if (px === 0) ctx.moveTo(cx, cy);
-            else ctx.lineTo(cx, cy);
-          }
-          ctx.stroke();
-          ctx.setLineDash([]);
-        }
-
-        // Active Waveform
-        ctx.beginPath();
-        ctx.strokeStyle = CHART_COLORS.active;
-        ctx.lineWidth = 2.5;
-        for (let px = 0; px <= plotWidth; px++) {
-          const x = X_RANGE[0] + (px / plotWidth) * (X_RANGE[1] - X_RANGE[0]);
-          const y = calcY(x);
-          const cx = mapX(x, width);
-          const cy = mapY(y, height);
-          if (px === 0) ctx.moveTo(cx, cy);
-          else ctx.lineTo(cx, cy);
-        }
-        ctx.stroke();
-
-        // Fill under curve
-        ctx.lineTo(mapX(X_RANGE[1], width), mapY(0, height));
-        ctx.lineTo(mapX(X_RANGE[0], width), mapY(0, height));
-        ctx.closePath();
-        ctx.fillStyle = CHART_COLORS.activeFill;
-        ctx.fill();
-      }
-
-      // --- Render Functions ---
-      let chartA, chartOmega, chartPhi;
-
-      function renderA() {
-        if (!chartA) return;
-        const { ctx, width, height } = chartA;
-        drawChart(ctx, width, height, (x) => state.A * Math.sin(x), { showBaseline: true });
-      }
-
-      function renderOmega() {
-        if (!chartOmega) return;
-        const { ctx, width, height } = chartOmega;
-        drawChart(ctx, width, height, (x) => Math.sin(state.omega * x), { showBaseline: true });
-      }
-
-      function renderPhi() {
-        if (!chartPhi) return;
-        const { ctx, width, height } = chartPhi;
-        drawChart(ctx, width, height, (x) => Math.sin(x + state.phi), { showBaseline: true });
-      }
-
-      // --- Event Bindings ---
-      function setup() {
-        chartA = initCanvas('canvas-A', 'canvas-wrapper-A');
-        chartOmega = initCanvas('canvas-omega', 'canvas-wrapper-omega');
-        chartPhi = initCanvas('canvas-phi', 'canvas-wrapper-phi');
-
-        renderA();
-        renderOmega();
-        renderPhi();
-
-        document.getElementById('slider-A').addEventListener('input', (e) => {
-          state.A = parseFloat(e.target.value);
-          document.getElementById('val-A').textContent = state.A.toFixed(1);
-          renderA();
-        });
-
-        document.getElementById('slider-omega').addEventListener('input', (e) => {
-          state.omega = parseFloat(e.target.value);
-          document.getElementById('val-omega').textContent = state.omega.toFixed(1);
-          renderOmega();
-        });
-
-        document.getElementById('slider-phi').addEventListener('input', (e) => {
-          state.phi = parseFloat(e.target.value);
-          updatePhiDisplay();
-          renderPhi();
-        });
-
-        document.querySelectorAll('input[name="phi-unit"]').forEach(radio => {
-          radio.addEventListener('change', (e) => {
-            state.phiUnit = e.target.value;
-            updatePhiDisplay();
-          });
-        });
-      }
-
-      function updatePhiDisplay() {
-        const displayVal = state.phiUnit === 'deg' 
-          ? (state.phi * 180 / Math.PI).toFixed(1) + '°' 
-          : state.phi.toFixed(2);
-        document.getElementById('val-phi').textContent = displayVal;
-      }
-
-      // Handle Resize
-      let resizeTimeout;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-          chartA = initCanvas('canvas-A', 'canvas-wrapper-A');
-          chartOmega = initCanvas('canvas-omega', 'canvas-wrapper-omega');
-          chartPhi = initCanvas('canvas-phi', 'canvas-wrapper-phi');
-          renderA();
-          renderOmega();
-          renderPhi();
-        }, 200);
+        return { pts: pts, ymin: ymin, ymax: ymax };
       });
-
-      // Init on DOM ready
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setup);
-      } else {
-        setup();
+      var ymin = Math.min.apply(null, series.map(function(s) { return s.ymin; }).filter(isFinite));
+      var ymax = Math.max.apply(null, series.map(function(s) { return s.ymax; }).filter(isFinite));
+      if (!isFinite(ymin) || !isFinite(ymax) || ymin === ymax) { ymin = (ymin || 0) - 1; ymax = (ymax || 0) + 1; }
+      var sx = function(x) { return pad + (x - lo) / (hi - lo) * (W - 2 * pad); };
+      var sy = function(y) { return H - pad - (y - ymin) / (ymax - ymin) * (H - 2 * pad); };
+      // axes (x-axis at y=0 if in range, else bottom)
+      ctx2.strokeStyle = '#d0d7de'; ctx2.lineWidth = 1;
+      var y0 = (ymin <= 0 && ymax >= 0) ? sy(0) : H - pad;
+      ctx2.beginPath(); ctx2.moveTo(pad, y0); ctx2.lineTo(W - pad, y0); ctx2.stroke();
+      var x0 = (lo <= 0 && hi >= 0) ? sx(0) : pad;
+      ctx2.beginPath(); ctx2.moveTo(x0, pad); ctx2.lineTo(x0, H - pad); ctx2.stroke();
+      // curves
+      series.forEach(function(s, ci) {
+        ctx2.strokeStyle = COLORS[ci % COLORS.length]; ctx2.lineWidth = 2; ctx2.beginPath();
+        var started = false;
+        s.pts.forEach(function(pt) {
+          if (!isFinite(pt[1])) { started = false; return; }
+          var px = sx(pt[0]), py = sy(pt[1]);
+          if (!started) { ctx2.moveTo(px, py); started = true; } else { ctx2.lineTo(px, py); }
+        });
+        ctx2.stroke();
+      });
+      // legacy marker at the slider's current value
+      if (legacy && curves.length) {
+        var mx = v[sweep.name], my = ev(curves[0].expr, v);
+        if (isFinite(my)) { ctx2.fillStyle = '#e8590c'; ctx2.beginPath(); ctx2.arc(sx(mx), sy(my), 5, 0, Math.PI * 2); ctx2.fill(); }
       }
-    })();
+    }
+
+    function update() {
+      var v = vals();
+      params.forEach(function(p) { root.querySelector('output[data-for="' + p.name + '"]').textContent = fmt(v[p.name]); });
+      scalars.forEach(function(o) {
+        var el = root.querySelector('[data-out="' + o.name + '"]');
+        if (el) el.textContent = fmt(ev(o.expr, v));
+      });
+      plot(v);
+    }
+    params.forEach(function(p) { sliders[p.name].addEventListener('input', update); });
+    update();
+  })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="param_sim_A">
-  <style>
-    [data-block-id="param_sim_A"] {
-      --kl-bg: #1e1e2e;
-      --kl-surface: #2a2a3c;
-      --kl-border: #3e3e55;
-      --kl-text: #e0e0e8;
-      --kl-text-muted: #8888a0;
-      --kl-accent: #7c6ff7;
-      --kl-accent-glow: rgba(124, 111, 247, 0.35);
-      --kl-grid: rgba(255, 255, 255, 0.06);
-      --kl-axis: rgba(255, 255, 255, 0.2);
-      --kl-wave-pos: #7c6ff7;
-      --kl-wave-neg: #f76f8a;
-      --kl-marker: #4ade80;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      color: var(--kl-text);
-      background: var(--kl-bg);
-      border: 1px solid var(--kl-border);
-      border-radius: 12px;
-      padding: 24px;
-      max-width: 640px;
-      margin: 0 auto;
-    }
-
-    [data-block-id="param_sim_A"] .kl-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      letter-spacing: -0.02em;
-    }
-
-    [data-block-id="param_sim_A"] .kl-subtitle {
-      font-size: 13px;
-      color: var(--kl-text-muted);
-      margin-bottom: 20px;
-    }
-
-    [data-block-id="param_sim_A"] .kl-canvas-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background: var(--kl-surface);
-      border: 1px solid var(--kl-border);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-
-    [data-block-id="param_sim_A"] .kl-canvas-wrap canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    [data-block-id="param_sim_A"] .kl-canvas-wrap .kl-loading {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--kl-surface);
-      transition: opacity 0.4s ease;
-    }
-
-    [data-block-id="param_sim_A"] .kl-canvas-wrap .kl-loading.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    [data-block-id="param_sim_A"] .kl-skeleton-bar {
-      width: 60%;
-      height: 4px;
-      background: linear-gradient(90deg, var(--kl-border) 25%, var(--kl-accent-glow) 50%, var(--kl-border) 75%);
-      background-size: 200% 100%;
-      border-radius: 2px;
-      animation: kl-shimmer 1.5s infinite;
-    }
-
-    @keyframes kl-shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    [data-block-id="param_sim_A"] .kl-param-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    [data-block-id="param_sim_A"] .kl-param-label {
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-      min-width: 60px;
-    }
-
-    [data-block-id="param_sim_A"] .kl-param-slider {
-      flex: 1;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 6px;
-      background: var(--kl-border);
-      border-radius: 3px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    [data-block-id="param_sim_A"] .kl-param-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--kl-accent);
-      box-shadow: 0 0 8px var(--kl-accent-glow);
-      cursor: grab;
-      transition: transform 0.15s ease;
-    }
-
-    [data-block-id="param_sim_A"] .kl-param-slider::-webkit-slider-thumb:active {
-      transform: scale(1.2);
-      cursor: grabbing;
-    }
-
-    [data-block-id="param_sim_A"] .kl-param-slider::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--kl-accent);
-      box-shadow: 0 0 8px var(--kl-accent-glow);
-      border: none;
-      cursor: grab;
-    }
-
-    [data-block-id="param_sim_A"] .kl-param-value {
-      font-size: 14px;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      min-width: 44px;
-      text-align: right;
-      color: var(--kl-accent);
-    }
-
-    [data-block-id="param_sim_A"] .kl-outputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    [data-block-id="param_sim_A"] .kl-output-card {
-      background: var(--kl-surface);
-      border: 1px solid var(--kl-border);
-      border-radius: 8px;
-      padding: 12px 16px;
-      text-align: center;
-    }
-
-    [data-block-id="param_sim_A"] .kl-output-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--kl-text-muted);
-      margin-bottom: 4px;
-    }
-
-    [data-block-id="param_sim_A"] .kl-output-value {
-      font-size: 22px;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-    }
-
-    [data-block-id="param_sim_A"] .kl-output-value.positive { color: var(--kl-wave-pos); }
-    [data-block-id="param_sim_A"] .kl-output-value.negative { color: var(--kl-wave-neg); }
-
-    [data-block-id="param_sim_A"] .kl-explain {
-      font-size: 13px;
-      line-height: 1.7;
-      color: var(--kl-text-muted);
-      background: var(--kl-surface);
-      border-left: 3px solid var(--kl-accent);
-      border-radius: 0 6px 6px 0;
-      padding: 12px 16px;
-    }
-  </style>
-
-  <div class="kl-title">正弦函数 y = A·sin(x)</div>
-  <div class="kl-subtitle">调节振幅 A，观察波形的纵向拉伸与翻转</div>
-
-  <div class="kl-canvas-wrap">
-    <canvas id="canvas_param_sim_A"></canvas>
-    <div class="kl-loading" id="loading_param_sim_A">
-      <div class="kl-skeleton-bar"></div>
-    </div>
-  </div>
-
-  <div class="kl-param-row">
-    <span class="kl-param-label">振幅 A</span>
-    <input type="range" class="kl-param-slider" id="slider_A" min="-3" max="3" step="0.1" value="1">
-    <span class="kl-param-value" id="val_A">1.0</span>
-  </div>
-
-  <div class="kl-outputs">
-    <div class="kl-output-card">
-      <div class="kl-output-label">波峰纵坐标</div>
-      <div class="kl-output-value positive" id="out_max_y">1.00</div>
-    </div>
-    <div class="kl-output-card">
-      <div class="kl-output-label">波谷纵坐标</div>
-      <div class="kl-output-value negative" id="out_min_y">-1.00</div>
-    </div>
-  </div>
-
-  <div class="kl-explain">
-    拖动滑块改变 A 的值。观察：A 的绝对值决定了波峰和波谷的距离；A 的正负决定了图像是否关于 x 轴翻转。
-  </div>
-
-  <script>
-    (function() {
-      const blockId = 'param_sim_A';
-      const canvas = document.getElementById('canvas_' + blockId);
-      const loading = document.getElementById('loading_' + blockId);
-      const sliderA = document.getElementById('slider_A');
-      const valA = document.getElementById('val_A');
-      const outMaxY = document.getElementById('out_max_y');
-      const outMinY = document.getElementById('out_min_y');
-
-      let A = 1;
-      const dpr = window.devicePixelRatio || 1;
-
-      function resizeCanvas() {
-        const rect = canvas.parentElement.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-      }
-
-      function compute() {
-        const maxY = Math.abs(A);
-        const minY = -Math.abs(A);
-        outMaxY.textContent = maxY.toFixed(2);
-        outMinY.textContent = minY.toFixed(2);
-        valA.textContent = A.toFixed(1);
-      }
-
-      function draw() {
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width;
-        const h = canvas.height;
-        ctx.clearRect(0, 0, w, h);
-
-        const padX = 48 * dpr;
-        const padY = 32 * dpr;
-        const plotW = w - padX * 2;
-        const plotH = h - padY * 2;
-        const cx = padX + plotW / 2;
-        const cy = padY + plotH / 2;
-
-        const yRange = 3.5;
-        const xRange = 2 * Math.PI;
-
-        function toScreenX(x) { return cx + (x / xRange) * (plotW / 2); }
-        function toScreenY(y) { return cy - (y / yRange) * (plotH / 2); }
-
-        // Grid lines
-        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-        ctx.lineWidth = 1 * dpr;
-        for (let gy = -3; gy <= 3; gy++) {
-          const sy = toScreenY(gy);
-          ctx.beginPath();
-          ctx.moveTo(padX, sy);
-          ctx.lineTo(w - padX, sy);
-          ctx.stroke();
-        }
-        for (let gx = -6; gx <= 6; gx++) {
-          const sx = toScreenX(gx);
-          ctx.beginPath();
-          ctx.moveTo(sx, padY);
-          ctx.lineTo(sx, h - padY);
-          ctx.stroke();
-        }
-
-        // Axes
-        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-        ctx.lineWidth = 1.5 * dpr;
-        // X axis
-        ctx.beginPath();
-        ctx.moveTo(padX, cy);
-        ctx.lineTo(w - padX, cy);
-        ctx.stroke();
-        // Y axis
-        ctx.beginPath();
-        ctx.moveTo(cx, padY);
-        ctx.lineTo(cx, h - padY);
-        ctx.stroke();
-
-        // Axis labels
-        ctx.fillStyle = 'rgba(255,255,255,0.35)';
-        ctx.font = `${11 * dpr}px system-ui`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        for (let gx = -6; gx <= 6; gx += 2) {
-          if (gx === 0) continue;
-          ctx.fillText(gx.toString(), toScreenX(gx), cy + 6 * dpr);
-        }
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        for (let gy = -3; gy <= 3; gy++) {
-          if (gy === 0) continue;
-          ctx.fillText(gy.toString(), cx - 8 * dpr, toScreenY(gy));
-        }
-
-        // Reference wave (A=1, dashed)
-        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-        ctx.lineWidth = 1.5 * dpr;
-        ctx.setLineDash([6 * dpr, 4 * dpr]);
-        ctx.beginPath();
-        for (let px = 0; px <= plotW; px++) {
-          const x = (px / plotW) * 2 * xRange - xRange;
-          const y = Math.sin(x);
-          const sx = padX + px;
-          const sy = toScreenY(y);
-          if (px === 0) ctx.moveTo(sx, sy);
-          else ctx.lineTo(sx, sy);
-        }
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Current wave y = A*sin(x)
-        const isNeg = A < 0;
-        const waveColor = isNeg ? '#f76f8a' : '#7c6ff7';
-        ctx.strokeStyle = waveColor;
-        ctx.lineWidth = 2.5 * dpr;
-        ctx.shadowColor = waveColor;
-        ctx.shadowBlur = 10 * dpr;
-        ctx.beginPath();
-        for (let px = 0; px <= plotW; px++) {
-          const x = (px / plotW) * 2 * xRange - xRange;
-          const y = A * Math.sin(x);
-          const sx = padX + px;
-          const sy = toScreenY(y);
-          if (px === 0) ctx.moveTo(sx, sy);
-          else ctx.lineTo(sx, sy);
-        }
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-
-        // Peak and trough markers
-        const absA = Math.abs(A);
-        if (absA > 0.05) {
-          // Peak marker at x = π/2
-          const peakX = toScreenX(Math.PI / 2);
-          const peakY = toScreenY(absA);
-          ctx.fillStyle = '#4ade80';
-          ctx.beginPath();
-          ctx.arc(peakX, peakY, 5 * dpr, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          ctx.font = `bold ${11 * dpr}px system-ui`;
-          ctx.textAlign = 'left';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText('y=' + absA.toFixed(1), peakX + 8 * dpr, peakY - 4 * dpr);
-
-          // Trough marker at x = -π/2
-          const troughX = toScreenX(-Math.PI / 2);
-          const troughY = toScreenY(-absA);
-          ctx.fillStyle = '#4ade80';
-          ctx.beginPath();
-          ctx.arc(troughX, troughY, 5 * dpr, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          ctx.textAlign = 'right';
-          ctx.textBaseline = 'top';
-          ctx.fillText('y=' + (-absA).toFixed(1), troughX - 8 * dpr, troughY + 4 * dpr);
-        }
-
-        // Current A indicator line
-        if (Math.abs(A) > 0.05) {
-          ctx.strokeStyle = 'rgba(74, 222, 128, 0.3)';
-          ctx.lineWidth = 1 * dpr;
-          ctx.setLineDash([4 * dpr, 3 * dpr]);
-          ctx.beginPath();
-          ctx.moveTo(padX, toScreenY(absA));
-          ctx.lineTo(w - padX, toScreenY(absA));
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(padX, toScreenY(-absA));
-          ctx.lineTo(w - padX, toScreenY(-absA));
-          ctx.stroke();
-          ctx.setLineDash([]);
-        }
-      }
-
-      function update() {
-        compute();
-        draw();
-      }
-
-      sliderA.addEventListener('input', function() {
-        A = parseFloat(this.value);
-        update();
-      });
-
-      // Initial render
-      resizeCanvas();
-      update();
-
-      // Hide loading
-      requestAnimationFrame(function() {
-        loading.classList.add('hidden');
-      });
-
-      // Handle resize
-      let resizeTimer;
-      window.addEventListener('resize', function() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-          resizeCanvas();
-          draw();
-        }, 100);
-      });
-    })();
-  </script>
-</section></div>
-<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="param_sim_omega">
-  <style>
-    .kl-paramsim[data-block-id="param_sim_omega"] {
-      --kl-bg: #1a1a2e;
-      --kl-surface: #16213e;
-      --kl-border: #0f3460;
-      --kl-accent: #e94560;
-      --kl-accent2: #00d2ff;
-      --kl-text: #eaeaea;
-      --kl-muted: #8899aa;
-      font-family: system-ui, -apple-system, sans-serif;
-      color: var(--kl-text);
-      background: var(--kl-bg);
-      border: 1px solid var(--kl-border);
-      border-radius: 12px;
-      padding: 24px;
-      max-width: 640px;
-      margin: 0 auto;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: var(--kl-accent2);
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-control {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-control-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      font-size: 0.95rem;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-control-label span:first-child {
-      font-weight: 600;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-control-value {
-      font-family: 'Courier New', Courier, monospace;
-      color: var(--kl-accent);
-      font-weight: 700;
-      background: rgba(233, 69, 96, 0.1);
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] input[type=range] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: var(--kl-border);
-      outline: none;
-      cursor: pointer;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--kl-accent);
-      border: 2px solid var(--kl-bg);
-      box-shadow: 0 0 8px rgba(233, 69, 96, 0.5);
-      cursor: grab;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] input[type=range]::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--kl-accent);
-      border: 2px solid var(--kl-bg);
-      box-shadow: 0 0 8px rgba(233, 69, 96, 0.5);
-      cursor: grab;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-output {
-      background: var(--kl-surface);
-      border: 1px solid var(--kl-border);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-output-label {
-      font-size: 0.85rem;
-      color: var(--kl-muted);
-      margin-bottom: 4px;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-output-value {
-      font-size: 1.5rem;
-      font-family: 'Courier New', Courier, monospace;
-      font-weight: 700;
-      color: var(--kl-accent2);
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-canvas-wrap {
-      position: relative;
-      background: var(--kl-surface);
-      border: 1px solid var(--kl-border);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] canvas {
-      display: block;
-      width: 100%;
-      height: 240px;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-skeleton {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, var(--kl-surface) 25%, var(--kl-border) 50%, var(--kl-surface) 75%);
-      background-size: 200% 100%;
-      animation: kl-shimmer 1.5s infinite;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--kl-muted);
-      font-size: 0.9rem;
-      transition: opacity 0.3s ease;
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-skeleton.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    @keyframes kl-shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-    .kl-paramsim[data-block-id="param_sim_omega"] .kl-explain {
-      font-size: 0.9rem;
-      line-height: 1.6;
-      color: var(--kl-muted);
-      background: rgba(0, 210, 255, 0.05);
-      border-left: 3px solid var(--kl-accent2);
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-    }
-  </style>
-
-  <div class="kl-title">角频率 ω 与周期</div>
-
-  <div class="kl-control">
-    <div class="kl-control-label">
-      <span>角频率 ω</span>
-      <span class="kl-control-value" id="omega_val">1.0</span>
-    </div>
-    <input type="range" id="omega_slider" min="0.5" max="4" step="0.1" value="1">
-  </div>
-
-  <div class="kl-output">
-    <div class="kl-output-label">周期 T = 2π / ω</div>
-    <div class="kl-output-value" id="T_val">2π ≈ 6.283</div>
-  </div>
-
-  <div class="kl-canvas-wrap">
-    <canvas id="omega_canvas" width="640" height="240"></canvas>
-    <div class="kl-skeleton" id="canvas_skeleton">Loading Chart...</div>
-  </div>
-
-  <div class="kl-explain">
-    拖动滑块改变 ω 的值。注意观察：ω 越大，一个周期内波动的次数越多，图像在横向上被"压缩"，周期 T=2π/ω 反而越小。
-  </div>
-
-  <script>
-    (function() {
-      const slider = document.getElementById('omega_slider');
-      const omegaValEl = document.getElementById('omega_val');
-      const tValEl = document.getElementById('T_val');
-      const canvas = document.getElementById('omega_canvas');
-      const skeleton = document.getElementById('canvas_skeleton');
-      const ctx = canvas.getContext('2d');
-
-      let omega = 1.0;
-
-      function formatT(omega) {
-        const T = 2 * Math.PI / omega;
-        // Try to find nice fraction of PI
-        const ratio = 2 / omega;
-        if (Math.abs(ratio - Math.round(ratio)) < 0.01) {
-          const num = Math.round(ratio);
-          if (num === 1) return `π ≈ ${T.toFixed(3)}`;
-          if (num === 2) return `2π ≈ ${T.toFixed(3)}`;
-          return `${num}π ≈ ${T.toFixed(3)}`;
-        }
-        return `≈ ${T.toFixed(3)}`;
-      }
-
-      function draw() {
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-        
-        const W = rect.width;
-        const H = rect.height;
-        const pad = 30;
-
-        ctx.clearRect(0, 0, W, H);
-
-        // Grid
-        ctx.strokeStyle = 'rgba(15, 52, 96, 0.5)';
-        ctx.lineWidth = 1;
-        for (let i = 0; i <= 10; i++) {
-          const x = pad + (W - 2 * pad) * i / 10;
-          ctx.beginPath();
-          ctx.moveTo(x, pad);
-          ctx.lineTo(x, H - pad);
-          ctx.stroke();
-        }
-        for (let i = 0; i <= 6; i++) {
-          const y = pad + (H - 2 * pad) * i / 6;
-          ctx.beginPath();
-          ctx.moveTo(pad, y);
-          ctx.lineTo(W - pad, y);
-          ctx.stroke();
-        }
-
-        // Axes
-        ctx.strokeStyle = '#8899aa';
-        ctx.lineWidth = 1.5;
-        const originY = H / 2;
-        const startX = pad;
-        const endX = W - pad;
-
-        ctx.beginPath();
-        ctx.moveTo(startX, originY);
-        ctx.lineTo(endX, originY);
-        ctx.stroke();
-        
-        // Y axis
-        ctx.beginPath();
-        ctx.moveTo(pad + 10, pad);
-        ctx.lineTo(pad + 10, H - pad);
-        ctx.stroke();
-
-        // Axis labels
-        ctx.fillStyle = '#8899aa';
-        ctx.font = '11px system-ui';
-        ctx.textAlign = 'center';
-        ctx.fillText('x', endX + 10, originY + 4);
-        ctx.fillText('y', pad + 10, pad - 10);
-        ctx.fillText('0', pad + 10, originY + 14);
-
-        // Plot range: x from 0 to 4π
-        const xMax = 4 * Math.PI;
-        
-        // Draw T markers
-        const T = 2 * Math.PI / omega;
-        ctx.fillStyle = 'rgba(233, 69, 96, 0.3)';
-        for (let k = 1; k * T <= xMax; k++) {
-          const px = pad + 10 + (k * T / xMax) * (endX - pad - 10);
-          ctx.beginPath();
-          ctx.moveTo(px, pad);
-          ctx.lineTo(px, H - pad);
-          ctx.strokeStyle = 'rgba(233, 69, 96, 0.4)';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([4, 4]);
-          ctx.stroke();
-          ctx.setLineDash([]);
-          ctx.fillStyle = '#e94560';
-          ctx.font = '10px system-ui';
-          ctx.fillText(`${k}T`, px, H - pad + 14);
-          ctx.fillStyle = 'rgba(233, 69, 96, 0.3)';
-        }
-
-        // Plot y = sin(ωx)
-        ctx.beginPath();
-        ctx.strokeStyle = '#00d2ff';
-        ctx.lineWidth = 2.5;
-        ctx.lineJoin = 'round';
-        
-        let firstPoint = true;
-        for (let px = pad + 10; px <= endX; px += 1) {
-          const x = ((px - pad - 10) / (endX - pad - 10)) * xMax;
-          const y = Math.sin(omega * x);
-          const plotY = originY - y * (H / 2 - pad - 10);
-          
-          if (firstPoint) {
-            ctx.moveTo(px, plotY);
-            firstPoint = false;
-          } else {
-            ctx.lineTo(px, plotY);
-          }
-        }
-        ctx.stroke();
-
-        // Mark current omega value on curve (at x = π/2ω, which is a peak)
-        const markX_val = Math.PI / (2 * omega);
-        if (markX_val <= xMax) {
-          const markPx = pad + 10 + (markX_val / xMax) * (endX - pad - 10);
-          const markPy = originY - 1 * (H / 2 - pad - 10);
-          
-          ctx.beginPath();
-          ctx.arc(markPx, markPy, 5, 0, Math.PI * 2);
-          ctx.fillStyle = '#e94560';
-          ctx.fill();
-          ctx.strokeStyle = '#1a1a2e';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        }
-      }
-
-      function update() {
-        omega = parseFloat(slider.value);
-        omegaValEl.textContent = omega.toFixed(1);
-        tValEl.textContent = formatT(omega);
-        draw();
-      }
-
-      slider.addEventListener('input', update);
-      
-      // Initial render & hide skeleton
-      window.addEventListener('resize', draw);
-      
-      // Simulate slight load delay to show skeleton, then render
-      setTimeout(() => {
-        update();
-        skeleton.classList.add('hidden');
-      }, 150);
-
-    })();
-  </script>
-</section></div>
-<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="param_sim_phi">
-  <style>
-    .kl-paramsim[data-block-id="param_sim_phi"] {
-      --kl-primary: #2563eb;
-      --kl-primary-light: #dbeafe;
-      --kl-text: #1e293b;
-      --kl-text-muted: #64748b;
-      --kl-bg: #ffffff;
-      --kl-border: #e2e8f0;
-      --kl-canvas-bg: #f8fafc;
-      --kl-grid: #e2e8f0;
-      --kl-axis: #94a3b8;
-      --kl-wave: #2563eb;
-      --kl-wave-ghost: #94a3b8;
-      --kl-marker: #dc2626;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      color: var(--kl-text);
-      background: var(--kl-bg);
-      border: 1px solid var(--kl-border);
-      border-radius: 12px;
-      padding: 24px;
-      max-width: 640px;
-      margin: 0 auto;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 0 0 20px 0;
-      color: var(--kl-text);
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-control-group {
-      margin-bottom: 16px;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-control-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 6px;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--kl-text);
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-value {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--kl-primary);
-      font-variant-numeric: tabular-nums;
-      min-width: 60px;
-      text-align: right;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] input[type="range"] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      background: var(--kl-border);
-      border-radius: 3px;
-      outline: none;
-      cursor: pointer;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      background: var(--kl-primary);
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 1px 3px rgba(37,99,235,0.3);
-      transition: transform 0.15s ease;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] input[type="range"]::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      background: var(--kl-primary);
-      border-radius: 50%;
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 1px 3px rgba(37,99,235,0.3);
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-canvas-wrapper {
-      position: relative;
-      background: var(--kl-canvas-bg);
-      border: 1px solid var(--kl-border);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] canvas {
-      display: block;
-      width: 100%;
-      height: 260px;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-skeleton {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, var(--kl-canvas-bg) 25%, #eef2f7 50%, var(--kl-canvas-bg) 75%);
-      background-size: 200% 100%;
-      animation: kl-shimmer 1.5s infinite;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--kl-text-muted);
-      font-size: 13px;
-      transition: opacity 0.3s ease;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-skeleton.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    @keyframes kl-shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-output-group {
-      background: var(--kl-primary-light);
-      border-radius: 8px;
-      padding: 14px 18px;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-output-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--kl-text);
-      white-space: nowrap;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-output-value {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--kl-primary);
-      font-variant-numeric: tabular-nums;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-output-unit {
-      font-size: 13px;
-      color: var(--kl-text-muted);
-      margin-left: 2px;
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-explain {
-      font-size: 14px;
-      line-height: 1.7;
-      color: var(--kl-text-muted);
-      padding: 14px 18px;
-      background: #f8fafc;
-      border-radius: 8px;
-      border-left: 3px solid var(--kl-primary);
-    }
-    .kl-paramsim[data-block-id="param_sim_phi"] .kl-explain strong {
-      color: var(--kl-text);
-      font-weight: 600;
-    }
-  </style>
-
-  <h3 class="kl-title">初相 φ 与水平平移</h3>
-
-  <div class="kl-control-group">
-    <div class="kl-control-header">
-      <label class="kl-label" for="phi-slider">初相 φ</label>
-      <span class="kl-value" id="phi-display">0.0</span>
-    </div>
-    <input type="range" id="phi-slider" min="-3.14" max="3.14" step="0.1" value="0">
-  </div>
-
-  <div class="kl-canvas-wrapper">
-    <canvas id="phi-canvas"></canvas>
-    <div class="kl-skeleton" id="phi-skeleton">加载图表中…</div>
-  </div>
-
-  <div class="kl-output-group">
-    <span class="kl-output-label">图像平移量：</span>
-    <span class="kl-output-value" id="shift-value">0.0</span>
-    <span class="kl-output-unit">个单位（左为负，右为正）</span>
-  </div>
-
-  <div class="kl-explain">
-    拖动滑块改变 φ 的值。关键发现：φ &gt; 0 时，图像往<strong>左</strong>平移 |φ| 个单位；φ &lt; 0 时，图像往<strong>右</strong>平移 |φ| 个单位。平移方向与 φ 的符号恰好相反！
-  </div>
-
-  <script>
-    (function() {
-      var phi = 0;
-      var slider = document.getElementById('phi-slider');
-      var phiDisplay = document.getElementById('phi-display');
-      var shiftValue = document.getElementById('shift-value');
-      var canvas = document.getElementById('phi-canvas');
-      var skeleton = document.getElementById('phi-skeleton');
-      var ctx = canvas.getContext('2d');
-
-      function resizeCanvas() {
-        var rect = canvas.getBoundingClientRect();
-        var dpr = window.devicePixelRatio || 1;
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-
-      function draw() {
-        var w = canvas.getBoundingClientRect().width;
-        var h = canvas.getBoundingClientRect().height;
-        var pad = { top: 20, right: 20, bottom: 30, left: 40 };
-        var plotW = w - pad.left - pad.right;
-        var plotH = h - pad.top - pad.bottom;
-
-        ctx.clearRect(0, 0, w, h);
-
-        var xMin = -2 * Math.PI;
-        var xMax = 2 * Math.PI;
-        var yMin = -1.5;
-        var yMax = 1.5;
-
-        function toCanvasX(x) { return pad.left + (x - xMin) / (xMax - xMin) * plotW; }
-        function toCanvasY(y) { return pad.top + (1 - (y - yMin) / (yMax - yMin)) * plotH; }
-
-        // Grid lines
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 1;
-        for (var gx = -6; gx <= 6; gx += 1) {
-          var cx = toCanvasX(gx);
-          ctx.beginPath();
-          ctx.moveTo(cx, pad.top);
-          ctx.lineTo(cx, pad.top + plotH);
-          ctx.stroke();
-        }
-        for (var gy = -1; gy <= 1; gy += 0.5) {
-          var cy = toCanvasY(gy);
-          ctx.beginPath();
-          ctx.moveTo(pad.left, cy);
-          ctx.lineTo(pad.left + plotW, cy);
-          ctx.stroke();
-        }
-
-        // Axes
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 1.5;
-        // X-axis
-        var yZero = toCanvasY(0);
-        ctx.beginPath();
-        ctx.moveTo(pad.left, yZero);
-        ctx.lineTo(pad.left + plotW, yZero);
-        ctx.stroke();
-        // Y-axis
-        var xZero = toCanvasX(0);
-        ctx.beginPath();
-        ctx.moveTo(xZero, pad.top);
-        ctx.lineTo(xZero, pad.top + plotH);
-        ctx.stroke();
-
-        // Axis labels
-        ctx.fillStyle = '#64748b';
-        ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        var piLabels = [
-          { val: -2 * Math.PI, text: '-2π' },
-          { val: -Math.PI, text: '-π' },
-          { val: Math.PI, text: 'π' },
-          { val: 2 * Math.PI, text: '2π' }
-        ];
-        piLabels.forEach(function(l) {
-          ctx.fillText(l.text, toCanvasX(l.val), yZero + 6);
-        });
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('1', xZero - 6, toCanvasY(1));
-        ctx.fillText('-1', xZero - 6, toCanvasY(-1));
-
-        // Ghost wave (φ=0)
-        ctx.strokeStyle = '#cbd5e1';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        for (var px = 0; px <= plotW; px++) {
-          var x = xMin + (px / plotW) * (xMax - xMin);
-          var y = Math.sin(x);
-          var cx2 = pad.left + px;
-          var cy2 = toCanvasY(y);
-          if (px === 0) ctx.moveTo(cx2, cy2);
-          else ctx.lineTo(cx2, cy2);
-        }
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Current wave (y = sin(x + φ))
-        ctx.strokeStyle = '#2563eb';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        for (var px2 = 0; px2 <= plotW; px2++) {
-          var x2 = xMin + (px2 / plotW) * (xMax - xMin);
-          var y2 = Math.sin(x2 + phi);
-          var cx3 = pad.left + px2;
-          var cy3 = toCanvasY(y2);
-          if (px2 === 0) ctx.moveTo(cx3, cy3);
-          else ctx.lineTo(cx3, cy3);
-        }
-        ctx.stroke();
-
-        // Shift marker: vertical line at x = -phi
-        var shiftX = -phi;
-        if (shiftX >= xMin && shiftX <= xMax) {
-          var markerCx = toCanvasX(shiftX);
-          ctx.strokeStyle = '#dc2626';
-          ctx.lineWidth = 1.5;
-          ctx.setLineDash([3, 3]);
-          ctx.beginPath();
-          ctx.moveTo(markerCx, pad.top);
-          ctx.lineTo(markerCx, pad.top + plotH);
-          ctx.stroke();
-          ctx.setLineDash([]);
-
-          // Marker dot on the wave
-          var markerY = Math.sin(shiftX + phi); // = sin(0) = 0
-          var markerCy = toCanvasY(markerY);
-          ctx.fillStyle = '#dc2626';
-          ctx.beginPath();
-          ctx.arc(markerCx, markerCy, 5, 0, 2 * Math.PI);
-          ctx.fill();
-
-          // Shift label
-          ctx.fillStyle = '#dc2626';
-          ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          var shiftLabel = 'x = ' + (-phi).toFixed(1);
-          ctx.fillText(shiftLabel, markerCx, pad.top - 4);
-        }
-
-        // Legend
-        ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        // Ghost legend
-        ctx.strokeStyle = '#cbd5e1';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(pad.left + 8, pad.top + 12);
-        ctx.lineTo(pad.left + 28, pad.top + 12);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = '#64748b';
-        ctx.fillText('φ = 0', pad.left + 32, pad.top + 12);
-        // Current legend
-        ctx.strokeStyle = '#2563eb';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(pad.left + 8, pad.top + 28);
-        ctx.lineTo(pad.left + 28, pad.top + 28);
-        ctx.stroke();
-        ctx.fillStyle = '#2563eb';
-        ctx.fillText('φ = ' + phi.toFixed(1), pad.left + 32, pad.top + 28);
-      }
-
-      function update() {
-        phi = parseFloat(slider.value);
-        phiDisplay.textContent = phi.toFixed(1);
-        var shift = -phi;
-        shiftValue.textContent = shift.toFixed(1);
-        draw();
-      }
-
-      slider.addEventListener('input', update);
-
-      // Initial render
-      resizeCanvas();
-      update();
-
-      // Hide skeleton after first render
-      skeleton.classList.add('hidden');
-
-      // Handle resize
-      var resizeTimeout;
-      window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(function() {
-          resizeCanvas();
-          draw();
-        }, 100);
-      });
-    })();
-  </script>
-</section></div>
-<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="step_through_combine">
+<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="sine_aha_callout">
+  <span class="kl-callout-icon">🛈</span>
+  <div class="kl-callout-body"><p>💡 <strong>核心洞察</strong></p>
+<ul>
+<li><strong>A 只管纵向伸缩</strong>：A 变大，波浪变高；A 变小，波浪变矮。它绝不干涉水平方向。</li>
+<li><strong>ω 只管横向伸缩</strong>：ω 变大，波浪变密（周期 T 变小）；ω 变小，波浪变疏（周期 T 变大）。周期与 ω 是<strong>反比</strong>关系！</li>
+<li><strong>φ 只管左右平移</strong>：φ &gt; 0 时，图像<strong>左移</strong> φ/ω 个单位；φ &lt; 0 时，图像<strong>右移</strong> |φ|/ω 个单位。因为 φ 作用在 x 身上，所以平移方向与正负号直觉相反。</li>
+</ul></div>
+</aside></div>
+<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="sine_step_through">
   <div class="kl-st-state"></div>
   <p class="kl-st-explain"></p>
   <div class="kl-st-nav">
@@ -1797,8 +302,8 @@ button:disabled { opacity: .45; cursor: default; }
   </div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="step_through_combine"]');
-    var steps = [{"title": "基础波形", "describe": "起点：y = sin(x)，一个平静的标准正弦波，周期 2π，振幅 1。"}, {"title": "叠加振幅 A", "describe": "将 A 设为 2，波形在纵向上拉伸为原来的 2 倍，变为 y = 2sin(x)。波峰到达 2。"}, {"title": "叠加角频率 ω", "describe": "将 ω 设为 2，波形在横向上压缩为原来的一半，变为 y = 2sin(2x)。周期缩短为 π。"}, {"title": "叠加初相 φ", "describe": "将 φ 设为 π/2，波形整体向左平移 π/4 个单位，最终形态：y = 2sin(2x + π/2)。"}];
+    var root = document.querySelector('[data-block-id="sine_step_through"]');
+    var steps = [{"state": "A=1, omega=1, phi=0", "explain": "基础正弦函数 y = sin(x)，振幅为1，周期为 2π，无平移。"}, {"state": "A=2, omega=1, phi=0", "explain": "将 A 从1变为2，图像纵向拉伸为2倍，最高点从1变为2，最低点从-1变为-2。周期与平移不变。"}, {"state": "A=2, omega=2, phi=0", "explain": "保持 A=2，将 ω 从1变为2，图像横向压缩，周期从 2π 缩短为 π。波浪变得更密集，但最高点依然是2。"}, {"state": "A=2, omega=2, phi=1.57", "explain": "保持 A=2, ω=2，将 φ 从0变为 π/2(≈1.57)。图像整体左移 π/4 个单位。原本在原点的起点，现在向左移动了。"}];
     var i = 0;
     var stateEl = root.querySelector('.kl-st-state');
     var explainEl = root.querySelector('.kl-st-explain');
@@ -1818,830 +323,160 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="quiz_check">
-  <style>
-    .kl-quiz {
-      --kl-bg: #ffffff;
-      --kl-surface: #f8f9fa;
-      --kl-border: #e2e8f0;
-      --kl-primary: #3b82f6;
-      --kl-primary-light: #eff6ff;
-      --kl-success: #10b981;
-      --kl-success-light: #ecfdf5;
-      --kl-error: #ef4444;
-      --kl-error-light: #fef2f2;
-      --kl-text: #1e293b;
-      --kl-text-secondary: #64748b;
-      --kl-radius: 12px;
-      --kl-radius-sm: 8px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      color: var(--kl-text);
-      line-height: 1.6;
-    }
-
-    .kl-quiz__header {
-      margin-bottom: 28px;
-    }
-
-    .kl-quiz__title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 0 0 6px 0;
-      letter-spacing: -0.02em;
-    }
-
-    .kl-quiz__subtitle {
-      font-size: 0.9rem;
-      color: var(--kl-text-secondary);
-      margin: 0;
-    }
-
-    /* --- Chart Sections --- */
-    .kl-quiz__chart-section {
-      background: var(--kl-surface);
-      border: 1px solid var(--kl-border);
-      border-radius: var(--kl-radius);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .kl-quiz__chart-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 0 0 14px 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .kl-quiz__chart-title span {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      background: var(--kl-primary);
-      color: white;
-      border-radius: 50%;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
-    .kl-quiz__canvas-wrap {
-      position: relative;
-      width: 100%;
-      height: 180px;
-      background: #fff;
-      border-radius: var(--kl-radius-sm);
-      border: 1px solid var(--kl-border);
-      overflow: hidden;
-    }
-
-    .kl-quiz__canvas-wrap canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    /* Skeleton / Loading */
-    .kl-quiz__skeleton {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, var(--kl-surface) 25%, #eef2f7 50%, var(--kl-surface) 75%);
-      background-size: 200% 100%;
-      animation: kl-shimmer 1.5s infinite;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--kl-text-secondary);
-      font-size: 0.85rem;
-      transition: opacity 0.3s ease;
-      z-index: 2;
-    }
-
-    .kl-quiz__skeleton.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    @keyframes kl-shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
-    .kl-quiz__slider-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 12px;
-      font-size: 0.85rem;
-      color: var(--kl-text-secondary);
-    }
-
-    .kl-quiz__slider-row input[type="range"] {
-      flex: 1;
-      accent-color: var(--kl-primary);
-      cursor: pointer;
-    }
-
-    .kl-quiz__slider-val {
-      min-width: 40px;
-      text-align: right;
-      font-weight: 600;
-      color: var(--kl-primary);
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* --- Quiz Section --- */
-    .kl-quiz__question-card {
-      background: var(--kl-bg);
-      border: 1px solid var(--kl-border);
-      border-radius: var(--kl-radius);
-      padding: 28px;
-      margin-top: 32px;
-    }
-
-    .kl-quiz__progress {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .kl-quiz__progress-bar {
-      flex: 1;
-      height: 6px;
-      background: var(--kl-border);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    .kl-quiz__progress-fill {
-      height: 100%;
-      background: var(--kl-primary);
-      border-radius: 3px;
-      transition: width 0.3s ease;
-    }
-
-    .kl-quiz__progress-text {
-      font-size: 0.8rem;
-      color: var(--kl-text-secondary);
-      font-weight: 600;
-      min-width: 36px;
-      text-align: right;
-    }
-
-    .kl-quiz__question-text {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-
-    .kl-quiz__options {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      list-style: none;
-      padding: 0;
-      margin: 0 0 24px 0;
-    }
-
-    .kl-quiz__option {
-      position: relative;
-    }
-
-    .kl-quiz__option input {
-      position: absolute;
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .kl-quiz__option label {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 16px 18px;
-      background: var(--kl-surface);
-      border: 2px solid var(--kl-border);
-      border-radius: var(--kl-radius-sm);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-
-    .kl-quiz__option label:hover {
-      border-color: var(--kl-primary);
-      background: var(--kl-primary-light);
-    }
-
-    .kl-quiz__option input:checked + label {
-      border-color: var(--kl-primary);
-      background: var(--kl-primary-light);
-      box-shadow: 0 0 0 1px var(--kl-primary);
-    }
-
-    .kl-quiz__option input:disabled + label {
-      cursor: default;
-      opacity: 0.85;
-    }
-
-    .kl-quiz__option input:disabled + label:hover {
-      background: var(--kl-primary-light);
-      border-color: var(--kl-primary);
-    }
-
-    .kl-quiz__radio-dot {
-      flex-shrink: 0;
-      width: 20px;
-      height: 20px;
-      border: 2px solid #cbd5e1;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      margin-top: 1px;
-    }
-
-    .kl-quiz__radio-dot::after {
-      content: '';
-      width: 10px;
-      height: 10px;
-      background: var(--kl-primary);
-      border-radius: 50%;
-      transform: scale(0);
-      transition: transform 0.2s ease;
-    }
-
-    .kl-quiz__option input:checked + label .kl-quiz__radio-dot {
-      border-color: var(--kl-primary);
-    }
-
-    .kl-quiz__option input:checked + label .kl-quiz__radio-dot::after {
-      transform: scale(1);
-    }
-
-    /* Correct / Wrong states */
-    .kl-quiz__option.is-correct input + label {
-      border-color: var(--kl-success) !important;
-      background: var(--kl-success-light) !important;
-    }
-    .kl-quiz__option.is-correct .kl-quiz__radio-dot {
-      border-color: var(--kl-success) !important;
-    }
-    .kl-quiz__option.is-correct .kl-quiz__radio-dot::after {
-      background: var(--kl-success) !important;
-    }
-
-    .kl-quiz__option.is-wrong input + label {
-      border-color: var(--kl-error) !important;
-      background: var(--kl-error-light) !important;
-    }
-    .kl-quiz__option.is-wrong .kl-quiz__radio-dot {
-      border-color: var(--kl-error) !important;
-    }
-    .kl-quiz__option.is-wrong .kl-quiz__radio-dot::after {
-      background: var(--kl-error) !important;
-    }
-
-    .kl-quiz__option-icon {
-      margin-left: auto;
-      flex-shrink: 0;
-      font-size: 1.1rem;
-      line-height: 1.4;
-    }
-
-    .kl-quiz__actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .kl-quiz__btn {
-      padding: 12px 28px;
-      border-radius: var(--kl-radius-sm);
-      border: none;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .kl-quiz__btn--primary {
-      background: var(--kl-primary);
-      color: white;
-    }
-
-    .kl-quiz__btn--primary:hover:not(:disabled) {
-      background: #2563eb;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-    .kl-quiz__btn--primary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .kl-quiz__btn--secondary {
-      background: var(--kl-surface);
-      color: var(--kl-text);
-      border: 1px solid var(--kl-border);
-    }
-
-    .kl-quiz__btn--secondary:hover {
-      background: #e2e8f0;
-    }
-
-    .kl-quiz__explain {
-      margin-top: 20px;
-      padding: 18px;
-      background: var(--kl-success-light);
-      border: 1px solid #a7f3d0;
-      border-radius: var(--kl-radius-sm);
-      font-size: 0.9rem;
-      line-height: 1.7;
-      color: #065f46;
-      display: none;
-    }
-
-    .kl-quiz__explain.visible {
-      display: block;
-      animation: kl-fadein 0.3s ease;
-    }
-
-    .kl-quiz__explain-title {
-      font-weight: 700;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Score Card */
-    .kl-quiz__score-card {
-      text-align: center;
-      padding: 40px 20px;
-      display: none;
-    }
-
-    .kl-quiz__score-card.visible {
-      display: block;
-      animation: kl-fadein 0.4s ease;
-    }
-
-    .kl-quiz__score-circle {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-    }
-
-    .kl-quiz__score-circle.perfect {
-      background: var(--kl-success-light);
-      color: var(--kl-success);
-      border: 3px solid var(--kl-success);
-    }
-
-    .kl-quiz__score-circle.partial {
-      background: #fffbeb;
-      color: #d97706;
-      border: 3px solid #fbbf24;
-    }
-
-    .kl-quiz__score-label {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-
-    @keyframes kl-fadein {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .kl-quiz__footer {
-      margin-top: 32px;
-      padding-top: 16px;
-      border-top: 1px solid var(--kl-border);
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--kl-text-secondary);
-    }
-  </style>
-
-  <div class="kl-quiz__header">
-    <h2 class="kl-quiz__title">正弦函数 y = A·sin(ωx + φ) 互动探索</h2>
-    <p class="kl-quiz__subtitle">调节参数，观察波形变化；完成测验，检验你的理解</p>
+<div class="kl-card"><section class="kl-block kl-interactivedemo" data-block-id="sine_period_relation">
+  <div class="kl-id-controls">
+    <label class="kl-id-ctl"><span>角频率 ω</span><input type="range" data-ctl="omega" data-kind="slider" min="0.0" max="10.0" step="any" value="5.0"><output data-val="omega"></output></label>
   </div>
-
-  <!-- Chart 1: Amplitude A -->
-  <div class="kl-quiz__chart-section">
-    <h3 class="kl-quiz__chart-title"><span>1</span> 振幅 A 的作用</h3>
-    <div class="kl-quiz__canvas-wrap">
-      <div class="kl-quiz__skeleton" id="skel-amp">加载图表中...</div>
-      <canvas id="chart-amp"></canvas>
-    </div>
-    <div class="kl-quiz__slider-row">
-      <span>A =</span>
-      <input type="range" id="slider-amp" min="0.5" max="4" step="0.1" value="1">
-      <span class="kl-quiz__slider-val" id="val-amp">1.0</span>
-    </div>
+  <div class="kl-id-outputs">
+    <div class="kl-id-out"><span>周期 T = 2π / ω</span><strong data-out="T">—</strong></div>
   </div>
-
-  <!-- Chart 2: Angular Frequency ω & Period -->
-  <div class="kl-quiz__chart-section">
-    <h3 class="kl-quiz__chart-title"><span>2</span> 角频率 ω 与周期</h3>
-    <div class="kl-quiz__canvas-wrap">
-      <div class="kl-quiz__skeleton" id="skel-freq">加载图表中...</div>
-      <canvas id="chart-freq"></canvas>
-    </div>
-    <div class="kl-quiz__slider-row">
-      <span>ω =</span>
-      <input type="range" id="slider-freq" min="0.5" max="5" step="0.1" value="1">
-      <span class="kl-quiz__slider-val" id="val-freq">1.0</span>
-    </div>
-    <div class="kl-quiz__slider-row" style="margin-top:6px; font-size:0.8rem; color: var(--kl-text-secondary);">
-      周期 T = 2π/ω = <strong id="val-period" style="color:var(--kl-primary);">6.28</strong>
-    </div>
-  </div>
-
-  <!-- Chart 3: Phase φ & Shift -->
-  <div class="kl-quiz__chart-section">
-    <h3 class="kl-quiz__chart-title"><span>3</span> 初相 φ 与平移</h3>
-    <div class="kl-quiz__canvas-wrap">
-      <div class="kl-quiz__skeleton" id="skel-phase">加载图表中...</div>
-      <canvas id="chart-phase"></canvas>
-    </div>
-    <div class="kl-quiz__slider-row">
-      <span>φ =</span>
-      <input type="range" id="slider-phase" min="-3.14" max="3.14" step="0.01" value="0">
-      <span class="kl-quiz__slider-val" id="val-phase">0.00</span>
-    </div>
-    <div class="kl-quiz__slider-row" style="margin-top:6px; font-size:0.8rem; color: var(--kl-text-secondary);">
-      水平平移 = −φ/ω = <strong id="val-shift" style="color:var(--kl-primary);">0.00</strong>（正数→右，负数→左）
-    </div>
-  </div>
-
-  <!-- Quiz -->
-  <div class="kl-quiz__question-card" id="quiz-card">
-    <div class="kl-quiz__progress">
-      <div class="kl-quiz__progress-bar"><div class="kl-quiz__progress-fill" id="progress-fill" style="width:0%"></div></div>
-      <div class="kl-quiz__progress-text" id="progress-text">0/1</div>
-    </div>
-
-    <div id="quiz-body">
-      <p class="kl-quiz__question-text">函数 y = 3sin(2x − π/4) 的图像，是由 y = sin(x) 的图像经过怎样的变换得到的？</p>
-      <ul class="kl-quiz__options" id="options-list">
-        <li class="kl-quiz__option">
-          <input type="radio" name="q1" id="q1o0" value="0">
-          <label for="q1o0">
-            <span class="kl-quiz__radio-dot"></span>
-            <span>振幅变为3，周期变为π，再向右平移π/8个单位</span>
-            <span class="kl-quiz__option-icon" id="icon-0"></span>
-          </label>
-        </li>
-        <li class="kl-quiz__option">
-          <input type="radio" name="q1" id="q1o1" value="1">
-          <label for="q1o1">
-            <span class="kl-quiz__radio-dot"></span>
-            <span>振幅变为3，周期变为π，再向左平移π/4个单位</span>
-            <span class="kl-quiz__option-icon" id="icon-1"></span>
-          </label>
-        </li>
-        <li class="kl-quiz__option">
-          <input type="radio" name="q1" id="q1o2" value="2">
-          <label for="q1o2">
-            <span class="kl-quiz__radio-dot"></span>
-            <span>振幅变为3，周期变为4π，再向右平移π/8个单位</span>
-            <span class="kl-quiz__option-icon" id="icon-2"></span>
-          </label>
-        </li>
-        <li class="kl-quiz__option">
-          <input type="radio" name="q1" id="q1o3" value="3">
-          <label for="q1o3">
-            <span class="kl-quiz__radio-dot"></span>
-            <span>振幅变为3，周期变为2，再向左平移π/4个单位</span>
-            <span class="kl-quiz__option-icon" id="icon-3"></span>
-          </label>
-        </li>
-      </ul>
-
-      <div class="kl-quiz__actions">
-        <button class="kl-quiz__btn kl-quiz__btn--primary" id="btn-submit" disabled>提交答案</button>
-      </div>
-
-      <div class="kl-quiz__explain" id="explain-box">
-        <div class="kl-quiz__explain-title">💡 解析</div>
-        <div id="explain-text"></div>
-      </div>
-    </div>
-
-    <div class="kl-quiz__score-card" id="score-card">
-      <div class="kl-quiz__score-circle" id="score-circle">1/1</div>
-      <div class="kl-quiz__score-label" id="score-label">完美通过！</div>
-      <button class="kl-quiz__btn kl-quiz__btn--secondary" id="btn-retry">重新挑战</button>
-    </div>
-  </div>
-
-  <div class="kl-quiz__footer">Generated by Knowling</div>
-
+  <p class="kl-id-explain">拖动滑块改变角频率 ω，观察周期 T 的数值变化。ω 越大，T 越小，两者成反比。</p>
   <script>
   (function() {
-    /* ========== State ========== */
-    const quizState = {
-      submitted: false,
-      selected: -1,
-      correctAnswer: 0,
-      explain: "A=3 决定振幅变为3；ω=2 决定周期 T=2π/2=π；φ=−π/4，根据平移法则，平移量为 −φ/ω = −(−π/4)/2 = π/8，正数表示向右平移 π/8 个单位。"
-    };
-
-    /* ========== Chart Drawing ========== */
-    const DPR = window.devicePixelRatio || 1;
-
-    function setupCanvas(canvas) {
-      const rect = canvas.parentElement.getBoundingClientRect();
-      canvas.width = rect.width * DPR;
-      canvas.height = rect.height * DPR;
-      const ctx = canvas.getContext('2d');
-      ctx.scale(DPR, DPR);
-      return { ctx, w: rect.width, h: rect.height };
-    }
-
-    function drawChart(canvasId, skeletonId, params) {
-      const canvas = document.getElementById(canvasId);
-      const skeleton = document.getElementById(skeletonId);
-      const { ctx, w, h } = setupCanvas(canvas);
-
-      // Hide skeleton
-      if (skeleton) skeleton.classList.add('hidden');
-
-      const pad = { top: 20, right: 20, bottom: 30, left: 45 };
-      const plotW = w - pad.left - pad.right;
-      const plotH = h - pad.top - pad.bottom;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // Ranges
-      const xMin = -2 * Math.PI, xMax = 2 * Math.PI;
-      const yMin = -4.5, yMax = 4.5;
-      const xScale = plotW / (xMax - xMin);
-      const yScale = plotH / (yMax - yMin);
-
-      function toCanvasX(x) { return pad.left + (x - xMin) * xScale; }
-      function toCanvasY(y) { return pad.top + (yMax - y) * yScale; }
-
-      // Grid
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 1;
-      // Vertical grid at π intervals
-      for (let xv = -2 * Math.PI; xv <= 2 * Math.PI; xv += Math.PI) {
-        const cx = toCanvasX(xv);
-        ctx.beginPath(); ctx.moveTo(cx, pad.top); ctx.lineTo(cx, pad.top + plotH); ctx.stroke();
-      }
-      // Horizontal grid at integer y
-      for (let yv = Math.ceil(yMin); yv <= Math.floor(yMax); yv++) {
-        const cy = toCanvasY(yv);
-        ctx.beginPath(); ctx.moveTo(pad.left, cy); ctx.lineTo(pad.left + plotW, cy); ctx.stroke();
-      }
-
-      // Axes
-      ctx.strokeStyle = '#94a3b8';
-      ctx.lineWidth = 1.5;
-      // X axis (y=0)
-      const y0 = toCanvasY(0);
-      ctx.beginPath(); ctx.moveTo(pad.left, y0); ctx.lineTo(pad.left + plotW, y0); ctx.stroke();
-      // Y axis (x=0)
-      const x0 = toCanvasX(0);
-      ctx.beginPath(); ctx.moveTo(x0, pad.top); ctx.lineTo(x0, pad.top + plotH); ctx.stroke();
-
-      // Axis labels
-      ctx.fillStyle = '#64748b';
-      ctx.font = '11px -apple-system, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      const piLabels = {'-6.283':'-2π', '-3.142':'-π', '0':'0', '3.142':'π', '6.283':'2π'};
-      for (let xv = -2 * Math.PI; xv <= 2 * Math.PI; xv += Math.PI) {
-        const key = xv.toFixed(3);
-        const label = piLabels[key] || '';
-        if (label) ctx.fillText(label, toCanvasX(xv), pad.top + plotH + 6);
-      }
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      for (let yv = -4; yv <= 4; yv += 2) {
-        if (yv === 0) continue;
-        ctx.fillText(yv, pad.left - 8, toCanvasY(yv));
-      }
-
-      // Draw base sin(x) in gray dashed
-      ctx.save();
-      ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = '#94a3b8';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      for (let px = 0; px <= plotW; px++) {
-        const x = xMin + px / xScale;
-        const y = Math.sin(x);
-        const cx = pad.left + px;
-        const cy = toCanvasY(y);
-        px === 0 ? ctx.moveTo(cx, cy) : ctx.lineTo(cx, cy);
-      }
-      ctx.stroke();
-      ctx.restore();
-
-      // Draw transformed wave
-      const { A, omega, phi } = params;
-      ctx.strokeStyle = '#3b82f6';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      for (let px = 0; px <= plotW; px++) {
-        const x = xMin + px / xScale;
-        const y = A * Math.sin(omega * x + phi);
-        const cx = pad.left + px;
-        const cy = toCanvasY(y);
-        px === 0 ? ctx.moveTo(cx, cy) : ctx.lineTo(cx, cy);
-      }
-      ctx.stroke();
-
-      // Amplitude annotation (if A != 1)
-      if (Math.abs(A - 1) > 0.05) {
-        ctx.save();
-        ctx.setLineDash([3, 3]);
-        ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 1;
-        const annotX = toCanvasX(0);
-        ctx.beginPath(); ctx.moveTo(annotX, y0); ctx.lineTo(annotX, toCanvasY(A)); ctx.stroke();
-        ctx.restore();
-        ctx.fillStyle = '#d97706';
-        ctx.font = 'bold 11px -apple-system, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('A=' + A.toFixed(1), annotX + 4, toCanvasY(A / 2));
-      }
-    }
-
-    /* ========== Chart Instances ========== */
-    let ampA = 1, freqOmega = 1, phasePhi = 0;
-
-    function redrawAmp() {
-      drawChart('chart-amp', 'skel-amp', { A: ampA, omega: 1, phi: 0 });
-    }
-    function redrawFreq() {
-      drawChart('chart-freq', 'skel-freq', { A: 1, omega: freqOmega, phi: 0 });
-    }
-    function redrawPhase() {
-      drawChart('chart-phase', 'skel-phase', { A: 1, omega: 1, phi: phasePhi });
-    }
-
-    // Sliders
-    const sliderAmp = document.getElementById('slider-amp');
-    const sliderFreq = document.getElementById('slider-freq');
-    const sliderPhase = document.getElementById('slider-phase');
-
-    sliderAmp.addEventListener('input', function() {
-      ampA = parseFloat(this.value);
-      document.getElementById('val-amp').textContent = ampA.toFixed(1);
-      redrawAmp();
-    });
-
-    sliderFreq.addEventListener('input', function() {
-      freqOmega = parseFloat(this.value);
-      document.getElementById('val-freq').textContent = freqOmega.toFixed(1);
-      const T = 2 * Math.PI / freqOmega;
-      document.getElementById('val-period').textContent = T.toFixed(2);
-      redrawFreq();
-    });
-
-    sliderPhase.addEventListener('input', function() {
-      phasePhi = parseFloat(this.value);
-      document.getElementById('val-phase').textContent = phasePhi.toFixed(2);
-      const shift = -phasePhi; // since ω=1 for this chart
-      document.getElementById('val-shift').textContent = shift.toFixed(2);
-      redrawPhase();
-    });
-
-    // Initial draw with slight delay to show skeleton
-    setTimeout(function() {
-      redrawAmp();
-      redrawFreq();
-      redrawPhase();
-    }, 400);
-
-    // Resize handling
-    let resizeTimer;
-    window.addEventListener('resize', function() {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function() {
-        redrawAmp();
-        redrawFreq();
-        redrawPhase();
-      }, 150);
-    });
-
-    /* ========== Quiz Logic ========== */
-    const options = document.querySelectorAll('input[name="q1"]');
-    const btnSubmit = document.getElementById('btn-submit');
-    const explainBox = document.getElementById('explain-box');
-    const explainText = document.getElementById('explain-text');
-    const quizBody = document.getElementById('quiz-body');
-    const scoreCard = document.getElementById('score-card');
-    const progressFill = document.getElementById('progress-fill');
-    const progressText = document.getElementById('progress-text');
-
-    // Enable submit when an option is selected
-    options.forEach(function(opt) {
-      opt.addEventListener('change', function() {
-        if (!quizState.submitted) {
-          quizState.selected = parseInt(this.value);
-          btnSubmit.disabled = false;
-        }
+    var root = document.querySelector('[data-block-id="sine_period_relation"]');
+    var outputs = [{"name": "T", "label": "周期 T = 2π / ω", "expr": "2*Math.PI/omega"}];
+    var ctls = Array.prototype.slice.call(root.querySelectorAll('[data-ctl]'));
+    function readVals() {
+      var v = {};
+      ctls.forEach(function(el) {
+        var k = el.dataset.kind, name = el.dataset.ctl;
+        if (k === 'checkbox') v[name] = el.checked;
+        else if (k === 'slider' || k === 'number') v[name] = parseFloat(el.value);
+        else v[name] = el.value;
+        var val = root.querySelector('[data-val="' + name + '"]');
+        if (val) val.textContent = v[name];
       });
-    });
-
-    btnSubmit.addEventListener('click', function() {
-      if (quizState.submitted || quizState.selected < 0) return;
-      quizState.submitted = true;
-
-      // Disable all options
-      options.forEach(function(opt) { opt.disabled = true; });
-
-      const isCorrect = quizState.selected === quizState.correctAnswer;
-
-      // Mark correct answer
-      document.querySelector('.kl-quiz__option:nth-child(' + (quizState.correctAnswer + 1) + ')')
-        .classList.add('is-correct');
-      document.getElementById('icon-' + quizState.correctAnswer).textContent = '✓';
-
-      // If wrong, mark selected
-      if (!isCorrect) {
-        document.querySelector('.kl-quiz__option:nth-child(' + (quizState.selected + 1) + ')')
-          .classList.add('is-wrong');
-        document.getElementById('icon-' + quizState.selected).textContent = '✗';
-      }
-
-      // Show explanation
-      explainText.textContent = quizState.explain;
-      explainBox.classList.add('visible');
-
-      // Update progress
-      progressFill.style.width = '100%';
-      progressText.textContent = '1/1';
-
-      // Show score card after a delay
-      setTimeout(function() {
-        quizBody.style.display = 'none';
-        const scoreCircle = document.getElementById('score-circle');
-        const scoreLabel = document.getElementById('score-label');
-
-        if (isCorrect) {
-          scoreCircle.textContent = '1/1';
-          scoreCircle.className = 'kl-quiz__score-circle perfect';
-          scoreLabel.textContent = '完美通过！你对 A、ω、φ 的理解非常准确。';
-        } else {
-          scoreCircle.textContent = '0/1';
-          scoreCircle.className = 'kl-quiz__score-circle partial';
-          scoreLabel.textContent = '再接再厉！回顾上方的互动图表和解析吧。';
-        }
-        scoreCard.classList.add('visible');
-      }, 1800);
-
-      btnSubmit.disabled = true;
-    });
-
-    // Retry
-    document.getElementById('btn-retry').addEventListener('click', function() {
-      quizState.submitted = false;
-      quizState.selected = -1;
-
-      options.forEach(function(opt) {
-        opt.disabled = false;
-        opt.checked = false;
+      return v;
+    }
+    function fmt(n) {
+      return (typeof n === 'number' && isFinite(n)) ? (Math.round(n * 1000) / 1000) : '—';
+    }
+    function update() {
+      var vals = readVals();
+      var keys = Object.keys(vals);
+      outputs.forEach(function(o) {
+        var out = root.querySelector('[data-out="' + o.name + '"]');
+        try {
+          var fn = new Function(keys.join(','), 'with(Math){return (' + o.expr + ');}');
+          out.textContent = fmt(fn.apply(null, keys.map(function(k) { return vals[k]; })));
+        } catch (e) { out.textContent = '—'; }
       });
-
-      document.querySelectorAll('.kl-quiz__option').forEach(function(li) {
-        li.classList.remove('is-correct', 'is-wrong');
-      });
-      for (let i = 0; i < 4; i++) {
-        document.getElementById('icon-' + i).textContent = '';
-      }
-
-      explainBox.classList.remove('visible');
-      btnSubmit.disabled = true;
-      progressFill.style.width = '0%';
-      progressText.textContent = '0/1';
-
-      scoreCard.classList.remove('visible');
-      quizBody.style.display = 'block';
+    }
+    ctls.forEach(function(el) {
+      el.addEventListener('input', update);
+      el.addEventListener('change', update);
     });
+    update();
+  })();
+  </script>
+</section></div>
+<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="sine_quiz">
+  <p class="kl-quiz-title">参数与图像变换测试</p>
+  <div class="kl-quiz-head"><span class="kl-quiz-progress"></span></div>
+  <p class="kl-quiz-q"></p>
+  <div class="kl-quiz-opts"></div>
+  <p class="kl-quiz-feedback" hidden></p>
+  <div class="kl-quiz-actions">
+    <button class="kl-quiz-submit" type="button">提交</button>
+    <button class="kl-quiz-next" type="button" hidden></button>
+  </div>
+  <div class="kl-quiz-score" hidden></div>
+  <script>
+  (function() {
+    var root = document.querySelector('[data-block-id="sine_quiz"]');
+    var questions = [{"type": "single", "prompt": "函数 y = 3sin(2x + π/4) 的振幅和周期分别是多少？", "options": ["振幅为2，周期为 π/4", "振幅为3，周期为 π", "振幅为3，周期为 2π", "振幅为2，周期为 π"], "answer": 1, "explain": "振幅 A=3；角频率 ω=2，周期 T=2π/ω=2π/2=π。"}, {"type": "single", "prompt": "将 y = sin(x) 的图像变为 y = sin(x + π/3)，图像应如何平移？", "options": ["向左平移 π/3 个单位", "向右平移 π/3 个单位", "向左平移 π/6 个单位", "向右平移 π/6 个单位"], "answer": 0, "explain": "φ = π/3 > 0，遵循'左加右减'原则，自变量加上一个正数，图像向左平移 π/3 个单位。"}, {"type": "single", "prompt": "角频率 ω 越大，正弦函数的周期 T 也越大。", "options": ["正确", "错误"], "answer": 1, "explain": "错误。周期 T = 2π/ω，ω 与 T 成反比。ω 越大，周期 T 越小，图像越密集。"}];
+    var many = questions.length > 1;
+    var idx = 0, score = 0, locked = false, selected = null;
+    var qBox = root.querySelector('.kl-quiz-q');
+    var optBox = root.querySelector('.kl-quiz-opts');
+    var fb = root.querySelector('.kl-quiz-feedback');
+    var submit = root.querySelector('.kl-quiz-submit');
+    var next = root.querySelector('.kl-quiz-next');
+    var prog = root.querySelector('.kl-quiz-progress');
+    var scoreBox = root.querySelector('.kl-quiz-score');
 
+    function render() {
+      var q = questions[idx];
+      locked = false; selected = q.type === 'multi' ? {} : null;
+      qBox.textContent = q.prompt;
+      fb.hidden = true; fb.className = 'kl-quiz-feedback';
+      next.hidden = true; submit.hidden = false; submit.disabled = false;
+      scoreBox.hidden = true;
+      prog.textContent = many ? (idx + 1) + ' / ' + questions.length : '';
+      optBox.innerHTML = '';
+      if (q.type === 'fill') {
+        var inp = document.createElement('input');
+        inp.type = 'text'; inp.className = 'kl-quiz-input'; inp.placeholder = '输入答案…';
+        inp.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !locked) judge(); });
+        optBox.appendChild(inp);
+      } else {
+        q.options.forEach(function(o, i) {
+          var btn = document.createElement('button');
+          btn.type = 'button'; btn.className = 'kl-quiz-opt'; btn.dataset.i = i; btn.textContent = o;
+          btn.addEventListener('click', function() {
+            if (locked) return;
+            if (q.type === 'multi') {
+              if (selected[i]) { delete selected[i]; btn.classList.remove('is-selected'); }
+              else { selected[i] = 1; btn.classList.add('is-selected'); }
+            } else {
+              selected = i;
+              optBox.querySelectorAll('.kl-quiz-opt').forEach(function(b) { b.classList.remove('is-selected'); });
+              btn.classList.add('is-selected');
+            }
+          });
+          optBox.appendChild(btn);
+        });
+      }
+    }
+
+    function judge() {
+      var q = questions[idx], correct = false;
+      optBox.querySelectorAll('.kl-quiz-opt').forEach(function(b) { b.classList.remove('is-selected'); });
+      if (q.type === 'fill') {
+        var val = (optBox.querySelector('.kl-quiz-input').value || '').trim().toLowerCase();
+        var accept = [String(q.answer)].concat(q.accept || []).map(function(s) { return String(s).trim().toLowerCase(); });
+        correct = accept.indexOf(val) >= 0;
+      } else if (q.type === 'multi') {
+        var sel = Object.keys(selected).map(Number).sort(function(a, b) { return a - b; });
+        var ans = (q.answer || []).slice();
+        correct = sel.length === ans.length && sel.every(function(v, k) { return v === ans[k]; });
+        optBox.querySelectorAll('.kl-quiz-opt').forEach(function(b) {
+          var i = parseInt(b.dataset.i, 10);
+          if (ans.indexOf(i) >= 0) b.classList.add('is-correct');
+          else if (selected[i]) b.classList.add('is-wrong');
+        });
+      } else {
+        correct = selected === q.answer;
+        optBox.querySelectorAll('.kl-quiz-opt').forEach(function(b) {
+          var i = parseInt(b.dataset.i, 10);
+          if (i === q.answer) b.classList.add('is-correct');
+          else if (i === selected) b.classList.add('is-wrong');
+        });
+      }
+      locked = true; submit.disabled = true;
+      if (correct) score++;
+      fb.hidden = false;
+      fb.className = 'kl-quiz-feedback ' + (correct ? 'is-correct' : 'is-wrong');
+      fb.textContent = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
+      if (many) { next.hidden = false; next.textContent = idx < questions.length - 1 ? '下一题' : '查看成绩'; }
+    }
+
+    function showScore() {
+      optBox.innerHTML = ''; qBox.textContent = ''; fb.hidden = true;
+      submit.hidden = true; next.hidden = true; prog.textContent = '';
+      scoreBox.hidden = false;
+      scoreBox.innerHTML = '成绩 ' + score + ' / ' + questions.length +
+        ' <button type="button" class="kl-quiz-redo">重做</button>';
+      scoreBox.querySelector('.kl-quiz-redo').addEventListener('click', function() {
+        idx = 0; score = 0; render();
+      });
+    }
+
+    submit.addEventListener('click', judge);
+    next.addEventListener('click', function() {
+      if (idx < questions.length - 1) { idx++; render(); } else showScore();
+    });
+    render();
   })();
   </script>
 </section></div>

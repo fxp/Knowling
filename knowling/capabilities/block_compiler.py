@@ -1,8 +1,14 @@
 """Block compiler (design §5 ④, §10.2) — BlockSpec → self-contained HTML fragment.
 
-Per the chosen P0 strategy, the LLM directly generates block HTML/JS. When the
-provider is the offline mock (or when generated output is unusable), we fall
-back to the block's deterministic template so the loop always closes.
+Two modes:
+  * ``template`` (default): render via the block's deterministic template using
+    the LLM-*planned* content_spec. Every block shares the .kl-* design system,
+    so a component looks uniform and blocks are reliable — the consistency path.
+  * ``codegen``: the LLM writes bespoke HTML/JS per block (more variety, but
+    inconsistent style + occasional breakage). For novel/unsupported blocks.
+
+The intelligence lives in planning (what blocks, what content); presentation is
+unified by the templates. The offline mock always renders via templates.
 """
 
 from __future__ import annotations
@@ -65,32 +71,30 @@ def compile(
     grounding: Optional[List[Any]],
     provider: LLMProvider,
     suggestions: Optional[List[str]] = None,
+    mode: str = "template",
 ) -> Tuple[str, ModelCall]:
+    """Compile a BlockSpec → self-contained HTML fragment.
+
+    mode="template" (default): render via the block's deterministic template
+      using the (LLM-planned) content_spec. This is the consistency path — every
+      block shares the .kl-* design system, so a component looks uniform and the
+      blocks are reliable. No per-block model call.
+    mode="codegen": the LLM writes bespoke HTML/JS for the block (more visual
+      variety, but inconsistent style + occasional breakage). For novel blocks.
+    """
     block_dict = block.to_dict()
 
     # validate structured content up front (raises with a clear message)
     blocks.validate(block_dict)
 
-    # mock path: deterministic template, no model round-trip
-    if provider.name == "mock":
+    # template path (default) — consistent styling, deterministic, no LLM call.
+    # Mock provider always lands here regardless of mode.
+    if mode != "codegen" or provider.name == "mock":
         html = blocks.render_block_template(block_dict)
-        comp = provider.complete(
-            [{"role": "user", "content": "compile"}],
-            task="compile_block",
-            meta={"block": block_dict, "kp": kp.to_dict()},
-        )
-        call = ModelCall(
-            stage="compile",
-            provider=comp.provider,
-            model=comp.model,
-            prompt_tokens=comp.prompt_tokens,
-            completion_tokens=comp.completion_tokens,
-            cost_usd=comp.cost_usd,
-        )
-        # comp.text already IS the template (mock._compile_block), prefer it
-        return (comp.text or html), call
+        call = ModelCall(stage="compile", provider="template", model="-", cost_usd=0.0)
+        return html, call
 
-    # real provider: LLM generates the block code
+    # codegen path: LLM generates the block code
     hint = blocks.compile_prompt(block_dict, kp.to_dict())
     if grounding:
         from .retriever import format_grounding, GroundingChunk
