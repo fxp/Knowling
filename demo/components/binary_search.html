@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>欧姆定律 V = IR · Knowling</title>
+<title>二分查找 Binary Search · Knowling</title>
 <style>
 :root {
   --kl-bg: #ffffff; --kl-fg: #1f2328; --kl-muted: #57606a;
@@ -150,39 +150,70 @@ button:disabled { opacity: .45; cursor: default; }
 <body>
 <main class="kl-doc">
   <header class="kl-header">
-    <h1>欧姆定律 V = IR</h1>
-    <p class="kl-hook">为什么「欧姆定律 V = IR」会这样？先动手试试。</p>
+    <h1>二分查找 Binary Search</h1>
+    <p class="kl-hook">如何在10亿个有序数字中，只用不到30次猜测就找到目标？体验一把&#x27;削去一半&#x27;的降维打击力量。</p>
   </header>
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
-<div class="kl-card"><section class="kl-block kl-text" data-block-id="b1-intro">
-<h2>欧姆定律 V = IR</h2>
-<p>电压、电流、电阻三者的关系</p>
-<p><strong>学完后你能：</strong> 理解 V、I、R 的关系；能计算其一</p>
+<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_1_hook">
+  <span class="kl-callout-icon">🛈</span>
+  <div class="kl-callout-body"><p>💡 <strong>猜数游戏</strong>：我在 1 到 1,000,000 之间想了一个数，你每次猜一个数，我只告诉你&#x27;大了&#x27;或&#x27;小了&#x27;。最少几次能保证猜中？</p>
+<p>答案是 <strong>20 次</strong>！这就是对半排除的威力——每次排除一半可能性，2 的 20 次方已经超过 100 万。二分查找就是这个过程的严格实现。</p></div>
+</aside></div>
+<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_2_step">
+  <div class="kl-st-state"></div>
+  <p class="kl-st-explain"></p>
+  <div class="kl-st-nav">
+    <button class="kl-st-prev" type="button">‹ 上一步</button>
+    <span class="kl-st-progress"></span>
+    <button class="kl-st-next" type="button">下一步 ›</button>
+  </div>
+  <script>
+  (function() {
+    var root = document.querySelector('[data-block-id="bk_2_step"]');
+    var steps = [{"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=0, high=9, mid=4", "explain": "初始状态：low 指向首元素(0)，high 指向尾元素(9)。计算 mid = floor((low + high) / 2) = 4，此时 arr[mid] = 16。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=9, mid=4", "explain": "因为 16 < 23，目标在右半部分。16 及其左侧全部排除，更新 low = mid + 1 = 5。注意 mid 位置已被排除，不能写 low = mid。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=9, mid=7", "explain": "重新计算 mid = floor((5 + 9) / 2) = 7，此时 arr[mid] = 56。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=6, mid=7", "explain": "因为 56 > 23，目标在左半部分。56 及其右侧全部排除，更新 high = mid - 1 = 6。注意 mid 位置已被排除，不能写 high = mid。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=6, mid=5", "explain": "重新计算 mid = floor((5 + 6) / 2) = 5，此时 arr[mid] = 23。"}, {"state": "array=[2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target=23, low=5, high=6, mid=5, found=true", "explain": "arr[mid] == target，查找成功！返回索引 5。只用了 3 次比较，区间从 10 缩减到了 1。"}];
+    var i = 0;
+    var stateEl = root.querySelector('.kl-st-state');
+    var explainEl = root.querySelector('.kl-st-explain');
+    var prog = root.querySelector('.kl-st-progress');
+    var prev = root.querySelector('.kl-st-prev');
+    var next = root.querySelector('.kl-st-next');
+    function render() {
+      stateEl.textContent = steps[i].state;
+      explainEl.textContent = steps[i].explain || '';
+      prog.textContent = (i + 1) + ' / ' + steps.length;
+      prev.disabled = i === 0;
+      next.disabled = i === steps.length - 1;
+    }
+    prev.addEventListener('click', function() { if (i > 0) { i--; render(); } });
+    next.addEventListener('click', function() { if (i < steps.length - 1) { i++; render(); } });
+    render();
+  })();
+  </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="b2-sim">
+<div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bk_3_param">
   <div class="kl-ps-controls">
   <label class="kl-ps-ctl">
-    <span class="kl-ps-name">输入 x</span>
-    <input type="range" data-param="x"
-           min="0" max="10" step="0.1"
-           value="2">
-    <output class="kl-ps-val" data-for="x"></output>
+    <span class="kl-ps-name">数组大小 N</span>
+    <input type="range" data-param="N"
+           min="1" max="1000000" step="1"
+           value="1000">
+    <output class="kl-ps-val" data-for="N"></output>
   </label>
   </div>
   <div class="kl-ps-outputs">
-  <div class="kl-ps-out"><span>输出 y = x²</span><strong data-out="y">—</strong></div>
+  <div class="kl-ps-out"><span>最大比较次数</span><strong data-out="max_steps">—</strong></div>
   </div>
   <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
-  <p class="kl-ps-explain">拖动 x，观察 y 如何变化——这就是该知识点的核心现象。</p>
+  <p class="kl-ps-explain">拖动滑块改变数组大小 N，观察最大比较次数（y轴）如何随 N（x轴）增长。即使 N 增长到 100 万，比较次数也仅为 20 次左右，这就是 O(log N) 的对数级威力。</p>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="b2-sim"]');
-    var params = [{"name": "x", "label": "输入 x", "min": 0, "max": 10, "step": 0.1, "default": 2}];
-    var sweep = {"name": "x", "min": 0.0, "max": 10.0};
-    var curves = [{"name": "y", "label": "输出 y = x²", "expr": "x * x"}];
-    var scalars = [{"name": "y", "label": "输出 y = x²", "expr": "x * x"}];
+    var root = document.querySelector('[data-block-id="bk_3_param"]');
+    var params = [{"name": "N", "label": "数组大小 N", "min": 1, "max": 1000000, "step": 1, "default": 1000}];
+    var sweep = {"name": "N", "min": 1.0, "max": 1000000.0};
+    var curves = [{"name": "max_steps", "label": "最大比较次数", "expr": "Math.ceil(Math.log2(Math.max(1, N)))"}];
+    var scalars = [{"name": "max_steps", "label": "最大比较次数", "expr": "Math.ceil(Math.log2(Math.max(1, N)))"}];
     var legacy = true;
     var sliders = {};
     params.forEach(function(p) { sliders[p.name] = root.querySelector('input[data-param="' + p.name + '"]'); });
@@ -265,8 +296,57 @@ button:disabled { opacity: .45; cursor: default; }
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="b3-quiz">
-  
+<div class="kl-card"><section class="kl-block kl-interactivedemo" data-block-id="bk_4_interact">
+  <div class="kl-id-controls">
+    <label class="kl-id-ctl"><span>目标值</span><input type="number" data-ctl="target" data-kind="number" min="0.0" max="10.0" step="any" value="5.0"><output data-val="target"></output></label>
+    <label class="kl-id-ctl"><span>边界更新规则</span><select data-ctl="boundary_rule" data-kind="select"><option value="low=mid+1, high=mid-1 (正确)">low=mid+1, high=mid-1 (正确)</option><option value="low=mid, high=mid (错误)">low=mid, high=mid (错误)</option></select></label>
+  </div>
+  <div class="kl-id-outputs">
+    <div class="kl-id-out"><span>所需步数</span><strong data-out="steps_needed">—</strong></div>
+    <div class="kl-id-out"><span>运行状态</span><strong data-out="status">—</strong></div>
+  </div>
+  <p class="kl-id-explain">在长度为10的数组 [2, 5, 8, 12, 16, 23, 38, 56, 72, 91] 中测试。选择正确的边界更新规则，步数是对数级；选择错误的规则（不跳过 mid），观察状态如何陷入死循环。</p>
+  <script>
+  (function() {
+    var root = document.querySelector('[data-block-id="bk_4_interact"]');
+    var outputs = [{"name": "steps_needed", "label": "所需步数", "expr": "boundary_rule === 'low=mid+1, high=mid-1 (正确)' ? Math.ceil(Math.log2(10)) : 999"}, {"name": "status", "label": "运行状态", "expr": "boundary_rule === 'low=mid+1, high=mid-1 (正确)' ? '成功找到' : '死循环溢出'"}];
+    var ctls = Array.prototype.slice.call(root.querySelectorAll('[data-ctl]'));
+    function readVals() {
+      var v = {};
+      ctls.forEach(function(el) {
+        var k = el.dataset.kind, name = el.dataset.ctl;
+        if (k === 'checkbox') v[name] = el.checked;
+        else if (k === 'slider' || k === 'number') v[name] = parseFloat(el.value);
+        else v[name] = el.value;
+        var val = root.querySelector('[data-val="' + name + '"]');
+        if (val) val.textContent = v[name];
+      });
+      return v;
+    }
+    function fmt(n) {
+      return (typeof n === 'number' && isFinite(n)) ? (Math.round(n * 1000) / 1000) : '—';
+    }
+    function update() {
+      var vals = readVals();
+      var keys = Object.keys(vals);
+      outputs.forEach(function(o) {
+        var out = root.querySelector('[data-out="' + o.name + '"]');
+        try {
+          var fn = new Function(keys.join(','), 'with(Math){return (' + o.expr + ');}');
+          out.textContent = fmt(fn.apply(null, keys.map(function(k) { return vals[k]; })));
+        } catch (e) { out.textContent = '—'; }
+      });
+    }
+    ctls.forEach(function(el) {
+      el.addEventListener('input', update);
+      el.addEventListener('change', update);
+    });
+    update();
+  })();
+  </script>
+</section></div>
+<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_5_quiz">
+  <p class="kl-quiz-title">二分查找核心概念检查</p>
   <div class="kl-quiz-head"><span class="kl-quiz-progress"></span></div>
   <p class="kl-quiz-q"></p>
   <div class="kl-quiz-opts"></div>
@@ -278,8 +358,8 @@ button:disabled { opacity: .45; cursor: default; }
   <div class="kl-quiz-score" hidden></div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="b3-quiz"]');
-    var questions = [{"type": "single", "prompt": "关于「欧姆定律 V = IR」，下列哪项正确？", "options": ["输出随输入变化", "输出恒定不变", "二者无关", "无法判断"], "answer": 0, "explain": "输出确实随输入而变化——这正是本知识点的中心现象。"}];
+    var root = document.querySelector('[data-block-id="bk_5_quiz"]');
+    var questions = [{"type": "single", "prompt": "当 arr[mid] < target 时，为什么更新 low = mid + 1 而不是 low = mid？", "options": ["因为 mid 位置已经被检查过，不可能等于 target", "因为数组是有序的，mid 及其左侧都小于 target", "为了防止整数溢出", "为了让循环跑得更快"], "answer": 1, "explain": "数组有序时，arr[mid] < target 意味着 mid 及左侧所有元素都小于 target，可以安全排除。如果只赋值 low = mid，区间未严格缩小，会导致死循环。"}, {"type": "single", "prompt": "二分查找可以应用于任何一维数组，无论其是否有序。", "options": ["正确", "错误"], "answer": 1, "explain": "二分查找的核心前提是'有序'。如果数组无序，你无法根据 arr[mid] 与 target 的大小关系来排除另一半，算法失效。"}];
     var many = questions.length > 1;
     var idx = 0, score = 0, locked = false, selected = null;
     var qBox = root.querySelector('.kl-quiz-q');
@@ -370,6 +450,42 @@ button:disabled { opacity: .45; cursor: default; }
     submit.addEventListener('click', judge);
     next.addEventListener('click', function() {
       if (idx < questions.length - 1) { idx++; render(); } else showScore();
+    });
+    render();
+  })();
+  </script>
+</section></div>
+<div class="kl-card"><section class="kl-block kl-flashcards" data-block-id="bk_6_summary">
+  <div class="kl-fc-card kl-fc-flip">
+    <div class="kl-fc-face kl-fc-front"></div>
+    <div class="kl-fc-face kl-fc-back"></div>
+  </div>
+  <div class="kl-fc-nav">
+    <button class="kl-fc-prev" type="button">上一张</button>
+    <span class="kl-fc-count"></span>
+    <button class="kl-fc-next" type="button">下一张</button>
+  </div>
+  <script>
+  (function() {
+    var root = document.querySelector('[data-block-id="bk_6_summary"]');
+    var cards = [{"front": "二分查找的前提条件是什么？", "back": "数组必须**有序**（升序或降序均可，但代码逻辑需对应）。"}, {"front": "如何计算中间索引 mid 以避免整数溢出？", "back": "使用 `low + Math.floor((high - low) / 2)`，而不是 `(low + high) / 2`，防止 low+high 超出整数最大值。"}, {"front": "循环的终止条件是什么？", "back": "当 `low > high` 时终止，说明搜索区间已缩至空集，目标不存在。"}];
+    var i = 0, flipped = false;
+    var card = root.querySelector('.kl-fc-card');
+    var front = root.querySelector('.kl-fc-front');
+    var back = root.querySelector('.kl-fc-back');
+    var count = root.querySelector('.kl-fc-count');
+    function render() {
+      front.textContent = cards[i].front;
+      back.textContent = cards[i].back;
+      card.classList.toggle('is-flipped', flipped);
+      count.textContent = (i + 1) + ' / ' + cards.length;
+    }
+    card.addEventListener('click', function() { flipped = !flipped; render(); });
+    root.querySelector('.kl-fc-prev').addEventListener('click', function() {
+      i = (i - 1 + cards.length) % cards.length; flipped = false; render();
+    });
+    root.querySelector('.kl-fc-next').addEventListener('click', function() {
+      i = (i + 1) % cards.length; flipped = false; render();
     });
     render();
   })();

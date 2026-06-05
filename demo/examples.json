@@ -1,0 +1,94 @@
+[
+  {
+    "title": "正弦函数 y = A·sin(ωx + φ)",
+    "file": "sine_function.html",
+    "source": "GLM-5",
+    "kp": "振幅A、角频率ω、相位φ 各自如何改变正弦波形",
+    "audience": "高一学生",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "step_through",
+      "interactive_demo",
+      "quiz"
+    ],
+    "qa": {
+      "render": 3.0,
+      "interact": 5.0,
+      "peda": 4.0,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": true
+  },
+  {
+    "title": "二次函数顶点式 y = a(x−h)² + k",
+    "file": "quadratic_vertex.html",
+    "source": "GLM-5",
+    "kp": "系数 a、顶点坐标 (h, k) 如何决定抛物线的形状与位置",
+    "audience": "初中生",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "interactive_demo",
+      "callout",
+      "quiz"
+    ],
+    "qa": {
+      "render": 2.0,
+      "interact": null,
+      "peda": null,
+      "passed": false
+    },
+    "status": "qa_failed",
+    "featured": false
+  },
+  {
+    "title": "二分查找 Binary Search",
+    "file": "binary_search.html",
+    "source": "GLM-5",
+    "kp": "在有序数组中通过不断对半缩小区间来定位目标值",
+    "audience": "编程初学者",
+    "blocks": [
+      "callout",
+      "step_through",
+      "param_sim",
+      "interactive_demo",
+      "quiz",
+      "flashcards"
+    ],
+    "qa": {
+      "render": 4.5,
+      "interact": 5.0,
+      "peda": 4.0,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": false
+  },
+  {
+    "title": "复利 A = P(1 + r)ⁿ",
+    "file": "compound_interest.html",
+    "source": "GLM-5",
+    "kp": "本金P、利率r、期数n 如何共同决定最终金额，以及复利与单利的差异",
+    "audience": "理财入门",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "interactive_demo",
+      "callout",
+      "quiz"
+    ],
+    "qa": {
+      "render": 4.8,
+      "interact": 5.0,
+      "peda": 3.5,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": false
+  }
+]
