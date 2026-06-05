@@ -44,6 +44,7 @@ python3 -m knowling.cli serve "链式法则" --objectives "能对复合函数求
 - 诉求示例：「太难了」「讲深点」「举个例子」「和导数是什么关系？」。
 - `knowling serve` 启动本地 Studio（key 留在服务端）：左侧卡片、右侧聊天 + 快捷诉求；发消息即重新生成、重跑质检、换卡。
 - 编程接口：`engine.refine_knowling(spec, kp, instruction, cfg) -> (new_knowling, summary)`。
+- **保真守卫（不跑题）**：改写后用 `fidelity` 检查卡片是否仍聚焦本知识点；若跑题（如「和X的关系」把卡片变成讲 X）→ 强化约束重试，仍跑题则回退到「只加澄清块、主体不动」。质检教学维也加入了「是否跑题」准则。Studio 会显示「· 已保持聚焦本知识点 ✓」。
 
 **输出模式**（仿 DeepTutor）：
 - `-f rich`（默认）：彩色人类可读进度。

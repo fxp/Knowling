@@ -3,6 +3,6 @@
 decompose / retriever / qa land in later phases.
 """
 
-from . import block_compiler, refine, retriever, spec_planner  # noqa: F401
+from . import block_compiler, fidelity, refine, retriever, spec_planner  # noqa: F401
 
-__all__ = ["spec_planner", "block_compiler", "retriever", "refine"]
+__all__ = ["spec_planner", "block_compiler", "retriever", "refine", "fidelity"]

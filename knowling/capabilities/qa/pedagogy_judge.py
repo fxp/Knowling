@@ -20,6 +20,7 @@ from .types import DimensionFeedback, QAConfig
 SYSTEM = "作为教学质量评审，锚定 Explorable Explanations 准则，对学习组件打分(0-5)并给可执行建议。"
 
 PROMPT = """对该学习组件打分(0-5)并给出可执行建议。锚定 Explorable Explanations 准则:
+- **是否始终聚焦在本知识点本身, 没有跑题到别的主题**(最重要)
 - 事实是否准确(对照依据材料, 标出任何幻觉)
 - 是否把读者注意力引导到中心现象: {central_phenomenon}
 - 是否澄清了这些误解: {misconceptions}

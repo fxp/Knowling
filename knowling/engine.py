@@ -13,7 +13,13 @@ from typing import Any, Callable, List, Optional
 
 from . import blocks as block_registry
 from .assembler import assemble_html
-from .capabilities import block_compiler, refine as refine_mod, retriever as retriever_mod, spec_planner
+from .capabilities import (
+    block_compiler,
+    fidelity as fidelity_mod,
+    refine as refine_mod,
+    retriever as retriever_mod,
+    spec_planner,
+)
 from .capabilities.qa import QAConfig, qa_loop
 from .providers import LLMProvider, get_provider
 from .schema import (
@@ -259,8 +265,28 @@ def refine_knowling(
     cfg = cfg or Config()
     emit("stage", {"stage": "refine", "status": "start", "instruction": instruction})
     provider = cfg.provider("plan")
+    judge = cfg.provider("judge")
+    trace = []
+
     new_spec, call, summary = refine_mod.refine(spec, kp, instruction, provider)
+    trace.append(call)
+
+    # fidelity guard: keep the card on its knowledge point (anti-drift)
+    fid = fidelity_mod.assess(new_spec, kp, judge)
+    emit("stage", {"stage": "fidelity", "status": "check", **fid.to_dict()})
+    if not fid.ok:
+        emit("stage", {"stage": "fidelity", "status": "reanchor", "reason": fid.reason})
+        reinforced = instruction + "（务必始终聚焦讲解本知识点本身，不要跑题成讲别的主题）"
+        spec2, call2, summary2 = refine_mod.refine(spec, kp, reinforced, provider)
+        trace.append(call2)
+        fid2 = fidelity_mod.assess(spec2, kp, judge)
+        if fid2.ok or fid2.score >= fid.score:
+            new_spec, summary, fid = spec2, summary2, fid2
+        if not fid.ok:
+            summary += "（已尽量保持聚焦本知识点）"
+
     emit("stage", {"stage": "refine", "status": "done", "summary": summary,
-                   "blocks": [b.type for b in new_spec.blocks]})
-    knowling = compile_spec(new_spec, kp, cfg, out_path=out_path, emit=emit, base_trace=[call])
+                   "fidelity": fid.to_dict(), "blocks": [b.type for b in new_spec.blocks]})
+    knowling = compile_spec(new_spec, kp, cfg, out_path=out_path, emit=emit, base_trace=trace)
+    knowling._fidelity = fid.to_dict()  # type: ignore[attr-defined]
     return knowling, summary

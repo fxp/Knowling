@@ -32,7 +32,13 @@ PROMPT = """这是当前知识点学习卡的蓝图(KnowlingSpec JSON):
 - 增删/重排 block(仍 ≤6, 优先 param_sim/step_through/interactive_demo 这类可交互块);
 - 若用户问"和某知识点的关系", 增加一个 text 或 callout block 说明这种关系;
 - 若"太难/太简单", 相应降低/提高难度并简化或加深内容。
-保持 knowledge_point_id 不变。content_spec 字段约定:
+
+⚠️ 最重要的约束 — 不要跑题:
+- 这张卡**始终在讲解「{title}」这一个知识点本身**, 不能变成讲别的知识点。
+- 用户问"和X的关系"时, 只用一小块说明关系, 主体仍然讲「{title}」, 不要把卡片改写成讲 X。
+- 保持 knowledge_point_id 不变, 学习目标不被稀释。
+
+content_spec 字段约定:
 - text {{"md"}}; callout {{"variant","md"}}; quiz {{"question","options","answer","explain"}};
 - param_sim {{"params":[{{name,label,min,max,step,default}}],"outputs":[{{name,label,expr}}],"x_range","explain"}}
   (画 y=f(x) 曲线时用自变量 x 作横轴, 滑块只放参数);
