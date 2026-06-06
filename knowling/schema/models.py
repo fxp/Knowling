@@ -21,7 +21,7 @@ BLOCK_TYPES = (
     "text", "callout", "figure", "code", "section",
     "quiz", "flashcards",
     "timeline", "concept_graph",
-    "interactive_demo", "param_sim", "step_through", "animation",
+    "interactive_demo", "param_sim", "step_through", "animation", "audio",
     "deep_dive", "user_note",
 )
 BlockType = str  # constrained at validation time, kept as str for JSON ease.

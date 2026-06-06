@@ -16,6 +16,7 @@ from typing import Any, Dict
 
 from . import (
     animation,
+    audio,
     callout,
     code,
     concept_graph,
@@ -48,6 +49,7 @@ REGISTRY = {
     "param_sim": param_sim,
     "step_through": step_through,
     "animation": animation,
+    "audio": audio,
     "deep_dive": deep_dive,
     "user_note": user_note,
 }

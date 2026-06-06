@@ -124,6 +124,17 @@ button:disabled { opacity: .45; cursor: default; }
 .kl-anim-stage { background: var(--kl-soft); border-radius: 8px; padding: 28px; text-align: center; min-height: 60px; font-size: 18px; }
 /* concept_graph */
 .kl-cg-canvas { width: 100%; height: auto; background: var(--kl-bg); border: 1px solid var(--kl-border); border-radius: 8px; cursor: pointer; }
+/* audio */
+.kl-au-canvas { width: 100%; height: auto; background: var(--kl-soft); border: 1px solid var(--kl-border); border-radius: 8px; }
+.kl-au-controls { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.kl-au-ctl { display: grid; grid-template-columns: 120px 1fr 64px; align-items: center; gap: 12px; }
+.kl-au-name { font-size: 14px; color: var(--kl-muted); }
+.kl-au-ctl input[type=range] { width: 100%; accent-color: var(--kl-accent); }
+.kl-au-val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.kl-au-bar { display: flex; align-items: center; gap: 14px; }
+.kl-audio-play { font: inherit; padding: 9px 20px; border: 1px solid var(--kl-accent); border-radius: 999px; background: var(--kl-accent); color: #fff; cursor: pointer; }
+.kl-audio-play.is-playing { background: var(--kl-accent-2); border-color: var(--kl-accent-2); }
+.kl-au-hint, .kl-au-explain { color: var(--kl-muted); font-size: 14px; }
 /* user_note */
 .kl-usernote-area { width: 100%; border: 1px solid var(--kl-border); border-radius: 8px; padding: 10px; font: inherit; resize: vertical; }
 /* deep_dive */

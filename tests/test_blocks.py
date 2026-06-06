@@ -26,6 +26,8 @@ SAMPLES = {
                   "outputs": [{"name": "y", "label": "y", "expr": "x*x"}]},
     "step_through": {"steps": [{"state": "s0", "explain": "e0"}, {"state": "s1", "explain": "e1"}]},
     "animation": {"keyframes": ["a", "b"], "autoplay": False},
+    "audio": {"waveform": "sine", "explain": "听",
+              "controls": [{"name": "f", "label": "频率", "min": 110, "max": 880, "default": 440, "maps": "frequency"}]},
     "deep_dive": {"summary": "more", "expanded_md": "detail"},
     "user_note": {"placeholder": "note"},
 }
