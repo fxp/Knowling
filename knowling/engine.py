@@ -268,7 +268,7 @@ def refine_knowling(
     judge = cfg.provider("judge")
     trace = []
 
-    new_spec, call, summary = refine_mod.refine(spec, kp, instruction, provider)
+    new_spec, call, summary, changes = refine_mod.refine(spec, kp, instruction, provider)
     trace.append(call)
 
     # fidelity guard: keep the card on its knowledge point (anti-drift)
@@ -277,16 +277,22 @@ def refine_knowling(
     if not fid.ok:
         emit("stage", {"stage": "fidelity", "status": "reanchor", "reason": fid.reason})
         reinforced = instruction + "（务必始终聚焦讲解本知识点本身，不要跑题成讲别的主题）"
-        spec2, call2, summary2 = refine_mod.refine(spec, kp, reinforced, provider)
+        spec2, call2, summary2, changes2 = refine_mod.refine(spec, kp, reinforced, provider)
         trace.append(call2)
         fid2 = fidelity_mod.assess(spec2, kp, judge)
         if fid2.ok or fid2.score >= fid.score:
-            new_spec, summary, fid = spec2, summary2, fid2
+            new_spec, summary, changes, fid = spec2, summary2, changes2, fid2
         if not fid.ok:
             summary += "（已尽量保持聚焦本知识点）"
 
+    # deterministic block-type delta, appended to the model's change list
+    delta = refine_mod.block_delta(spec, new_spec)
+    changes = list(changes) + [f"📦 {delta}"]
+
     emit("stage", {"stage": "refine", "status": "done", "summary": summary,
-                   "fidelity": fid.to_dict(), "blocks": [b.type for b in new_spec.blocks]})
+                   "changes": changes, "fidelity": fid.to_dict(),
+                   "blocks": [b.type for b in new_spec.blocks]})
     knowling = compile_spec(new_spec, kp, cfg, out_path=out_path, emit=emit, base_trace=trace)
     knowling._fidelity = fid.to_dict()  # type: ignore[attr-defined]
-    return knowling, summary
+    knowling._changes = changes  # type: ignore[attr-defined]
+    return knowling, summary, changes

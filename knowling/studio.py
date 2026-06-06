@@ -30,6 +30,7 @@ class StudioState:
         self.lock = threading.Lock()
         self.qa = {}
         self.fidelity = {}
+        self.changes = []
 
     def _store(self, k) -> None:
         self.spec = k.spec
@@ -37,6 +38,7 @@ class StudioState:
         self.version += 1
         self.qa = k.qa.to_dict()
         self.fidelity = getattr(k, "_fidelity", {})
+        self.changes = getattr(k, "_changes", [])
 
     def generate(self):
         with self.lock:
@@ -48,7 +50,7 @@ class StudioState:
         with self.lock:
             if self.spec is None:
                 self.generate()
-            k, summary = refine_knowling(self.spec, self.kp, instruction, self.cfg)
+            k, summary, _changes = refine_knowling(self.spec, self.kp, instruction, self.cfg)
             self._store(k)
             return k, summary
 
@@ -126,8 +128,9 @@ async function refine(text){{
     var r=await fetch('/api/refine',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{instruction:text}})}});
     var data=await r.json();
     if(data.ok){{pend.className='msg bot';
-      var note=(data.fidelity&&data.fidelity.on_topic===false)?'\\n⚠ 注意：检测到可能跑题，已尽量拉回本知识点。':(data.fidelity&&data.fidelity.on_topic?'\\n· 已保持聚焦本知识点 ✓':'');
-      pend.textContent='✓ '+data.summary+note;card.src='/card?v='+data.version;setQa(data.qa);}}
+      var diff=(data.changes&&data.changes.length)?('\\n本次改动：\\n• '+data.changes.join('\\n• ')):'';
+      var note=(data.fidelity&&data.fidelity.on_topic===false)?'\\n⚠ 检测到可能跑题，已尽量拉回本知识点。':(data.fidelity&&data.fidelity.on_topic?'\\n· 已保持聚焦本知识点 ✓':'');
+      pend.textContent='✓ '+data.summary+diff+note;card.src='/card?v='+data.version;setQa(data.qa);}}
     else{{pend.className='msg err';pend.textContent='生成失败：'+(data.error||'未知错误');}}
   }}catch(e){{pend.className='msg err';pend.textContent='请求出错：'+e;}}
   send.disabled=false;inp.focus();
@@ -174,7 +177,7 @@ def _make_handler(state: StudioState):
                 _k, summary = state.refine(instruction)
                 self._send(200, json.dumps(
                     {"ok": True, "summary": summary, "version": state.version,
-                     "qa": state.qa, "fidelity": state.fidelity},
+                     "qa": state.qa, "fidelity": state.fidelity, "changes": state.changes},
                     ensure_ascii=False), "application/json; charset=utf-8")
             except Exception as e:  # noqa: BLE001
                 self._send(200, json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False),

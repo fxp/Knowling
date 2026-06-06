@@ -213,13 +213,16 @@ def cmd_refine(args) -> int:
     )
     from .engine import refine_knowling
 
-    knowling, summary = refine_knowling(spec, kp, args.instruction, cfg,
-                                        out_path=args.output, emit=emit)
+    knowling, summary, changes = refine_knowling(spec, kp, args.instruction, cfg,
+                                                 out_path=args.output, emit=emit)
     total = round(sum(c.cost_usd for c in knowling.model_trace), 6)
     emit("done", {"id": knowling.id, "status": knowling.status, "cost_usd": total,
-                  "entry": knowling.artifact.entry, "qa": knowling.qa.to_dict()})
+                  "entry": knowling.artifact.entry, "qa": knowling.qa.to_dict(),
+                  "changes": changes})
     if args.format == "rich":
         print("  调整：" + summary)
+        for c in changes:
+            print("    " + c)
     if args.output and args.spec_out:
         with open(args.spec_out, "w", encoding="utf-8") as f:
             f.write(json.dumps(knowling.spec.to_dict(), ensure_ascii=False, indent=2))

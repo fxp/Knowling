@@ -43,7 +43,7 @@ def test_refine_attaches_fidelity_and_stays_on_topic():
     cfg = Config(provider_name="mock", quiet=True, qa=QAConfig(sandbox_name="static"))
     base = generate_knowling(KP, cfg)
     # a relationship question must NOT turn the card into a different topic
-    new, summary = refine_knowling(base.spec, KP, "这个和导数是什么关系？", cfg)
+    new, summary, changes = refine_knowling(base.spec, KP, "这个和导数是什么关系？", cfg)
     assert hasattr(new, "_fidelity")
     assert new._fidelity["on_topic"] is True  # original 链式法则 blocks kept
     # the original knowledge point is preserved
