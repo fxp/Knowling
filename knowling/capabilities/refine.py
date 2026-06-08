@@ -52,6 +52,36 @@ PROMPT = """这是当前知识点学习卡的蓝图(KnowlingSpec JSON):
   "spec": <修订后的 KnowlingSpec>}}"""
 
 
+def quiz_reteach_instruction(outcome: Any) -> str:
+    """Seam ③: turn a failed quiz result into a refine instruction.
+
+    ``outcome`` is a ``QuizOutcome``/``MasteryResult`` or a plain dict (e.g. the
+    ``knowling:quiz-result`` event payload). The result feeds ``refine`` so the
+    same KP is re-taught in an easier way — single round; the caller loops."""
+    if hasattr(outcome, "quiz") and getattr(outcome, "quiz", None) is not None:
+        outcome = outcome.quiz  # unwrap MasteryResult → QuizOutcome
+    if hasattr(outcome, "to_dict"):
+        outcome = outcome.to_dict()
+    total = outcome.get("total", 0)
+    correct = outcome.get("correct", 0)
+    wrong = [pq for pq in outcome.get("per_question", []) if not pq.get("correct", True)]
+    tags = [str(t) for t in (outcome.get("wrong_tags") or []) if str(t).strip()]
+
+    parts = [f"学生在本知识点的测验得分为 {correct}/{total}，未达标，说明当前讲法没讲懂。"]
+    if wrong:
+        labels = [str(pq.get("q_id") or pq.get("prompt") or "") for pq in wrong]
+        labels = [x for x in labels if x]
+        if labels:
+            parts.append("答错的题：" + "、".join(labels) + "。")
+    if tags:
+        parts.append("薄弱子技能：" + "、".join(tags) + "。")
+    parts.append(
+        "请把这张学习卡改得更易懂：降低难度、换更直观的讲法、增加铺垫和具体例子，"
+        "针对上面答错的点重点讲解，保持同一个知识点不跑题。"
+    )
+    return " ".join(parts)
+
+
 def _kp_field(kp, name, default=""):
     return getattr(kp, name, default) or default
 

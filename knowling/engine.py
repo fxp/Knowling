@@ -296,3 +296,27 @@ def refine_knowling(
     knowling._fidelity = fid.to_dict()  # type: ignore[attr-defined]
     knowling._changes = changes  # type: ignore[attr-defined]
     return knowling, summary, changes
+
+
+def reteach_knowling(
+    spec: KnowlingSpec,
+    kp: KnowledgePoint,
+    outcome: Any,
+    cfg: Optional[Config] = None,
+    out_path: Optional[str] = None,
+    emit: EventSink = _noop_sink,
+) -> "tuple[Knowling, str]":
+    """Seam ③ — signal-driven re-teach: a failed quiz result → an easier card for
+    the SAME kp. A thin adapter over ``refine_knowling`` (the quiz failure is
+    translated into a refine instruction). Single round; the caller (an L2 session
+    runner) loops ``reteach → re-test`` until the learner passes.
+
+    ``outcome`` is a ``QuizOutcome``/``MasteryResult`` or the raw
+    ``knowling:quiz-result`` event payload dict. Returns (new_knowling, summary).
+    """
+    instruction = refine_mod.quiz_reteach_instruction(outcome)
+    emit("stage", {"stage": "reteach", "status": "start",
+                   "kp": getattr(kp, "id", ""), "instruction": instruction})
+    knowling, summary, _changes = refine_knowling(
+        spec, kp, instruction, cfg=cfg, out_path=out_path, emit=emit)
+    return knowling, summary

@@ -69,6 +69,36 @@ class SourceRef:
 
 
 @dataclass
+class Curriculum:
+    """Syllabus coordinates (seam contract ①, see docs/seam-contract-draft.md).
+
+    Lets a host orchestrator (L1) address a Knowling unit 1:1 with a syllabus
+    graph node. Pure metadata — does not affect rendering. The graph node id is
+    ``KnowledgePoint.id``; ``node_code`` is the human-readable curriculum path."""
+
+    syllabus_id: str
+    grade: str = ""
+    chapter: str = ""
+    section: Optional[str] = None
+    node_code: Optional[str] = None
+    order: Optional[int] = None
+
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any]) -> "Curriculum":
+        return cls(
+            syllabus_id=d.get("syllabus_id", ""),
+            grade=d.get("grade", ""),
+            chapter=d.get("chapter", ""),
+            section=d.get("section"),
+            node_code=d.get("node_code"),
+            order=d.get("order"),
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return _strip_none(dataclasses.asdict(self))
+
+
+@dataclass
 class KnowledgePoint:
     """Pipeline input (design §4.1). ``description`` should be as specific as
     possible — it scopes everything downstream."""
@@ -83,6 +113,7 @@ class KnowledgePoint:
     audience: Optional[str] = None
     source_refs: List[SourceRef] = field(default_factory=list)
     locale: str = "zh-CN"
+    curriculum: Optional["Curriculum"] = None
 
     def __post_init__(self) -> None:
         if self.difficulty not in DIFFICULTIES:
@@ -103,6 +134,8 @@ class KnowledgePoint:
             audience=d.get("audience"),
             source_refs=[SourceRef.from_dict(s) for s in d.get("source_refs", [])],
             locale=d.get("locale", "zh-CN"),
+            curriculum=(Curriculum.from_dict(d["curriculum"])
+                        if d.get("curriculum") else None),
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -118,6 +151,7 @@ class KnowledgePoint:
                 "audience": self.audience,
                 "source_refs": [s.to_dict() for s in self.source_refs],
                 "locale": self.locale,
+                "curriculum": self.curriculum.to_dict() if self.curriculum else None,
             }
         )
 

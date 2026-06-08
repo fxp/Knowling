@@ -7,5 +7,12 @@ dist/
 out/
 .DS_Store
 
+# local secrets (API keys) — never commit
+.env
+*.key
+
+# harness artifacts
+.claude/*.lock
+
 # demo build artifacts (keep index.html + components, ignore preview shots)
 demo/_shot-*.png

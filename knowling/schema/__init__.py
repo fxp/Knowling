@@ -9,6 +9,7 @@ from .models import (
     BlockSpec,
     BLOCK_TYPES,
     BlockType,
+    Curriculum,
     GraphLinks,
     KnowledgePoint,
     Knowling,
@@ -18,18 +19,24 @@ from .models import (
     QAReport,
     SourceRef,
 )
+from .mastery import AxisScore, MasteryResult, QuizOutcome, level_for
 
 __all__ = [
     "Artifact",
+    "AxisScore",
     "BlockSpec",
     "BLOCK_TYPES",
     "BlockType",
+    "Curriculum",
     "GraphLinks",
     "KnowledgePoint",
     "Knowling",
     "KnowlingSpec",
+    "MasteryResult",
     "ModelCall",
     "Pedagogy",
     "QAReport",
+    "QuizOutcome",
     "SourceRef",
+    "level_for",
 ]

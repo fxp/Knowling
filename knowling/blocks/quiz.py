@@ -168,7 +168,7 @@ def template(block: Dict[str, Any]) -> str:
     var root = document.querySelector('[data-block-id="{bid}"]');
     var questions = {jslit(q_js)};
     var many = questions.length > 1;
-    var idx = 0, score = 0, locked = false, selected = null;
+    var idx = 0, score = 0, locked = false, selected = null, results = [];
     var qBox = root.querySelector('.kl-quiz-q');
     var optBox = root.querySelector('.kl-quiz-opts');
     var fb = root.querySelector('.kl-quiz-feedback');
@@ -211,17 +211,32 @@ def template(block: Dict[str, Any]) -> str:
       }}
     }}
 
+    function emit() {{
+      // Seam ④: report the finished quiz to an embedding host without breaking
+      // self-containment. Fires once the whole quiz is done.
+      var meta = window.__KNOWLING__ || {{}};
+      var payload = {{ type: 'knowling:quiz-result', block_id: '{bid}',
+        kp_id: meta.kp_id || '', knowling_id: meta.knowling_id || '',
+        total: questions.length, correct: score,
+        score: questions.length ? score / questions.length : 0,
+        per_question: results, wrong_tags: [] }};
+      try {{ if (window.parent && window.parent !== window) window.parent.postMessage(payload, '*'); }} catch (e) {{}}
+      try {{ window.dispatchEvent(new CustomEvent('knowling:quiz-result', {{ detail: payload }})); }} catch (e) {{}}
+    }}
+
     function judge() {{
-      var q = questions[idx], correct = false;
+      var q = questions[idx], correct = false, chosen = null, expected = null;
       optBox.querySelectorAll('.kl-quiz-opt').forEach(function(b) {{ b.classList.remove('is-selected'); }});
       if (q.type === 'fill') {{
         var val = (optBox.querySelector('.kl-quiz-input').value || '').trim().toLowerCase();
         var accept = [String(q.answer)].concat(q.accept || []).map(function(s) {{ return String(s).trim().toLowerCase(); }});
         correct = accept.indexOf(val) >= 0;
+        chosen = val; expected = String(q.answer);
       }} else if (q.type === 'multi') {{
         var sel = Object.keys(selected).map(Number).sort(function(a, b) {{ return a - b; }});
         var ans = (q.answer || []).slice();
         correct = sel.length === ans.length && sel.every(function(v, k) {{ return v === ans[k]; }});
+        chosen = sel; expected = ans;
         optBox.querySelectorAll('.kl-quiz-opt').forEach(function(b) {{
           var i = parseInt(b.dataset.i, 10);
           if (ans.indexOf(i) >= 0) b.classList.add('is-correct');
@@ -229,6 +244,7 @@ def template(block: Dict[str, Any]) -> str:
         }});
       }} else {{
         correct = selected === q.answer;
+        chosen = selected; expected = q.answer;
         optBox.querySelectorAll('.kl-quiz-opt').forEach(function(b) {{
           var i = parseInt(b.dataset.i, 10);
           if (i === q.answer) b.classList.add('is-correct');
@@ -237,10 +253,12 @@ def template(block: Dict[str, Any]) -> str:
       }}
       locked = true; submit.disabled = true;
       if (correct) score++;
+      results.push({{ q_id: 'q' + idx, type: q.type, correct: correct, chosen: chosen, expected: expected }});
       fb.hidden = false;
       fb.className = 'kl-quiz-feedback ' + (correct ? 'is-correct' : 'is-wrong');
       fb.innerHTML = (correct ? '✓ 正确！' : '✗ 再想想。') + (q.explain ? ' ' + q.explain : '');
       if (many) {{ next.hidden = false; next.textContent = idx < questions.length - 1 ? '下一题' : '查看成绩'; }}
+      else emit();
     }}
 
     function showScore() {{
@@ -250,8 +268,9 @@ def template(block: Dict[str, Any]) -> str:
       scoreBox.innerHTML = '成绩 ' + score + ' / ' + questions.length +
         ' <button type="button" class="kl-quiz-redo">重做</button>';
       scoreBox.querySelector('.kl-quiz-redo').addEventListener('click', function() {{
-        idx = 0; score = 0; render();
+        idx = 0; score = 0; results = []; render();
       }});
+      emit();
     }}
 
     submit.addEventListener('click', judge);

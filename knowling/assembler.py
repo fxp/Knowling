@@ -8,6 +8,7 @@ blocks a consistent look; LLM-generated blocks are told to reuse them.
 from __future__ import annotations
 
 import html as _html
+import json as _json
 from typing import List
 
 from .schema import KnowlingSpec
@@ -242,6 +243,14 @@ def assemble_html(spec: KnowlingSpec, fragments: List[str], title: str) -> str:
     hook = spec.pedagogy.hook if spec.pedagogy else ""
     cards = "\n".join(f'<div class="kl-card">{frag}</div>' for frag in fragments)
     hook_html = f'<p class="kl-hook">{_html.escape(hook)}</p>' if hook else ""
+    # Seam ④: expose the unit's kp_id so the (self-contained) quiz block can
+    # report its result to an embedding host. A host may pre-set window.__KNOWLING__
+    # (e.g. knowling_id) before load; we only fill kp_id if absent.
+    kp_json = _json.dumps(spec.knowledge_point_id, ensure_ascii=False)
+    ident = (
+        "<script>window.__KNOWLING__=window.__KNOWLING__||{};"
+        "if(!window.__KNOWLING__.kp_id)window.__KNOWLING__.kp_id=" + kp_json + ";</script>"
+    )
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -249,6 +258,7 @@ def assemble_html(spec: KnowlingSpec, fragments: List[str], title: str) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{_html.escape(title)} · Knowling</title>
 <style>{_CSS}</style>
+{ident}
 </head>
 <body>
 <main class="kl-doc">
