@@ -88,8 +88,39 @@ def render_data_uri(script: str, scene: str, **kw) -> Tuple[Optional[str], str]:
     data, err = render(script, scene, **kw)
     if data is None:
         return None, err
-    b64 = base64.b64encode(data).decode("ascii")
-    return f"data:video/mp4;base64,{b64}", ""
+    return mp4_to_data_uri(data), ""
+
+
+def mp4_to_data_uri(data: bytes) -> str:
+    return "data:video/mp4;base64," + base64.b64encode(data).decode("ascii")
+
+
+def _pick(n: int, count: int) -> list:
+    """Choose `count` frame indices spread across [0,n), biased to the end
+    (final composed states reveal text placement best); always include the last."""
+    if n <= count:
+        return list(range(n))
+    fracs = [0.5, 0.78, 1.0][-count:] if count <= 3 else [i / (count - 1) for i in range(count)]
+    return sorted({min(n - 1, int(round(f * (n - 1)))) for f in fracs})
+
+
+def extract_frames(mp4: bytes, count: int = 3) -> list:
+    """Extract a few representative PNG frames from an MP4 (for visual review)."""
+    from shutil import which
+    ff = which("ffmpeg")
+    if not ff or not mp4:
+        return []
+    with tempfile.TemporaryDirectory(prefix="knowling-frames-") as td:
+        tdp = Path(td)
+        (tdp / "v.mp4").write_bytes(mp4)
+        subprocess.run([ff, "-i", str(tdp / "v.mp4"), "-vf", "fps=2", str(tdp / "f_%04d.png")],
+                       capture_output=True, text=True)
+        frames = sorted(tdp.glob("f_*.png"))
+        if not frames:
+            subprocess.run([ff, "-sseof", "-0.2", "-i", str(tdp / "v.mp4"),
+                            "-frames:v", "1", str(tdp / "last.png")], capture_output=True, text=True)
+            frames = sorted(tdp.glob("last.png"))
+        return [frames[i].read_bytes() for i in _pick(len(frames), count)] if frames else []
 
 
 if __name__ == "__main__":  # tiny self-test: python -m knowling.capabilities.manim_render
