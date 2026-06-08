@@ -14,7 +14,7 @@ import re
 from typing import Any, List, Optional
 
 from ...providers.base import LLMProvider
-from .._extract import extract_json
+from .._extract import complete_json, extract_json
 from .types import DimensionFeedback, QAConfig
 
 SYSTEM = "作为教学质量评审，锚定 Explorable Explanations 准则，对学习组件打分(0-5)并给可执行建议。"
@@ -68,13 +68,13 @@ def _assess_llm(artifact_html, spec, kp, provider) -> Optional[DimensionFeedback
         text=_visible_text(artifact_html)[:4000],
     )
     try:
-        comp = provider.complete(
+        data, _comp = complete_json(
+            provider,
             [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],
             task="qa_pedagogy", temperature=0.2, max_tokens=3000,
         )
     except Exception:
         return None
-    data = extract_json(comp.text)
     if not isinstance(data, dict) or "score" not in data:
         return None
     return DimensionFeedback(

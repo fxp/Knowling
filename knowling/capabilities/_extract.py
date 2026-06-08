@@ -4,7 +4,37 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any, Optional
+from typing import Any, List, Optional, Tuple
+
+
+def complete_json(
+    provider,
+    messages: List[dict],
+    *,
+    task: str = "generic",
+    retries: int = 2,
+    **kw: Any,
+) -> Tuple[Optional[Any], Any]:
+    """``provider.complete`` + ``extract_json`` with retry-on-unparseable.
+
+    Reasoning models (e.g. GLM-5) intermittently emit prose/thinking that starves
+    or breaks the JSON. On a parse miss we retry with thinking off and a strict
+    "JSON only" nudge. Returns ``(data, last_completion)``; ``data`` is ``None``
+    if every attempt fails. ``thinking`` defaults to ``"disabled"``."""
+    kw.setdefault("thinking", "disabled")
+    last = None
+    msgs = list(messages)
+    for attempt in range(retries + 1):
+        last = provider.complete(msgs, task=task, **kw)
+        data = extract_json(last.text)
+        if data is not None:
+            return data, last
+        msgs = list(messages) + [{
+            "role": "user",
+            "content": "你上次的回复无法被解析为 JSON。请直接输出一个合法的 JSON，"
+                       "不要输出任何思考过程、解释或多余文本。",
+        }]
+    return None, last
 
 
 def extract_json(text: str) -> Optional[Any]:

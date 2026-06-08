@@ -63,7 +63,7 @@ class ZhipuProvider(LLMProvider):
         task: str = "generic",
         temperature: float = 0.6,
         max_tokens: int = 4096,
-        thinking: Optional[str] = None,  # "disabled" | "enabled"
+        thinking: Optional[str] = "disabled",  # "disabled" | "enabled" | None(API default)
         **kwargs: Any,
     ) -> Completion:
         if not self.api_key:
