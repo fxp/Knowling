@@ -86,8 +86,8 @@ def author(
     text_provider: LLMProvider,
     vlm_provider: LLMProvider,
     *,
-    max_rounds: int = 3,
-    accept: float = 4.0,
+    max_rounds: int = 5,
+    accept: float = 4.5,
     quality: str = "medium",
     emit=None,
 ) -> Optional[Dict[str, Any]]:
@@ -125,7 +125,10 @@ def author(
         review = review_frames(frames, vlm_provider)
         cand = {"script": script, "scene": scene,
                 "video": manim_render.mp4_to_data_uri(data), "review": review, "rounds": r + 1}
-        if best is None or review["score"] > best["review"]["score"]:
+        # rank by score, then fewest outstanding issues (a 4.0/1-issue beats 4.0/2-issue)
+        def _key(rv):
+            return (rv.get("score", 0), -len(rv.get("issues", [])))
+        if best is None or _key(review) > _key(best["review"]):
             best = cand
         log(f"round {r}: visual score {review['score']} issues={len(review.get('issues', []))}")
         if review["score"] >= accept and not review.get("issues"):

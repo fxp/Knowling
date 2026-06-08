@@ -23,8 +23,9 @@ TYPE = "manim"
 
 
 def validate(content_spec: Dict[str, Any]) -> None:
-    if not content_spec.get("script"):
-        raise ValueError("manim block requires content_spec.script (a ManimCE Scene)")
+    # Either a ready Scene script, or an `animate` intent the compile step authors.
+    if not content_spec.get("script") and not content_spec.get("animate"):
+        raise ValueError("manim block requires content_spec.script or content_spec.animate")
     if not content_spec.get("scene"):
         raise ValueError("manim block requires content_spec.scene (the Scene class name)")
 

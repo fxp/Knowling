@@ -49,6 +49,7 @@ class Config:
     quiet: bool = False
     retriever_name: str = "auto"  # P2: RAG grounding backend
     compile_mode: str = "template"  # "template" (consistent) | "codegen" (bespoke)
+    allow_manim: bool = False  # let the planner add a 3B1B-style manim block (heavy/offline)
     qa_enabled: bool = True  # P1: run the three-dimensional QA loop
     qa: QAConfig = field(default_factory=QAConfig)
     approval_cb: Optional[Callable[[KnowlingSpec], KnowlingSpec]] = None
@@ -86,7 +87,8 @@ def plan_spec(
     """Stage ② — produce the blueprint (no code)."""
     emit("stage", {"stage": "plan", "status": "start", "kp": kp.id})
     provider = cfg.planner_provider()
-    spec, call = spec_planner.plan(kp, grounding, provider, render_target=cfg.render_target)
+    spec, call = spec_planner.plan(kp, grounding, provider, render_target=cfg.render_target,
+                                   allow_manim=cfg.allow_manim)
     emit("cost", {"stage": "plan", **call.to_dict()})
     has_visual = spec_planner._has_visual(spec)
     if not has_visual:
@@ -126,6 +128,8 @@ def compile_blocks(
 ) -> "tuple[List[str], List[ModelCall]]":
     """Stage ④ — compile each block to a self-contained fragment."""
     provider = cfg.compiler_provider()
+    # VLM for the manim block's visual-review loop (only built if needed)
+    vlm = cfg.provider("render_vlm") if any(b.type == "manim" for b in spec.blocks) else None
     fragments: List[str] = []
     calls: List[ModelCall] = []
     for i, b in enumerate(spec.blocks):
@@ -135,7 +139,8 @@ def compile_blocks(
              "i": i + 1, "n": len(spec.blocks)},
         )
         try:
-            html, call = block_compiler.compile(b, kp, grounding, provider, mode=cfg.compile_mode)
+            html, call = block_compiler.compile(b, kp, grounding, provider,
+                                                mode=cfg.compile_mode, vlm_provider=vlm)
         except Exception as e:  # block-level failure shouldn't kill the run in P0
             emit("warn", {"stage": "compile", "block_id": b.block_id, "error": str(e)})
             html = block_registry.render_block_template(b.to_dict())

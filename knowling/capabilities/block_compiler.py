@@ -40,11 +40,13 @@ PROMPT_TEMPLATE = """把以下 BlockSpec 编译成一个自包含的 HTML 片段
 {compile_hint}"""
 
 
-def _render_manim(block_dict: dict) -> None:
-    """Render a manim block's Scene → inline data-URI into its content_spec.
+def _render_manim(block_dict: dict, text_provider=None, vlm_provider=None) -> None:
+    """Render a manim block → inline data-URI into its content_spec.
 
-    Mutates ``content_spec`` in place: sets ``video`` on success, else
-    ``render_error`` (the template then shows a placeholder). Never raises."""
+    Three paths: (a) ``video`` already present → skip; (b) a ready ``script`` →
+    render directly; (c) only an ``animate`` intent → author the Scene with the
+    visual-review loop (needs real LLM + VLM). Mutates content_spec in place;
+    sets ``render_error`` + leaves a placeholder on any failure. Never raises."""
     cs = block_dict.setdefault("content_spec", {})
     if cs.get("video"):
         return
@@ -52,7 +54,26 @@ def _render_manim(block_dict: dict) -> None:
     if not manim_render.available():
         cs["render_error"] = "manim toolchain not installed"
         return
-    uri, err = manim_render.render_data_uri(cs.get("script", ""), cs.get("scene", ""))
+    scene = cs.get("scene") or "GeneratedScene"
+
+    if not cs.get("script"):
+        animate = cs.get("animate")
+        if not animate:
+            cs["render_error"] = "manim block needs `script` or `animate`"
+            return
+        if text_provider is None or getattr(text_provider, "name", "mock") == "mock":
+            cs["render_error"] = "manim authoring needs a real LLM provider"
+            return
+        from . import manim_author
+        res = manim_author.author(animate, scene, text_provider, vlm_provider, max_rounds=4)
+        if res:
+            cs.update({"script": res["script"], "scene": res["scene"],
+                       "video": res["video"], "review": res["review"]})
+        else:
+            cs["render_error"] = "manim authoring failed to render"
+        return
+
+    uri, err = manim_render.render_data_uri(cs["script"], scene)
     if uri:
         cs["video"] = uri
     else:
@@ -91,6 +112,7 @@ def compile(
     provider: LLMProvider,
     suggestions: Optional[List[str]] = None,
     mode: str = "template",
+    vlm_provider: Optional[LLMProvider] = None,
 ) -> Tuple[str, ModelCall]:
     """Compile a BlockSpec → self-contained HTML fragment.
 
@@ -109,7 +131,7 @@ def compile(
     # manim block: render the Scene script → inline MP4 (optional [manim] toolchain).
     # Degrades to a captioned placeholder if the toolchain is absent or render fails.
     if block.type == "manim":
-        _render_manim(block_dict)
+        _render_manim(block_dict, text_provider=provider, vlm_provider=vlm_provider)
 
     # template path (default) — consistent styling, deterministic, no LLM call.
     # Mock provider always lands here regardless of mode.

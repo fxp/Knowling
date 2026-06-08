@@ -105,11 +105,22 @@ def _format_objectives(kp: KnowledgePoint) -> str:
     return "；".join(kp.learning_objectives) if kp.learning_objectives else "（未指定）"
 
 
+MANIM_GUIDE = """
+
+【可选】本卡允许使用 1 个 manim 块（3Blue1Brown 风格的渲染动画），**仅当动画能显著
+帮助理解**时才用：几何/面积模型、代数恒等式的几何意义、图形变换、向量、极限逼近 等可动画的
+视觉证明。最多 1 个，放在概念讲解附近。**不要写代码**，只描述要动画呈现什么：
+- content_spec: {{ "animate": "<详细描述：有哪些对象、如何分解/变换、动画顺序、各步标注什么文字>",
+  "scene": "<PascalCase 类名, 如 AreaIdentity>", "caption": "<一句话说明>" }}
+（脚本会在编译期由系统据此自动生成并经视觉质检修正，你只需给出清晰的动画描述。）"""
+
+
 def plan(
     kp: KnowledgePoint,
     grounding: Optional[List[Any]],
     provider: LLMProvider,
     render_target: str = "html",
+    allow_manim: bool = False,
 ) -> Tuple[KnowlingSpec, ModelCall]:
     grounding_txt = ""
     if grounding:
@@ -132,6 +143,8 @@ def plan(
         render_target=render_target,
         grounding=grounding_txt,
     )
+    if allow_manim:
+        user += MANIM_GUIDE
     messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
 
     def _build(data) -> KnowlingSpec:
