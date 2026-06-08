@@ -202,11 +202,30 @@ def template(block: Dict[str, Any]) -> str:
     }}
 
     var canvas = root.querySelector('.kl-ps-canvas'), ctx2 = canvas.getContext('2d');
-    var COLORS = ['#3056d3', '#e8590c', '#1a7f37', '#bf3989'];
+    var COLORS = ['#4f46e5', '#f97316', '#0ea5e9', '#db2777'];
+    var FILLS  = ['rgba(79,70,229,.14)', 'rgba(249,115,22,.12)', 'rgba(14,165,233,.12)', 'rgba(219,39,119,.10)'];
+
+    function niceStep(range, target) {{
+      var raw = range / target, mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+      var n = raw / mag;
+      return (n >= 5 ? 5 : n >= 2 ? 2 : 1) * mag;
+    }}
+    function tickLabel(n) {{
+      if (Math.abs(n) < 1e-9) return '0';
+      if (Math.abs(n) >= 1000 || Math.abs(n) < 0.01) return n.toPrecision(2);
+      return (Math.round(n * 100) / 100).toString();
+    }}
 
     function plot(v) {{
-      var W = canvas.width, H = canvas.height, pad = 30, N = 200;
+      var dpr = window.devicePixelRatio || 1;
+      var W = canvas.clientWidth || 640;
+      var H = Math.max(210, Math.round(W * 0.44));
+      if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {{
+        canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); canvas.style.height = H + 'px';
+      }}
+      ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx2.clearRect(0, 0, W, H);
+      var padL = 46, padR = 16, padT = 14, padB = 28, N = 240;
       var lo = sweep.min, hi = sweep.max;
       var series = curves.map(function(c) {{
         var pts = [], ymin = Infinity, ymax = -Infinity;
@@ -222,29 +241,65 @@ def template(block: Dict[str, Any]) -> str:
       var ymin = Math.min.apply(null, series.map(function(s) {{ return s.ymin; }}).filter(isFinite));
       var ymax = Math.max.apply(null, series.map(function(s) {{ return s.ymax; }}).filter(isFinite));
       if (!isFinite(ymin) || !isFinite(ymax) || ymin === ymax) {{ ymin = (ymin || 0) - 1; ymax = (ymax || 0) + 1; }}
-      var sx = function(x) {{ return pad + (x - lo) / (hi - lo) * (W - 2 * pad); }};
-      var sy = function(y) {{ return H - pad - (y - ymin) / (ymax - ymin) * (H - 2 * pad); }};
-      // axes (x-axis at y=0 if in range, else bottom)
-      ctx2.strokeStyle = '#d0d7de'; ctx2.lineWidth = 1;
-      var y0 = (ymin <= 0 && ymax >= 0) ? sy(0) : H - pad;
-      ctx2.beginPath(); ctx2.moveTo(pad, y0); ctx2.lineTo(W - pad, y0); ctx2.stroke();
-      var x0 = (lo <= 0 && hi >= 0) ? sx(0) : pad;
-      ctx2.beginPath(); ctx2.moveTo(x0, pad); ctx2.lineTo(x0, H - pad); ctx2.stroke();
-      // curves
+      var padY = (ymax - ymin) * 0.08; ymin -= padY; ymax += padY;
+      var PW = W - padL - padR, PH = H - padT - padB;
+      var sx = function(x) {{ return padL + (x - lo) / (hi - lo) * PW; }};
+      var sy = function(y) {{ return padT + PH - (y - ymin) / (ymax - ymin) * PH; }};
+
+      // grid + tick labels
+      ctx2.font = '11px -apple-system, sans-serif'; ctx2.textBaseline = 'middle';
+      var xs = niceStep(hi - lo, 6), ys = niceStep(ymax - ymin, 5);
+      ctx2.lineWidth = 1;
+      for (var gx = Math.ceil(lo / xs) * xs; gx <= hi + 1e-9; gx += xs) {{
+        var X = sx(gx);
+        ctx2.strokeStyle = '#eef0f6'; ctx2.beginPath(); ctx2.moveTo(X, padT); ctx2.lineTo(X, padT + PH); ctx2.stroke();
+        if (Math.abs(gx) > 1e-9) {{ ctx2.fillStyle = '#9aa3b2'; ctx2.textAlign = 'center'; ctx2.fillText(tickLabel(gx), X, H - padB + 12); }}
+      }}
+      for (var gy = Math.ceil(ymin / ys) * ys; gy <= ymax + 1e-9; gy += ys) {{
+        var Y = sy(gy);
+        ctx2.strokeStyle = '#eef0f6'; ctx2.beginPath(); ctx2.moveTo(padL, Y); ctx2.lineTo(padL + PW, Y); ctx2.stroke();
+        ctx2.fillStyle = '#9aa3b2'; ctx2.textAlign = 'right'; ctx2.fillText(tickLabel(gy), padL - 6, Y);
+      }}
+      // emphasized x=0 / y=0 axes
+      ctx2.strokeStyle = '#c2c8d4'; ctx2.lineWidth = 1.4;
+      var y0 = (ymin <= 0 && ymax >= 0) ? sy(0) : (padT + PH);
+      ctx2.beginPath(); ctx2.moveTo(padL, y0); ctx2.lineTo(padL + PW, y0); ctx2.stroke();
+      var x0 = (lo <= 0 && hi >= 0) ? sx(0) : padL;
+      ctx2.beginPath(); ctx2.moveTo(x0, padT); ctx2.lineTo(x0, padT + PH); ctx2.stroke();
+
+      // curves: gradient area fill + smooth line
       series.forEach(function(s, ci) {{
-        ctx2.strokeStyle = COLORS[ci % COLORS.length]; ctx2.lineWidth = 2; ctx2.beginPath();
+        var firstX = null, lastX = null, open = false;
+        ctx2.beginPath();
+        s.pts.forEach(function(pt) {{
+          if (!isFinite(pt[1])) {{ open = false; return; }}
+          var px = sx(pt[0]), py = sy(pt[1]);
+          if (!open) {{ ctx2.moveTo(px, py); open = true; if (firstX === null) firstX = px; }} else ctx2.lineTo(px, py);
+          lastX = px;
+        }});
+        if (firstX !== null) {{
+          ctx2.lineTo(lastX, y0); ctx2.lineTo(firstX, y0); ctx2.closePath();
+          ctx2.fillStyle = FILLS[ci % FILLS.length]; ctx2.fill();
+        }}
+        ctx2.strokeStyle = COLORS[ci % COLORS.length]; ctx2.lineWidth = 2.5;
+        ctx2.lineJoin = 'round'; ctx2.lineCap = 'round'; ctx2.beginPath();
         var started = false;
         s.pts.forEach(function(pt) {{
           if (!isFinite(pt[1])) {{ started = false; return; }}
           var px = sx(pt[0]), py = sy(pt[1]);
-          if (!started) {{ ctx2.moveTo(px, py); started = true; }} else {{ ctx2.lineTo(px, py); }}
+          if (!started) {{ ctx2.moveTo(px, py); started = true; }} else ctx2.lineTo(px, py);
         }});
         ctx2.stroke();
       }});
-      // legacy marker at the slider's current value
+      // legacy marker at the slider's current value (halo + dot)
       if (legacy && curves.length) {{
         var mx = v[sweep.name], my = ev(curves[0].expr, v);
-        if (isFinite(my)) {{ ctx2.fillStyle = '#e8590c'; ctx2.beginPath(); ctx2.arc(sx(mx), sy(my), 5, 0, Math.PI * 2); ctx2.fill(); }}
+        if (isFinite(my)) {{
+          var MX = sx(mx), MY = sy(my);
+          ctx2.fillStyle = 'rgba(249,115,22,.18)'; ctx2.beginPath(); ctx2.arc(MX, MY, 9, 0, Math.PI * 2); ctx2.fill();
+          ctx2.fillStyle = '#f97316'; ctx2.strokeStyle = '#fff'; ctx2.lineWidth = 2;
+          ctx2.beginPath(); ctx2.arc(MX, MY, 5, 0, Math.PI * 2); ctx2.fill(); ctx2.stroke();
+        }}
       }}
     }}
 
@@ -258,6 +313,7 @@ def template(block: Dict[str, Any]) -> str:
       plot(v);
     }}
     params.forEach(function(p) {{ sliders[p.name].addEventListener('input', update); }});
+    window.addEventListener('resize', function() {{ plot(vals()); }});
     update();
   }})();
   </script>
