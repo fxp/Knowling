@@ -93,3 +93,20 @@ def test_errors(base_url):
     assert s == 400 and "error" in d
     s, d = _get(base_url + "/v1/nope")
     assert s == 404
+
+
+def test_token_auth(base_url, monkeypatch):
+    monkeypatch.setenv("KNOWLING_API_TOKEN", "secret123")
+    # no token → 401
+    s, d = _post(base_url + "/v1/knowling/plan", {**MOCK, "kp": {"id": "k", "title": "t"}})
+    assert s == 401
+    # GET stays open
+    s, _ = _get(base_url + "/v1/health")
+    assert s == 200
+    # with token → ok
+    req = urllib.request.Request(
+        base_url + "/v1/knowling/plan",
+        data=json.dumps({**MOCK, "kp": {"id": "k", "title": "t"}}).encode(),
+        headers={"Content-Type": "application/json", "Authorization": "Bearer secret123"}, method="POST")
+    with urllib.request.urlopen(req, timeout=30) as r:
+        assert r.status == 200

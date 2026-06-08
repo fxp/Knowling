@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Callable, Dict, Tuple
 
@@ -198,6 +199,16 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:  # pragma: no cover - defensive
             self._send(500, {"error": f"{type(e).__name__}: {e}"})
 
+    def _authed(self) -> bool:
+        """If KNOWLING_API_TOKEN is set, POST routes require it (Bearer or X-API-Key).
+        GET health/blocks stay open. Unset → no auth (local dev)."""
+        token = os.environ.get("KNOWLING_API_TOKEN")
+        if not token:
+            return True
+        auth = self.headers.get("Authorization", "")
+        given = auth[7:] if auth.startswith("Bearer ") else self.headers.get("X-API-Key", "")
+        return given == token
+
     def do_OPTIONS(self):
         self._send(200, {"ok": True})
 
@@ -205,6 +216,9 @@ class Handler(BaseHTTPRequestHandler):
         self._dispatch(GET_ROUTES, {})
 
     def do_POST(self):
+        if not self._authed():
+            self._send(401, {"error": "missing or invalid API token"})
+            return
         try:
             n = int(self.headers.get("Content-Length", 0))
             raw = self.rfile.read(n) if n else b"{}"
