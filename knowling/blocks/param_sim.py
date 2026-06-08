@@ -87,10 +87,31 @@ def compile_prompt(block: Dict[str, Any], kp: Dict[str, Any]) -> str:
     )
 
 
+def _num(v: Any, default: float = 0.0) -> float:
+    """Tolerant float — LLMs sometimes emit non-numeric values (e.g. 'N') in
+    numeric fields; coerce gracefully instead of crashing the whole card."""
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return default
+
+
+def _step(p: Dict[str, Any]) -> Any:
+    """Return a valid range-input step: a number, or 'any' (no stepping)."""
+    s = p.get("step", "any")
+    if s == "any" or s is None:
+        return "any"
+    try:
+        return float(s)
+    except (TypeError, ValueError):
+        return "any"
+
+
 def _default(p: Dict[str, Any]) -> float:
+    lo, hi = _num(p.get("min"), 0.0), _num(p.get("max"), 1.0)
     if p.get("default") is not None:
-        return p["default"]
-    return round((float(p["min"]) + float(p["max"])) / 2, 4)
+        return _num(p.get("default"), round((lo + hi) / 2, 4))
+    return round((lo + hi) / 2, 4)
 
 
 def _free_vars(expr: str) -> set:
@@ -112,7 +133,7 @@ def _analyze(params: List[Dict[str, Any]], outputs: List[Dict[str, Any]], cs: Di
         sweep_name = "x" if "x" in non_param else sorted(non_param)[0]
         rng = cs.get("x_range") or cs.get("xRange")
         if isinstance(rng, (list, tuple)) and len(rng) == 2:
-            lo, hi = float(rng[0]), float(rng[1])
+            lo, hi = _num(rng[0], -2 * math.pi), _num(rng[1], 2 * math.pi)
         else:
             lo, hi = -2 * math.pi, 2 * math.pi
         sweep = {"name": sweep_name, "min": lo, "max": hi}
@@ -125,7 +146,7 @@ def _analyze(params: List[Dict[str, Any]], outputs: List[Dict[str, Any]], cs: Di
 
     # legacy: slider IS the axis — sweep over the first param, mark current value
     p0 = params[0]
-    sweep = {"name": p0["name"], "min": float(p0["min"]), "max": float(p0["max"])}
+    sweep = {"name": p0["name"], "min": _num(p0["min"], 0.0), "max": _num(p0["max"], 1.0)}
     return sweep, outputs[:1], outputs[1:], True
 
 
@@ -139,7 +160,8 @@ def template(block: Dict[str, Any]) -> str:
     # normalize params (ensure a sensible default)
     pnorm = [{
         "name": p["name"], "label": p.get("label", p["name"]),
-        "min": p["min"], "max": p["max"], "step": p.get("step", "any"),
+        "min": _num(p["min"], 0.0), "max": _num(p["max"], 1.0),
+        "step": _step(p),
         "default": _default(p),
     } for p in params]
 

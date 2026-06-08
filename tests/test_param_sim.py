@@ -8,6 +8,17 @@ def _analyze(cs):
     return param_sim._analyze(cs["params"], cs["outputs"], cs)
 
 
+def test_non_numeric_fields_coerce_not_crash():
+    # LLMs sometimes emit a non-numeric value (e.g. 'N') in a numeric field;
+    # the block must render rather than crash the whole card.
+    cs = {"params": [{"name": "n", "min": 1, "max": "N", "step": "x", "default": "N"}],
+          "outputs": [{"name": "p", "expr": "1/n"}], "x_range": ["N", 10]}
+    html = param_sim.template({"block_id": "ps", "type": "param_sim", "content_spec": cs})
+    assert 'type="range"' in html and 'data-block-id="ps"' in html
+    # bad max coerced to default 1.0, bad step → "any"
+    assert 'max="1.0"' in html and 'step="any"' in html
+
+
 def test_legacy_slider_is_axis():
     # param x, output x*x → x is a slider AND the axis (drag x, see y=x²)
     cs = {"params": [{"name": "x", "min": 0, "max": 5, "default": 2}],
