@@ -138,6 +138,8 @@ def template(block: Dict[str, Any]) -> str:
     }}
     btn.addEventListener('click', function() {{ playing ? stop() : start(); }});
     document.addEventListener('visibilitychange', function() {{ if (document.hidden && playing) stop(); }});
+    // stop sound when the host (e.g. card deck) switches away from this card
+    window.addEventListener('knowling:stop-media', function() {{ if (playing) stop(); }});
 
     function draw() {{
       var W = canvas.width, H = canvas.height, pad = 14, mid = H / 2;

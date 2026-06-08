@@ -262,7 +262,13 @@ _DECK_JS = """
     dots.forEach(function (d, i) { d.classList.toggle('is-active', i === idx); });
     setHeight();
   }
-  function go(i) { idx = Math.max(0, Math.min(n - 1, i)); render(); }
+  function stopMedia() {
+    // halt anything playing on the card we're leaving: Web-Audio blocks listen
+    // for this event; also pause any real <audio>/<video> elements.
+    try { window.dispatchEvent(new CustomEvent('knowling:stop-media')); } catch (e) {}
+    deck.querySelectorAll('audio, video').forEach(function (m) { try { m.pause(); } catch (e) {} });
+  }
+  function go(i) { if (i !== idx) stopMedia(); idx = Math.max(0, Math.min(n - 1, i)); render(); }
 
   prev.addEventListener('click', function () { go(idx - 1); });
   next.addEventListener('click', function () { if (idx < n - 1) go(idx + 1); });
