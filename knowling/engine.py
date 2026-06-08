@@ -88,9 +88,13 @@ def plan_spec(
     provider = cfg.planner_provider()
     spec, call = spec_planner.plan(kp, grounding, provider, render_target=cfg.render_target)
     emit("cost", {"stage": "plan", **call.to_dict()})
+    has_visual = spec_planner._has_visual(spec)
+    if not has_visual:
+        emit("warn", {"stage": "plan", "msg": "no visual/interactive block after repair (text-only card)"})
     emit(
         "stage",
-        {"stage": "plan", "status": "done", "blocks": [b.type for b in spec.blocks]},
+        {"stage": "plan", "status": "done", "blocks": [b.type for b in spec.blocks],
+         "has_media": has_visual},
     )
     return spec, call
 
