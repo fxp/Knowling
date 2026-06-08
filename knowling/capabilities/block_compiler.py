@@ -40,6 +40,25 @@ PROMPT_TEMPLATE = """把以下 BlockSpec 编译成一个自包含的 HTML 片段
 {compile_hint}"""
 
 
+def _render_manim(block_dict: dict) -> None:
+    """Render a manim block's Scene → inline data-URI into its content_spec.
+
+    Mutates ``content_spec`` in place: sets ``video`` on success, else
+    ``render_error`` (the template then shows a placeholder). Never raises."""
+    cs = block_dict.setdefault("content_spec", {})
+    if cs.get("video"):
+        return
+    from . import manim_render
+    if not manim_render.available():
+        cs["render_error"] = "manim toolchain not installed"
+        return
+    uri, err = manim_render.render_data_uri(cs.get("script", ""), cs.get("scene", ""))
+    if uri:
+        cs["video"] = uri
+    else:
+        cs["render_error"] = err
+
+
 def _looks_usable(html: str, block: BlockSpec) -> bool:
     if not html or len(html.strip()) < 20:
         return False
@@ -86,6 +105,11 @@ def compile(
 
     # validate structured content up front (raises with a clear message)
     blocks.validate(block_dict)
+
+    # manim block: render the Scene script → inline MP4 (optional [manim] toolchain).
+    # Degrades to a captioned placeholder if the toolchain is absent or render fails.
+    if block.type == "manim":
+        _render_manim(block_dict)
 
     # template path (default) — consistent styling, deterministic, no LLM call.
     # Mock provider always lands here regardless of mode.

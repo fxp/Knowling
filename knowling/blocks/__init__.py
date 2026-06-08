@@ -25,6 +25,7 @@ from . import (
     flashcards,
     generic,
     interactive_demo,
+    manim,
     param_sim,
     quiz,
     section,
@@ -50,6 +51,7 @@ REGISTRY = {
     "step_through": step_through,
     "animation": animation,
     "audio": audio,
+    "manim": manim,
     "deep_dive": deep_dive,
     "user_note": user_note,
 }

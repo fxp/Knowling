@@ -173,6 +173,12 @@ button:disabled { opacity: .4; cursor: default; }
 .kl-audio-play:hover { transform: translateY(-1px); }
 .kl-audio-play.is-playing { background: linear-gradient(135deg, var(--kl-warm), #fb923c); }
 .kl-au-hint, .kl-au-explain { color: var(--kl-muted); font-size: 14.5px; }
+/* manim — 3Blue1Brown-style rendered animation */
+.kl-manim-fig { margin: 0; }
+.kl-manim-video { width: 100%; height: auto; display: block; border-radius: 12px; background: #000; box-shadow: var(--kl-shadow); }
+.kl-manim-cap { color: var(--kl-muted); font-size: 13px; margin: 10px 2px 0; text-align: center; }
+.kl-manim-fallback { background: linear-gradient(180deg, #fbfcfe, var(--kl-soft)); border: 1.5px dashed var(--kl-border); border-radius: 12px; padding: 30px; text-align: center; color: var(--kl-muted); }
+.kl-manim-note { font-size: 12px; margin: 8px 0 0; color: var(--kl-muted); }
 /* user_note */
 .kl-usernote-area { width: 100%; border: 1.5px solid var(--kl-border); border-radius: 12px; padding: 12px; font: inherit; resize: vertical; transition: border-color .15s; }
 .kl-usernote-area:focus { outline: none; border-color: var(--kl-accent); }

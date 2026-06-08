@@ -28,6 +28,8 @@ SAMPLES = {
     "animation": {"keyframes": ["a", "b"], "autoplay": False},
     "audio": {"waveform": "sine", "explain": "听",
               "controls": [{"name": "f", "label": "频率", "min": 110, "max": 880, "default": 440, "maps": "frequency"}]},
+    "manim": {"script": "from manim import *\nclass S(Scene):\n    def construct(self):\n        self.add(Dot())",
+              "scene": "S", "caption": "动画"},
     "deep_dive": {"summary": "more", "expanded_md": "detail"},
     "user_note": {"placeholder": "note"},
 }

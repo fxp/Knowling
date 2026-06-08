@@ -14,5 +14,9 @@ out/
 # harness artifacts
 .claude/*.lock
 
+# manim toolchain + render artifacts (optional [manim] extra)
+.venv-manim/
+media/
+
 # demo build artifacts (keep index.html + components, ignore preview shots)
 demo/_shot-*.png

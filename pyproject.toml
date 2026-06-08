@@ -22,6 +22,10 @@ dev = ["pytest>=7"]
 qa = ["playwright>=1.40"]
 # Optional vector-store RAG backend. The default SimpleRetriever is stdlib-only.
 rag = ["llama-index>=0.10"]
+# Optional 3Blue1Brown-style animation backend for the `manim` block. Heavy +
+# offline (needs FFmpeg; LaTeX optional). Without it, manim blocks degrade to a
+# captioned placeholder. Also needs a system FFmpeg. See capabilities/manim_render.
+manim = ["manim>=0.19", "importlib_metadata; python_version < '3.10'"]
 
 [project.scripts]
 knowling = "knowling.cli:main"
