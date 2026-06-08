@@ -25,7 +25,14 @@ def complete_json(
     last = None
     msgs = list(messages)
     for attempt in range(retries + 1):
-        last = provider.complete(msgs, task=task, **kw)
+        try:
+            last = provider.complete(msgs, task=task, **kw)
+        except Exception:
+            # transient provider/network error (e.g. connection reset) — retry,
+            # but let the final attempt's exception propagate.
+            if attempt == retries:
+                raise
+            continue
         data = extract_json(last.text)
         if data is not None:
             return data, last
