@@ -95,6 +95,16 @@ def test_errors(base_url):
     assert s == 404
 
 
+def test_base_path_mount(base_url, monkeypatch):
+    # behind a shared gateway mounted at /knowling
+    monkeypatch.setenv("KNOWLING_BASE_PATH", "/knowling")
+    s, d = _get(base_url + "/knowling/v1/health")
+    assert s == 200 and d["ok"] is True
+    s, d = _post(base_url + "/knowling/v1/knowling/plan",
+                 {**MOCK, "kp": {"id": "k", "title": "t"}})
+    assert s == 200 and d["spec"]["knowledge_point_id"] == "k"
+
+
 def test_token_auth(base_url, monkeypatch):
     monkeypatch.setenv("KNOWLING_API_TOKEN", "secret123")
     # no token → 401

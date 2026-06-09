@@ -22,6 +22,38 @@ cloudflared tunnel --url http://localhost:8765
 ```
 Good for demos/sharing. The URL changes each run and lasts only while it's running.
 
+## Behind a shared API gateway (e.g. api.xiaopingfeng.com) ✅
+
+`api.xiaopingfeng.com` is a **unified gateway serving many projects** — Knowling
+must mount as *one service under a path*, never claim the whole host. **Do NOT**
+`cloudflared tunnel route dns ... api.xiaopingfeng.com` (that hijacks the host).
+
+Mount Knowling under a path so it answers at `…/knowling/v1/*`:
+```bash
+export KNOWLING_BASE_PATH=/knowling      # server now serves /knowling/v1/health etc.
+export KNOWLING_API_TOKEN=...; export ZHIPU_API_KEY=...
+python3 -m knowling.server --port 8765
+```
+`KNOWLING_BASE_PATH` makes Knowling work whether or not the gateway strips the
+prefix (it accepts both `/knowling/v1/...` and `/v1/...`).
+
+Then add a route on the **existing gateway** → `http://<knowling-host>:8765`:
+- **cloudflared (ingress rules)** — add a path rule to the gateway tunnel's config.yml
+  (don't create a second tunnel for the same hostname):
+  ```yaml
+  ingress:
+    - hostname: api.xiaopingfeng.com
+      path: ^/knowling/.*           # Knowling
+      service: http://localhost:8765
+    - hostname: api.xiaopingfeng.com  # ...your other services / catch-all stay below
+      service: http://localhost:OTHER
+    - service: http_status:404
+  ```
+- **Cloudflare Worker router** — add `if (url.pathname.startsWith('/knowling/')) return fetch(KNOWLING_ORIGIN + url.pathname, request)`.
+- **nginx / Caddy origin** — `location /knowling/ { proxy_pass http://127.0.0.1:8765; }`.
+
+Knowling itself stays a plain backend; the gateway owns hostname + DNS.
+
 ## Option B — Named Tunnel on your domain (persistent, free) ✅ recommended
 
 Runs the server on any always-on box (your Mac, a VPS) and serves it at a stable

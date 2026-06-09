@@ -185,8 +185,15 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _dispatch(self, routes, body):
-        path = self.path.split("?", 1)[0].rstrip("/") or "/"
-        fn = routes.get(path) or routes.get(self.path.split("?", 1)[0])
+        path = self.path.split("?", 1)[0]
+        # Mount under a base path so we slot behind a shared API gateway as one
+        # service (e.g. KNOWLING_BASE_PATH=/knowling → /knowling/v1/health). The
+        # gateway may or may not strip the prefix; supporting it here works either way.
+        base = os.environ.get("KNOWLING_BASE_PATH", "").rstrip("/")
+        if base and (path == base or path.startswith(base + "/")):
+            path = path[len(base):] or "/"
+        path = path.rstrip("/") or "/"
+        fn = routes.get(path)
         if fn is None:
             self._send(404, {"error": f"no route {path}"})
             return
@@ -246,8 +253,10 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     httpd = serve(args.host, args.port)
     prov = "zhipu" if get_provider("auto", quiet=True).name == "zhipu" else "mock(offline)"
-    print(f"Knowling API v{__version__} on http://{args.host}:{args.port}  "
-          f"(provider: {prov}, manim: {manim_render.available()})")
+    base = os.environ.get("KNOWLING_BASE_PATH", "").rstrip("/")
+    auth = "token" if os.environ.get("KNOWLING_API_TOKEN") else "open"
+    print(f"Knowling API v{__version__} on http://{args.host}:{args.port}{base or ''}  "
+          f"(provider: {prov}, manim: {manim_render.available()}, auth: {auth})")
     print("  POST /v1/knowling/{plan,generate,compile,refine,reteach,quiz-eval} · GET /v1/{health,blocks}")
     try:
         httpd.serve_forever()
