@@ -18,5 +18,9 @@ out/
 .venv-manim/
 media/
 
+# node / wrangler (Cloudflare deploy)
+node_modules/
+.wrangler/
+
 # demo build artifacts (keep index.html + components, ignore preview shots)
 demo/_shot-*.png

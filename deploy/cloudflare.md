@@ -79,20 +79,38 @@ cloudflared tunnel run knowling-api               # or install as a service: clo
 Add **Cloudflare Access** (Zero Trust) on `api.xiaopingfeng.com` for SSO/JWT auth on
 top of the API token if you want managed access control.
 
-## Option C — Cloudflare Containers (fully hosted)
+## Option C — Cloudflare Containers (fully hosted) ✅ chosen
 
-Hosts the container on Cloudflare (no always-on box of yours). Needs the **Workers
-Paid** plan and `wrangler`.
+Hosts the container on Cloudflare and attaches a **path-specific Worker Route**
+`api.xiaopingfeng.com/knowling/*` — additive at the edge, so it works regardless of
+how the rest of the gateway is built and doesn't touch other routes. Needs the
+**Workers Paid** plan. Deploy package (repo root): `Dockerfile`, `wrangler.jsonc`,
+`worker.js`, `package.json`.
+
 ```bash
-docker build -t knowling-api -f deploy/Dockerfile .   # test locally first
-docker run -p 8765:8765 -e ZHIPU_API_KEY=... -e KNOWLING_API_TOKEN=... knowling-api
-npx wrangler login
-# Define a Container in wrangler.jsonc bound to deploy/Dockerfile, then:
-npx wrangler deploy
+# 1. (optional) build/run locally to sanity-check
+docker build -t knowling-api .
+docker run -p 8765:8765 -e KNOWLING_BASE_PATH=/knowling \
+  -e ZHIPU_API_KEY=$ZHIPU_API_KEY -e KNOWLING_API_TOKEN=$KNOWLING_API_TOKEN knowling-api
+curl -s localhost:8765/knowling/v1/health
+
+# 2. deploy to Cloudflare
+npm install
+npx wrangler login                       # your Cloudflare account
+npx wrangler secret put ZHIPU_API_KEY    # real GLM
+npx wrangler secret put KNOWLING_API_TOKEN
+npx wrangler deploy                       # builds the image, pushes, wires the route
+# → live at https://api.xiaopingfeng.com/knowling/v1/health
 ```
-Note: the lean image does plan/compile/generate (no manim/QA). The `manim` block
-needs the heavy `[manim]` layer (see the commented lines in deploy/Dockerfile);
-Playwright-based QA isn't included — keep `qa:false` (the API default).
+
+The Worker (`worker.js`) only forwards `/knowling/*` to the container and injects
+`KNOWLING_BASE_PATH=/knowling` + the secrets. Scales to zero (`sleepAfter`).
+
+**Caveat (Containers + heavy features):** the image is lean — core endpoints
+(plan/compile/generate/refine/reteach/quiz-eval) only. The `manim` block degrades
+to a placeholder (manim/LaTeX too heavy for the lean image) and `qa` stays off
+(no Playwright). For 3B1B animations, render offline or use a beefier instance
+with the `[manim]` layer (commented in `Dockerfile`).
 
 ## Smoke test (any option)
 ```bash

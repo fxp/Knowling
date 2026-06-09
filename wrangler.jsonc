@@ -1,0 +1,39 @@
+{
+  // Cloudflare Worker + Container deploy for the Knowling API.
+  // Mounts at api.xiaopingfeng.com/knowling/* via a path-specific Worker Route —
+  // additive at the edge, so it slots in without touching the rest of the gateway.
+  // Deploy: npx wrangler login && npx wrangler deploy
+  "name": "knowling-api",
+  "main": "worker.js",
+  "compatibility_date": "2025-05-06",
+
+  // The Python API runs in a container built from the repo-root Dockerfile.
+  "containers": [
+    {
+      "class_name": "KnowlingContainer",
+      "image": "./Dockerfile",
+      "instance_type": "standard",
+      "max_instances": 3
+    }
+  ],
+
+  // Containers are driven by a Durable Object class.
+  "durable_objects": {
+    "bindings": [
+      { "class_name": "KnowlingContainer", "name": "KNOWLING" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["KnowlingContainer"] }
+  ],
+
+  // Path-specific route: only /knowling/* hits this Worker; other gateway routes
+  // (more general or different paths) are unaffected. Requires the zone on Cloudflare.
+  "routes": [
+    { "pattern": "api.xiaopingfeng.com/knowling/*", "zone_name": "xiaopingfeng.com" }
+  ]
+
+  // Secrets (set once, never commit):
+  //   npx wrangler secret put ZHIPU_API_KEY
+  //   npx wrangler secret put KNOWLING_API_TOKEN
+}

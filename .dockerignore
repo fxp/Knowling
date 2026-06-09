@@ -1,0 +1,12 @@
+.git
+.venv-manim
+out
+media
+node_modules
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+demo/_shot-*.png
+.env
+*.key
