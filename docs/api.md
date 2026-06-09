@@ -13,9 +13,40 @@ python -m knowling.server --port 8765  # or, after `pip install -e .`: knowling-
 
 `GET /v1/health` → `{ok, version, provider, manim}`.
 
+## Authentication
+
+Token-based, opt-in via the **`KNOWLING_API_TOKEN`** env var:
+
+- **Unset** (default) → no auth — convenient for local dev.
+- **Set** → every **POST** route (`/v1/plan|generate|compile|refine|reteach|quiz-eval`)
+  requires the token. The **GET** routes (`/v1/health`, `/v1/blocks`) stay open so
+  health checks and discovery work unauthenticated.
+
+```bash
+export KNOWLING_API_TOKEN=$(openssl rand -hex 16)   # set a token → POST now protected
+python -m knowling.server --port 8765
+```
+
+Send it on POST requests as either header:
+
+```
+Authorization: Bearer <token>
+# — or —
+X-API-Key: <token>
+```
+
+A missing/incorrect token on a POST returns **401** `{"error":"missing or invalid API token"}`.
+The startup banner shows the mode: `auth: token` vs `auth: open`.
+
+> Deployed behind the gateway (`api.xiaopingfeng.com/knowling/*`), the Worker injects
+> `KNOWLING_API_TOKEN` as a Cloudflare secret, so the live API is token-protected by
+> default. For stronger control, layer **Cloudflare Access** on the route (SSO/JWT) in
+> addition to the token.
+
 ## Endpoints
 
 All JSON. POST bodies are JSON objects. CORS is open (`*`) for browser frontends.
+**POST routes require the token** when `KNOWLING_API_TOKEN` is set (see Authentication).
 
 | Method | Path | Body | Returns |
 |---|---|---|---|
@@ -46,27 +77,30 @@ All JSON. POST bodies are JSON objects. CORS is open (`*`) for browser frontends
 ## Examples
 
 ```bash
-# health
+TOKEN=$KNOWLING_API_TOKEN          # the token you set on the server (omit header if auth is open)
+AUTH="Authorization: Bearer $TOKEN"
+
+# health (open — no token needed)
 curl -s localhost:8765/v1/health
 
 # blueprint only
 curl -s -X POST localhost:8765/v1/plan \
-  -H 'Content-Type: application/json' \
+  -H "$AUTH" -H 'Content-Type: application/json' \
   -d '{"kp":{"id":"math.slope","title":"一次函数的斜率","description":"k 表示倾斜程度"}}'
 
 # full card (self-contained HTML in .html)
 curl -s -X POST localhost:8765/v1/generate \
-  -H 'Content-Type: application/json' \
+  -H "$AUTH" -H 'Content-Type: application/json' \
   -d '{"kp":{"id":"math.slope","title":"一次函数的斜率"},"allow_manim":true}'
 
 # quiz failed → re-teach an easier card for the same KP
 curl -s -X POST localhost:8765/v1/reteach \
-  -H 'Content-Type: application/json' \
+  -H "$AUTH" -H 'Content-Type: application/json' \
   -d '{"kp":{"id":"math.slope","title":"斜率"},"spec":{...},"quiz":{"total":5,"correct":1}}'
 
 # turn a quiz result into a mastery signal (graph lighting)
 curl -s -X POST localhost:8765/v1/quiz-eval \
-  -H 'Content-Type: application/json' \
+  -H "$AUTH" -H 'Content-Type: application/json' \
   -d '{"kp_id":"math.slope","quiz":{"total":5,"correct":5}}'
 ```
 
