@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from typing import Any, List, Optional
@@ -91,14 +92,25 @@ class ZhipuProvider(LLMProvider):
             },
             method="POST",
         )
-        try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                body = json.loads(resp.read().decode("utf-8"))
-        except urllib.error.HTTPError as e:  # pragma: no cover - network
-            detail = e.read().decode("utf-8", "ignore")
-            raise ProviderError(f"GLM HTTP {e.code}: {detail}") from e
-        except urllib.error.URLError as e:  # pragma: no cover - network
-            raise ProviderError(f"GLM connection failed: {e.reason}") from e
+        # Retry transient failures (connection resets, timeouts, 429/5xx) — the
+        # proxy/edge can be flaky; one drop shouldn't fail a whole generation.
+        body = None
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                    body = json.loads(resp.read().decode("utf-8"))
+                break
+            except urllib.error.HTTPError as e:  # pragma: no cover - network
+                detail = e.read().decode("utf-8", "ignore")
+                if e.code in (429, 500, 502, 503, 504) and attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                raise ProviderError(f"GLM HTTP {e.code}: {detail}") from e
+            except urllib.error.URLError as e:  # pragma: no cover - network
+                if attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                raise ProviderError(f"GLM connection failed: {e.reason}") from e
 
         msg = body["choices"][0]["message"]
         # GLM-5 reasoning models may leave content empty and put text in
