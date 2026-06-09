@@ -10,12 +10,15 @@ Run:
 Endpoints (all JSON; POST bodies are JSON objects):
     GET  /v1/health                  → {ok, provider, manim, version}
     GET  /v1/blocks                  → {blocks: [...]}
-    POST /v1/knowling/plan           {kp, ground?, allow_manim?}        → {spec}
-    POST /v1/knowling/compile        {spec, kp, qa?}                    → {knowling, html}
-    POST /v1/knowling/generate       {kp, qa?, allow_manim?, ground?}   → {knowling, html}
-    POST /v1/knowling/refine         {spec, kp, instruction}           → {knowling, html, summary, changes}
-    POST /v1/knowling/reteach        {spec, kp, quiz}                  → {knowling, html, summary}
-    POST /v1/knowling/quiz-eval      {kp_id, quiz, knowling_id?, pass_threshold?} → {mastery}
+    POST /v1/plan                    {kp, ground?, allow_manim?}        → {spec}
+    POST /v1/compile                 {spec, kp, qa?}                    → {knowling, html}
+    POST /v1/generate                {kp, qa?, allow_manim?, ground?}   → {knowling, html}
+    POST /v1/refine                  {spec, kp, instruction}           → {knowling, html, summary, changes}
+    POST /v1/reteach                 {spec, kp, quiz}                  → {knowling, html, summary}
+    POST /v1/quiz-eval               {kp_id, quiz, knowling_id?, pass_threshold?} → {mastery}
+
+Behind a gateway mount (KNOWLING_BASE_PATH=/knowling) these become
+/knowling/v1/* — e.g. https://api.xiaopingfeng.com/knowling/v1/generate.
 
 Common request fields: ``provider`` ("auto"|"zhipu"|"mock"), ``qa`` (bool, default
 false — QA is slow + needs a browser/VLM), ``allow_manim`` (bool), ``ground``
@@ -154,12 +157,12 @@ def h_blocks(_body):
 
 
 POST_ROUTES: Dict[str, Callable[[dict], dict]] = {
-    "/v1/knowling/plan": h_plan,
-    "/v1/knowling/generate": h_generate,
-    "/v1/knowling/compile": h_compile,
-    "/v1/knowling/refine": h_refine,
-    "/v1/knowling/reteach": h_reteach,
-    "/v1/knowling/quiz-eval": h_quiz_eval,
+    "/v1/plan": h_plan,
+    "/v1/generate": h_generate,
+    "/v1/compile": h_compile,
+    "/v1/refine": h_refine,
+    "/v1/reteach": h_reteach,
+    "/v1/quiz-eval": h_quiz_eval,
 }
 GET_ROUTES: Dict[str, Callable[[dict], dict]] = {
     "/v1/health": h_health,
@@ -257,7 +260,7 @@ def main(argv=None) -> int:
     auth = "token" if os.environ.get("KNOWLING_API_TOKEN") else "open"
     print(f"Knowling API v{__version__} on http://{args.host}:{args.port}{base or ''}  "
           f"(provider: {prov}, manim: {manim_render.available()}, auth: {auth})")
-    print("  POST /v1/knowling/{plan,generate,compile,refine,reteach,quiz-eval} · GET /v1/{health,blocks}")
+    print("  POST /v1/{plan,generate,compile,refine,reteach,quiz-eval} · GET /v1/{health,blocks}")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

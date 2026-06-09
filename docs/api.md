@@ -21,12 +21,12 @@ All JSON. POST bodies are JSON objects. CORS is open (`*`) for browser frontends
 |---|---|---|---|
 | GET | `/v1/health` | — | `{ok, version, provider, manim}` |
 | GET | `/v1/blocks` | — | `{blocks: [...]}` |
-| POST | `/v1/knowling/plan` | `{kp, ground?, allow_manim?}` | `{spec}` |
-| POST | `/v1/knowling/generate` | `{kp, qa?, allow_manim?, ground?}` | `{knowling, html}` |
-| POST | `/v1/knowling/compile` | `{spec, kp, qa?}` | `{knowling, html}` |
-| POST | `/v1/knowling/refine` | `{spec, kp, instruction}` | `{knowling, html, summary, changes}` |
-| POST | `/v1/knowling/reteach` | `{spec, kp, quiz}` | `{knowling, html, summary}` |
-| POST | `/v1/knowling/quiz-eval` | `{kp_id, quiz, knowling_id?, pass_threshold?}` | `{mastery}` |
+| POST | `/v1/plan` | `{kp, ground?, allow_manim?}` | `{spec}` |
+| POST | `/v1/generate` | `{kp, qa?, allow_manim?, ground?}` | `{knowling, html}` |
+| POST | `/v1/compile` | `{spec, kp, qa?}` | `{knowling, html}` |
+| POST | `/v1/refine` | `{spec, kp, instruction}` | `{knowling, html, summary, changes}` |
+| POST | `/v1/reteach` | `{spec, kp, quiz}` | `{knowling, html, summary}` |
+| POST | `/v1/quiz-eval` | `{kp_id, quiz, knowling_id?, pass_threshold?}` | `{mastery}` |
 
 ### Common request fields
 - `provider`: `"auto"` (default) · `"zhipu"` · `"mock"`.
@@ -50,22 +50,22 @@ All JSON. POST bodies are JSON objects. CORS is open (`*`) for browser frontends
 curl -s localhost:8765/v1/health
 
 # blueprint only
-curl -s -X POST localhost:8765/v1/knowling/plan \
+curl -s -X POST localhost:8765/v1/plan \
   -H 'Content-Type: application/json' \
   -d '{"kp":{"id":"math.slope","title":"一次函数的斜率","description":"k 表示倾斜程度"}}'
 
 # full card (self-contained HTML in .html)
-curl -s -X POST localhost:8765/v1/knowling/generate \
+curl -s -X POST localhost:8765/v1/generate \
   -H 'Content-Type: application/json' \
   -d '{"kp":{"id":"math.slope","title":"一次函数的斜率"},"allow_manim":true}'
 
 # quiz failed → re-teach an easier card for the same KP
-curl -s -X POST localhost:8765/v1/knowling/reteach \
+curl -s -X POST localhost:8765/v1/reteach \
   -H 'Content-Type: application/json' \
   -d '{"kp":{"id":"math.slope","title":"斜率"},"spec":{...},"quiz":{"total":5,"correct":1}}'
 
 # turn a quiz result into a mastery signal (graph lighting)
-curl -s -X POST localhost:8765/v1/knowling/quiz-eval \
+curl -s -X POST localhost:8765/v1/quiz-eval \
   -H 'Content-Type: application/json' \
   -d '{"kp_id":"math.slope","quiz":{"total":5,"correct":5}}'
 ```

@@ -115,7 +115,7 @@ with the `[manim]` layer (commented in `Dockerfile`).
 ## Smoke test (any option)
 ```bash
 curl -s https://<your-host>/v1/health
-curl -s -X POST https://<your-host>/v1/knowling/generate \
+curl -s -X POST https://<your-host>/v1/generate \
   -H "Authorization: Bearer $KNOWLING_API_TOKEN" -H 'Content-Type: application/json' \
   -d '{"kp":{"id":"math.slope","title":"一次函数的斜率"}}'
 ```
