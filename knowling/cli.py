@@ -140,6 +140,7 @@ def _cfg_from_args(args, quiet: bool = False) -> Config:
         approval=getattr(args, "approval", "auto"),
         qa_enabled=getattr(args, "qa_enabled", True),
         compile_mode=getattr(args, "compile_mode", "template"),
+        allow_manim=getattr(args, "allow_manim", False),
         quiet=quiet,
     )
 
@@ -268,6 +269,8 @@ def _add_common(p: argparse.ArgumentParser, with_kp: bool = True) -> None:
     p.add_argument("--compile-mode", dest="compile_mode", choices=["template", "codegen"],
                    default="template",
                    help="template: consistent .kl-* rendering (default); codegen: LLM writes each block")
+    p.add_argument("--allow-manim", dest="allow_manim", action="store_true", default=False,
+                   help="let the planner add a 3Blue1Brown-style manim animation (needs [manim] toolchain)")
     p.add_argument("-o", "--output", default=None, help="output path (file or dir/)")
     if with_kp:
         p.add_argument("--id", default=None, help="stable knowledge-point id")
