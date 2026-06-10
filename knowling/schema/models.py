@@ -310,6 +310,7 @@ class QAReport:
     score_render: Optional[float] = None
     score_interact: Optional[float] = None
     score_peda: Optional[float] = None
+    score_learn: Optional[float] = None
     passed: bool = False
     notes: List[str] = field(default_factory=list)
 

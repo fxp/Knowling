@@ -1,9 +1,11 @@
-"""QA loop — backtrack + select-best (design §6.2), three-dimensional.
+"""QA loop — backtrack + select-best (design §6.2), four-dimensional.
 
-``qa_step`` evaluates render → interact → pedagogy in order, short-circuiting at
-the first dimension that fails (design §6.1). ``qa_loop`` drives steps, recompiles
+``qa_step`` evaluates render → interact → pedagogy → learnability in order,
+short-circuiting at the first dimension that fails (design §6.1). Learnability is
+the final gate: a learner who masters all prerequisites must be able to acquire
+the point's knowledge from the card alone. ``qa_loop`` drives steps, recompiles
 only the failed blocks (design §3.1 #3), backtracks after repeated render errors,
-and finally selects the best step by peda → interact → render → recency.
+and finally selects the best step by learn → peda → interact → render → recency.
 """
 
 from __future__ import annotations
@@ -16,7 +18,7 @@ from ...sandbox import get_sandbox
 from ...sandbox.base import Sandbox
 from ...schema import KnowlingSpec, QAReport
 from .. import block_compiler
-from . import gui_agent, pedagogy_judge, render_vlm
+from . import gui_agent, learn_judge, pedagogy_judge, render_vlm
 from .types import QAConfig, StepFeedback
 
 EventSink = Callable[[str, dict], None]
@@ -57,7 +59,15 @@ def qa_step(
     if not f_peda.passed:
         return StepFeedback(stage="pedagogy", render=f_render, interact=f_interact, pedagogy=f_peda)
 
-    return StepFeedback(stage="pass", render=f_render, interact=f_interact, pedagogy=f_peda)
+    f_learn = learn_judge.assess(
+        render.html, spec, kp, grounding, providers.get("learn") or providers["judge"], cfg
+    )
+    if not f_learn.passed:
+        return StepFeedback(stage="learn", render=f_render, interact=f_interact,
+                            pedagogy=f_peda, learn=f_learn)
+
+    return StepFeedback(stage="pass", render=f_render, interact=f_interact,
+                        pedagogy=f_peda, learn=f_learn)
 
 
 # ─────────────────────────── pure helpers (testable) ───────────────────────────
@@ -71,11 +81,12 @@ def _score(fb: StepFeedback, key: str) -> float:
 
 
 def select_best(memory: Memory) -> int:
-    """Index of best step: peda → interact → render → recency (design §6.2)."""
+    """Index of best step: learn → peda → interact → render → recency (design §6.2)."""
     best_i = 0
     best_key = None
     for i, (_frag, fb) in enumerate(memory):
-        key = (_score(fb, "peda"), _score(fb, "interact"), _score(fb, "render"), i)
+        key = (_score(fb, "learn"), _score(fb, "peda"),
+               _score(fb, "interact"), _score(fb, "render"), i)
         if best_key is None or key >= best_key:
             best_key, best_i = key, i
     return best_i
@@ -169,6 +180,7 @@ def qa_loop(
         score_render=best_fb.scores.get("render"),
         score_interact=best_fb.scores.get("interact"),
         score_peda=best_fb.scores.get("peda"),
+        score_learn=best_fb.scores.get("learn"),
         passed=best_fb.all_pass(),
         notes=([f"selected step {best_i + 1}/{len(memory)}"]
                + (best_fb.suggestions if not best_fb.all_pass() else [])),
