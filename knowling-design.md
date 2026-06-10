@@ -216,6 +216,8 @@ interface KnowlingSpec {
     central_phenomenon: string;  // Bret Victor: 要引导读者注意的"那个现象"
     misconceptions: string[];    // 常见误解 (质检会检查是否澄清)
     aha_moment: string;          // 期望的"顿悟点"
+    prerequisites?: { name: string; why?: string }[];  // 本卡依赖的前置知识点；
+                                 // 自动渲染为整张卡的第一页「学习之前」(assembler)
   };
   blocks: BlockSpec[];           // 有序块编排
   render_target: "react" | "html";

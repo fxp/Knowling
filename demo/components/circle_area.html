@@ -175,6 +175,16 @@ button:disabled { opacity: .4; cursor: default; }
 .kl-usernote-area:focus { outline: none; border-color: var(--kl-accent); }
 /* deep_dive */
 .kl-deepdive summary { cursor: pointer; font-weight: 640; }
+/* prerequisites — the guaranteed first card stating what to know first */
+.kl-prereq { border-left: 4px solid var(--kl-accent-2); background: linear-gradient(100deg, #e8f7fe, rgba(232,247,254,.2)); }
+.kl-prereq-title { display: flex; align-items: center; gap: 9px; font-size: 19px; margin: 0 0 6px; }
+.kl-prereq-lead { color: var(--kl-muted); font-size: 14.5px; margin: 0 0 14px; }
+.kl-prereq-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: kl-prereq; }
+.kl-prereq-list li { position: relative; padding: 12px 16px 12px 46px; background: var(--kl-bg); border: 1px solid var(--kl-border); border-radius: 12px; }
+.kl-prereq-list li::before { counter-increment: kl-prereq; content: counter(kl-prereq); position: absolute; left: 12px; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: var(--kl-grad); color: #fff; font-size: 13px; font-weight: 700; display: grid; place-items: center; }
+.kl-prereq-name { font-weight: 660; }
+.kl-prereq-why { display: block; color: var(--kl-muted); font-size: 14px; margin-top: 3px; }
+.kl-prereq-note { color: var(--kl-muted); font-size: 13px; margin: 14px 0 0; }
 /* ── card deck (one block at a time) ── */
 .kl-deck { margin: 20px 0 4px; }
 .kl-deck-viewport { overflow: hidden; transition: height .35s ease; }
@@ -231,6 +241,9 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
+<div class="kl-card"><section class="kl-block kl-prereq"><h2 class="kl-prereq-title"><span>🧭</span>学习之前 · 先备好这些前置知识</h2><p class="kl-prereq-lead">这张卡建立在以下知识点之上。其中有不熟悉的，建议先补上再继续，学起来会顺畅得多。</p><ol class="kl-prereq-list"><li><span class="kl-prereq-name">圆的周长公式 <span class="kl-math"><math><mrow><mi>C</mi><mo>=</mo><mn>2</mn><mi>π</mi><mi>r</mi></mrow></math></span></span><span class="kl-prereq-why">每个半径为 <span class="kl-math"><math><mi>t</mi></math></span> 的薄环拉直后，长度正是它的周长 <span class="kl-math"><math><mrow><mn>2</mn><mi>π</mi><mi>t</mi></mrow></math></span></span></li>
+<li><span class="kl-prereq-name">三角形面积 <span class="kl-math"><math><mrow><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>×</mo></mrow></math></span>底<span class="kl-math"><math><mo form="prefix" stretchy="false" lspace="0em" rspace="0em">×</mo></math></span>高</span><span class="kl-prereq-why">把所有细条叠成三角形后，就用这个公式算出 <span class="kl-math"><math><mrow><mi>π</mi><msup><mi>r</mi><mn class="tml-sml-pad">2</mn></msup></mrow></math></span></span></li>
+<li><span class="kl-prereq-name"><span class="kl-math"><math><mi>π</mi></math></span> 的含义（圆周率）</span><span class="kl-prereq-why">它把圆的半径与周长、面积联系起来</span></li></ol><p class="kl-prereq-note">都熟悉了？点「下一张」开始学习。</p></section></div>
 <div class="kl-card"><section class="kl-block kl-text" data-block-id="bk_1_hook">
 <p>圆的面积公式 <span class="kl-math"><math><mrow><mi>A</mi><mo>=</mo><mi>π</mi><msup><mi>r</mi><mn class="tml-sml-pad">2</mn></msup></mrow></math></span> 人人会背，但它<strong>从哪来</strong>？</p>
 <p>一个不用微积分的漂亮办法：把圆切成许多很薄的<strong>同心圆环</strong>，再把每个环剪开、拉直。半径为 <span class="kl-math"><math><mi>t</mi></math></span> 的环拉直后是一根长 <span class="kl-math"><math><mrow><mn>2</mn><mi>π</mi><mi>t</mi></mrow></math></span> 的细条。把这些细条按长短叠起来，竟拼成一个<strong>三角形</strong>——底是最外圈周长 <span class="kl-math"><math><mrow><mn>2</mn><mi>π</mi><mi>r</mi></mrow></math></span>，高是半径 <span class="kl-math"><math><mi>r</mi></math></span>。下面先动手感受面积如何随 <span class="kl-math"><math><mi>r</mi></math></span> 变化。</p>
