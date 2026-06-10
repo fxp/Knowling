@@ -7,9 +7,7 @@ name: Deploy demo gallery to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-      - claude/math-manim-knowling-integration-jlk8oc
+    branches: [main]   # Pages publishes only from the default branch
     paths:
       - demo/**
       - .github/workflows/pages.yml
