@@ -6,7 +6,7 @@
 
 > 完整设计见 [`knowling-design.md`](knowling-design.md)，开发进度见 [`ROADMAP.md`](ROADMAP.md)。
 >
-> **演示画廊**：用浏览器打开 [`demo/index.html`](demo/index.html) 即可交互体验生成的组件（含一个真实 GLM-5 生成并通过三维质检的「正弦函数」组件）。
+> **演示画廊**：用浏览器打开 [`demo/index.html`](demo/index.html) 即可交互体验生成的组件——含真实 GLM-5 生成的「正弦函数 / 二次函数 / 二分查找 / 复利」，以及参考 [HarleyCoops/Math-To-Manim](https://github.com/HarleyCoops/Math-To-Manim) 与 3Blue1Brown 可视化手写蓝图的 **Math-To-Manim 系列**（傅里叶级数逼近方波、泰勒级数逼近 eˣ、圆面积展开法）。
 
 ## 已实现（P0 + P1 + P2，设计文档 §12）
 

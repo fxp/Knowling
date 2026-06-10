@@ -8,12 +8,21 @@
 
 ## 内容
 
-跨学科示例，均由真实 GLM-5 规划内容、统一模板渲染、通过三维质检：
+跨学科示例，统一模板渲染、通过三维质检。徽章标注内容来源：
 
+**GLM-5 规划**
 - **正弦函数 y = A·sin(ωx + φ)** — param_sim 曲线随 A/ω/φ 滑块变化
 - **二次函数顶点式 y = a(x−h)²+k** — 抛物线随系数平移/开口
 - **二分查找 Binary Search** — step_through 逐步推演
 - **复利 A = P(1+r)ⁿ** — 指数增长 + Quiz
+
+**Math-To-Manim 系列**（手写蓝图，灵感来自 [HarleyCoops/Math-To-Manim](https://github.com/HarleyCoops/Math-To-Manim) 与 3Blue1Brown 的可视化）
+- **傅里叶级数逼近方波** — 滑块加入奇次谐波，看方波浮现 + 吉布斯过冲
+- **泰勒级数逼近 eˣ** — 滑块控制项数，多项式逐段咬住 e^x（收敛半径）
+- **圆面积 A = πr²（展开法）** — 同心环拉直叠成三角形，不用积分推出 πr²
+
+> Math-To-Manim 系列是**手写的 KnowlingSpec 蓝图**（见 `demo/specs/`），用同一套 `.kl-*`
+> 模板编译，可用 `python3 demo/build.py --rerender` **免模型**从蓝图重新编译。
 
 ## 重新生成
 

@@ -43,6 +43,21 @@ EXAMPLES = [
      "description": "本金P、利率r、期数n 如何共同决定最终金额，以及复利与单利的差异",
      "objectives": "理解复利随期数指数增长,体会利率与时间的威力",
      "audience": "理财入门", "difficulty": "intro"},
+
+    # ── Math-To-Manim 系列（手写蓝图，灵感来自 HarleyCoops/Math-To-Manim
+    #    与 3Blue1Brown 的可视化；用 --rerender 从 demo/specs 免模型重编译）──
+    {"id": "fourier_square_wave", "title": "傅里叶级数逼近方波",
+     "description": "用频率成倍、振幅递减的奇次正弦波叠加出方波，以及吉布斯过冲现象",
+     "objectives": "理解方波只含奇次谐波,谐波越多越逼近,认识吉布斯现象",
+     "audience": "本科生", "difficulty": "advanced", "source": "Math-To-Manim"},
+    {"id": "taylor_series_exp", "title": "泰勒级数逼近 eˣ",
+     "description": "用多项式部分和逼近 e^x，项数越多逼近范围越大，以及收敛半径的含义",
+     "objectives": "理解麦克劳林展开,阶乘分母保证收敛,区分收敛半径有限/无穷",
+     "audience": "高中/本科", "difficulty": "advanced", "source": "Math-To-Manim"},
+    {"id": "circle_area", "title": "圆面积 A = πr²（展开法）",
+     "description": "把圆拆成同心环、拉直叠成三角形，不用积分推出 πr²，并体会平方关系",
+     "objectives": "理解几何推导,掌握面积随半径平方增长,区分周长与面积公式",
+     "audience": "初中生", "difficulty": "core", "source": "Math-To-Manim"},
 ]
 
 
@@ -67,7 +82,8 @@ def _generate() -> None:
         with open(os.path.join(SPECS, ex["id"] + ".json"), "w", encoding="utf-8") as f:
             json.dump(k.spec.to_dict(), f, ensure_ascii=False, indent=2)
         manifest.append({
-            "title": ex["title"], "file": ex["id"] + ".html", "source": source,
+            "title": ex["title"], "file": ex["id"] + ".html",
+            "source": ex.get("source", source),
             "kp": ex["description"], "audience": ex["audience"],
             "blocks": [b.type for b in k.spec.blocks],
             "qa": {"render": k.qa.score_render, "interact": k.qa.score_interact,
@@ -96,8 +112,12 @@ def _qa_chips(qa: dict) -> str:
 
 
 def _card(item: dict) -> str:
-    badge = ('<span class="src src-glm">GLM-5 生成</span>' if item["source"] == "GLM-5"
-             else '<span class="src src-mock">离线模板</span>')
+    if item["source"] == "GLM-5":
+        badge = '<span class="src src-glm">GLM-5 生成</span>'
+    elif item["source"] == "Math-To-Manim":
+        badge = '<span class="src src-m2m">Math-To-Manim</span>'
+    else:
+        badge = '<span class="src src-mock">离线模板</span>'
     status = item.get("status", "draft")
     status_cls = "ready" if status == "ready" else "draft"
     blocks = "".join(f'<span class="chip chip-block">{_esc(b)}</span>' for b in item["blocks"])
@@ -156,6 +176,7 @@ header.hero {{ padding:64px 0 36px; border-bottom:1px solid var(--border);
 .src {{ font-size:12px; padding:4px 10px; border-radius:999px; white-space:nowrap; font-weight:600; }}
 .src-glm {{ background:rgba(108,140,255,.16); color:var(--accent); border:1px solid rgba(108,140,255,.4); }}
 .src-mock {{ background:#21262d; color:var(--muted); border:1px solid var(--border); }}
+.src-m2m {{ background:rgba(255,138,76,.16); color:var(--accent2); border:1px solid rgba(255,138,76,.4); }}
 .meta, .blocks {{ display:flex; flex-wrap:wrap; gap:6px; padding:0 18px; }}
 .blocks {{ padding-top:10px; padding-bottom:4px; }}
 .chip {{ font-size:12px; padding:3px 9px; border-radius:999px; background:#21262d; color:var(--muted); border:1px solid var(--border); }}
