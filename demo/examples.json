@@ -109,7 +109,76 @@
       "render": 5.0,
       "interact": 5.0,
       "peda": 3.5,
-      "learn": 3.0,
+      "learn": 3.6,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": false
+  },
+  {
+    "title": "正态分布：μ 与 σ 如何决定钟形曲线",
+    "file": "normal_distribution.html",
+    "source": "离线模板",
+    "kp": "均值μ控制位置、标准差σ控制胖瘦与峰高，曲线下面积恒为1",
+    "audience": "统计入门",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 3.5,
+      "learn": 3.25,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": false
+  },
+  {
+    "title": "指数衰减与半衰期 N = N₀·(1/2)^(t/T)",
+    "file": "exponential_decay.html",
+    "source": "离线模板",
+    "kp": "半衰期T与初始量N₀如何决定衰减曲线，每过一个T剩余量减半且永不为0",
+    "audience": "高中生",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 3.5,
+      "learn": 4.3,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": false
+  },
+  {
+    "title": "Sigmoid 函数 σ(x)=1/(1+e^(−k(x−x₀)))",
+    "file": "sigmoid_function.html",
+    "source": "离线模板",
+    "kp": "陡峭度k控制S形软硬、中点x₀控制平移，输出恒被挤压在(0,1)",
+    "audience": "机器学习入门",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 3.5,
+      "learn": 3.6,
       "passed": true
     },
     "status": "ready",

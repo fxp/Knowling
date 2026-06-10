@@ -47,6 +47,18 @@ EXAMPLES = [
      "description": "先验P(D)、似然P(+|D)、后验P(D|+) 三者如何随证据更新，及基础率忽视",
      "objectives": "分清似然与后验,理解先验如何影响后验,看懂后验公式",
      "audience": "初学者", "difficulty": "core"},
+    {"id": "normal_distribution", "title": "正态分布：μ 与 σ 如何决定钟形曲线",
+     "description": "均值μ控制位置、标准差σ控制胖瘦与峰高，曲线下面积恒为1",
+     "objectives": "理解μ控制位置,理解σ控制分散与峰高,理解面积守恒为1",
+     "audience": "统计入门", "difficulty": "core"},
+    {"id": "exponential_decay", "title": "指数衰减与半衰期 N = N₀·(1/2)^(t/T)",
+     "description": "半衰期T与初始量N₀如何决定衰减曲线，每过一个T剩余量减半且永不为0",
+     "objectives": "理解每过半衰期减半,理解T控制衰减快慢,区分指数衰减与线性减少",
+     "audience": "高中生", "difficulty": "intro"},
+    {"id": "sigmoid_function", "title": "Sigmoid 函数 σ(x)=1/(1+e^(−k(x−x₀)))",
+     "description": "陡峭度k控制S形软硬、中点x₀控制平移，输出恒被挤压在(0,1)",
+     "objectives": "理解输出恒在0到1之间,理解k控制陡缓,理解x₀控制中点位置",
+     "audience": "机器学习入门", "difficulty": "core"},
 ]
 
 

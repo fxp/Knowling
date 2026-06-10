@@ -148,15 +148,20 @@ def _assess_heuristic(artifact_html, kp, cfg: QAConfig) -> DimensionFeedback:
     score = 5.0
     suggestions: List[str] = []
 
+    # Lexical coverage is only a proxy — a card may teach an objective with
+    # synonyms the objective's wording doesn't share. So penalties are gentle:
+    # offline we don't hard-fail a substantive card, but a card that mentions
+    # *nothing* relevant (coverage ≈ 0 across all objectives) still drops below
+    # the bar. Real per-objective judgment is the LLM path above.
     objs = (kp.learning_objectives if kp else []) or []
     for obj in objs:
         cov = _coverage(obj, text)
         if cov < 0.3:
-            score -= 1.0
-            suggestions.append(f"卡片内容几乎未触及学习目标，学习者无法获得：{obj}")
+            score -= 0.7
+            suggestions.append(f"卡片内容几乎未触及学习目标，学习者可能无法获得：{obj}")
         elif cov < 0.6:
-            score -= 0.5
-            suggestions.append(f"卡片对该目标讲解不足，学习者可能学不全：{obj}")
+            score -= 0.35
+            suggestions.append(f"卡片对该目标讲解可能不足，学习者或学不全：{obj}")
 
     # a card with almost no prose can't transmit knowledge regardless of coverage.
     if len(text) < 80:
