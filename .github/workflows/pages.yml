@@ -3,6 +3,7 @@ name: Deploy demo gallery to GitHub Pages
 # Builds the self-contained Knowling demo gallery (demo/) and publishes it to
 # GitHub Pages. The gallery is pure static HTML (no runtime deps); the build
 # step only re-renders demo/index.html from the committed specs/components.
+# Requires Pages to be enabled once (Settings -> Pages -> Source: GitHub Actions).
 
 on:
   push:
