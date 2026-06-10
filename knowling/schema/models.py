@@ -37,6 +37,32 @@ def _strip_none(d: Dict[str, Any]) -> Dict[str, Any]:
     return {k: v for k, v in d.items() if v is not None and v != [] and v != {}}
 
 
+def normalize_prerequisites(items: Any) -> List[Dict[str, str]]:
+    """Coerce prerequisite entries into ``[{name, why?}]``.
+
+    Tolerant of the shapes LLMs emit: a plain string ("正弦函数的图象"), or a
+    dict keyed by name/why under various aliases. Entries without a name drop.
+    """
+    out: List[Dict[str, str]] = []
+    for it in items or []:
+        if isinstance(it, str):
+            name = it.strip()
+            if name:
+                out.append({"name": name})
+        elif isinstance(it, dict):
+            name = str(it.get("name") or it.get("title") or it.get("point")
+                       or it.get("topic") or "").strip()
+            if not name:
+                continue
+            entry = {"name": name}
+            why = (it.get("why") or it.get("reason") or it.get("desc")
+                   or it.get("description") or it.get("explain"))
+            if why:
+                entry["why"] = str(why).strip()
+            out.append(entry)
+    return out
+
+
 def as_int(v: Any, default: int = 0) -> int:
     """Tolerant int coercion — LLMs often emit '1.0', 1.0, or ' 2 '."""
     if isinstance(v, bool):
@@ -168,6 +194,7 @@ class Pedagogy:
     central_phenomenon: str = ""
     misconceptions: List[str] = field(default_factory=list)
     aha_moment: str = ""
+    prerequisites: List[Dict[str, str]] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "Pedagogy":
@@ -176,15 +203,20 @@ class Pedagogy:
             central_phenomenon=d.get("central_phenomenon", ""),
             misconceptions=list(d.get("misconceptions", [])),
             aha_moment=d.get("aha_moment", ""),
+            prerequisites=normalize_prerequisites(d.get("prerequisites")),
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        out = {
             "hook": self.hook,
             "central_phenomenon": self.central_phenomenon,
             "misconceptions": self.misconceptions,
             "aha_moment": self.aha_moment,
         }
+        # Keep specs terse/diffable: only emit prerequisites when present.
+        if self.prerequisites:
+            out["prerequisites"] = self.prerequisites
+        return out
 
 
 @dataclass

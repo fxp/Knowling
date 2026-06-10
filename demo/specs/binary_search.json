@@ -8,7 +8,12 @@
       "更新边界时写成 low = mid 或 high = mid，导致死循环",
       "计算 mid 时直接写 (low + high) 可能导致整数溢出"
     ],
-    "aha_moment": "意识到 mid 已经比较过且不等于目标，所以新区间必须彻底跨过 mid（low=mid+1 或 high=mid-1），这就是为什么区间能绝对减半且不会遗漏"
+    "aha_moment": "意识到 mid 已经比较过且不等于目标，所以新区间必须彻底跨过 mid（low=mid+1 或 high=mid-1），这就是为什么区间能绝对减半且不会遗漏",
+    "prerequisites": [
+      { "name": "有序数组与下标访问", "why": "二分查找要求数据已排好序，并通过 low/high/mid 下标定位元素" },
+      { "name": "区间与中点的计算 mid=(low+high)/2", "why": "每一步都靠中点把区间一分为二" },
+      { "name": "循环与条件判断（基础编程）", "why": "整个过程是一个『比较→更新边界』的循环，需要会读 if 与 while" }
+    ]
   },
   "blocks": [
     {
