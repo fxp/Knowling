@@ -57,10 +57,10 @@ code { background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; }
     <span class="step">知识点</span><span class="arrow">→</span>
     <span class="step">蓝图 Spec</span><span class="arrow">→</span>
     <span class="step">模板编译</span><span class="arrow">→</span>
-    <span class="step qa">三维质检</span><span class="arrow">→</span>
+    <span class="step qa">四维质检</span><span class="arrow">→</span>
     <span class="step">知识卡片牌组</span>
   </div>
-  <p class="scope">范围聚焦：<b>只做单个知识点的学习 / Quiz 卡片</b>。三维质检 = 渲染分（GLM-5V 看截图）+ 交互分（校验控件）+ 教学分（含「是否跑题」）。下方 4 个示例均可直接交互。</p>
+  <p class="scope">范围聚焦：<b>只做单个知识点的学习 / Quiz 卡片</b>。四维质检 = 渲染分（GLM-5V 看截图）+ 交互分（校验控件）+ 教学分（含「是否跑题」）+ 可学会分（模拟已掌握前置知识的学习者，只读卡片能否获得该知识点所需知识）。下方 5 个示例均可直接交互。</p>
 </div></header>
 <main class="wrap"><section class="gallery">
 <article class="card card-featured">
@@ -119,9 +119,23 @@ code { background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; }
   <div class="frame-wrap"><iframe loading="lazy" src="components/compound_interest.html" title="复利 A = P(1 + r)ⁿ"></iframe></div>
   <a class="open" href="components/compound_interest.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
 </article>
+<article class="card">
+  <div class="card-head">
+    <div><h3>贝叶斯定理：证据如何更新信念</h3><p class="kp">先验P(D)、似然P(+|D)、后验P(D|+) 三者如何随证据更新，及基础率忽视</p></div>
+    <span class="src src-mock">离线模板</span>
+  </div>
+  <div class="meta">
+    <span class="chip chip-status chip-ready">ready</span>
+    <span class="chip chip-ok">渲染 5.0</span><span class="chip chip-ok">交互 5.0</span><span class="chip chip-ok">教学 3.5</span><span class="chip chip-ok">可学会 3.0</span>
+    <span class="chip chip-aud">初学者</span>
+  </div>
+  <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">callout</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
+  <div class="frame-wrap"><iframe loading="lazy" src="components/bayes_theorem.html" title="贝叶斯定理：证据如何更新信念"></iframe></div>
+  <a class="open" href="components/bayes_theorem.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
+</article>
 </section></main>
 <footer><div class="wrap">
-  由 Knowling 生成 · <code>GLM-5</code> 示例为真实模型规划内容、统一模板渲染并通过三维质检 · 每张卡片均为单文件自包含 HTML · 用 <code>knowling serve</code> 可对卡片对话式改写。
+  由 Knowling 生成 · <code>GLM-5</code> 示例为真实模型规划内容、统一模板渲染并通过四维质检 · 每张卡片均为单文件自包含 HTML · 用 <code>knowling serve</code> 可对卡片对话式改写。
 </div></footer>
 </body>
 </html>

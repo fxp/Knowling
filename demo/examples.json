@@ -90,5 +90,29 @@
     },
     "status": "ready",
     "featured": false
+  },
+  {
+    "title": "贝叶斯定理：证据如何更新信念",
+    "file": "bayes_theorem.html",
+    "source": "离线模板",
+    "kp": "先验P(D)、似然P(+|D)、后验P(D|+) 三者如何随证据更新，及基础率忽视",
+    "audience": "初学者",
+    "blocks": [
+      "text",
+      "callout",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 3.5,
+      "learn": 3.0,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": false
   }
 ]

@@ -116,20 +116,41 @@ def _assess_llm(artifact_html, spec, kp, provider, cfg: QAConfig) -> Optional[Di
     )
 
 
+def _coverage(objective: str, text: str) -> float:
+    """How much of an objective's *content* shows up in the card text, in [0,1].
+
+    Two signals, take the better: (a) word tokens (good for Latin / space-delimited
+    terms); (b) CJK character bigrams — Chinese objectives have no spaces, so a
+    phrase like 「分清似然与后验」 must be matched by its 2-字 shingles (似然 / 后验 …)
+    rather than verbatim. Lenient by design: this is an offline proxy, not the real
+    learner simulation."""
+    covs: List[float] = []
+
+    toks = [t for t in re.split(r"[，,。、；;：:\s/（）()]+", objective)
+            if len(t) >= 2 and not re.search(r"[一-鿿]", t)]
+    if toks:
+        covs.append(sum(1 for t in toks if t in text) / len(toks))
+
+    cjk = re.findall(r"[一-鿿]", objective)
+    bigrams = {cjk[i] + cjk[i + 1] for i in range(len(cjk) - 1)}
+    if bigrams:
+        covs.append(sum(1 for b in bigrams if b in text) / len(bigrams))
+
+    return max(covs) if covs else 1.0
+
+
 def _assess_heuristic(artifact_html, kp, cfg: QAConfig) -> DimensionFeedback:
     """Lenient offline proxy: does the card text actually carry content for each
     objective? We can't truly simulate learning without an LLM, so we degrade
-    gracefully (objective token coverage + enough substance), matching the rest of
-    the offline QA path which stays green on templated/mock cards."""
+    gracefully (objective coverage + enough substance), matching the rest of the
+    offline QA path which stays green on real, content-rich cards."""
     text = _visible_text(artifact_html)
     score = 5.0
     suggestions: List[str] = []
 
     objs = (kp.learning_objectives if kp else []) or []
     for obj in objs:
-        toks = [t for t in re.split(r"[，,。、；;\s/]+", obj) if len(t) >= 2]
-        hit = sum(1 for t in toks if t in text)
-        cov = hit / len(toks) if toks else 1.0
+        cov = _coverage(obj, text)
         if cov < 0.3:
             score -= 1.0
             suggestions.append(f"卡片内容几乎未触及学习目标，学习者无法获得：{obj}")
