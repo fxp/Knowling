@@ -1,0 +1,113 @@
+{
+  "knowledge_point_id": "damped-oscillation-envelope",
+  "pedagogy": {
+    "hook": "拨一下吉他弦、推一下秋千再松手——它们都来回摆动，但幅度一点点变小，最后停下。这种「越摆越小的振动」怎么用一个式子描述？",
+    "central_phenomenon": "阻尼振动 $y(t)=A\\,e^{-\\gamma t}\\cos(\\omega t)$ 是「余弦振荡」乘上「指数衰减包络」：$\\cos(\\omega t)$ 负责来回摆，$A e^{-\\gamma t}$ 像一只手把振幅一点点压小。阻尼 $\\gamma$ 越大，衰减越快。",
+    "misconceptions": [
+      "认为阻尼会改变振动的快慢（周期），其实主要改变的是振幅的衰减速度",
+      "把指数衰减当成线性减小（等量递减），其实每个周期振幅按固定比例缩小",
+      "认为振动会在有限时间内精确停到 0（指数衰减只是无限趋近 0）"
+    ],
+    "aha_moment": "拖动阻尼 $\\gamma$，看见振荡曲线被一对镜像的指数包络 $\\pm A e^{-\\gamma t}$ 紧紧夹住、一起收口——「振荡 × 衰减」的乘积结构一目了然。",
+    "prerequisites": [
+      { "name": "余弦/正弦的周期振荡", "why": "$\\cos(\\omega t)$ 提供来回摆动的部分，需先理解角频率 ω 与周期" },
+      { "name": "指数衰减 $e^{-\\gamma t}$", "why": "它是把振幅一点点压小的「包络」，每过等长时间按固定比例缩小" },
+      { "name": "函数相乘的图象（包络的概念）", "why": "阻尼振动是两个函数的乘积，振荡被衰减曲线作为上下包络夹住" }
+    ]
+  },
+  "blocks": [
+    {
+      "block_id": "bk_1_hook",
+      "type": "text",
+      "intent": "把阻尼振动拆成「振荡 × 衰减」两部分",
+      "content_spec": {
+        "md": "现实中的振动几乎都会**衰减**：能量被摩擦、空气慢慢耗散，幅度越来越小。最常见的模型是\n\n$$y(t) = A\\,e^{-\\gamma t}\\cos(\\omega t).$$\n\n它是两部分的**乘积**：\n- $\\cos(\\omega t)$——来回摆动（角频率 $\\omega$ 决定快慢）；\n- $A\\,e^{-\\gamma t}$——把振幅逐渐压小的**包络**（阻尼 $\\gamma$ 决定衰减快慢）。\n\n下面拖动 $A$、$\\gamma$、$\\omega$，看包络如何夹住振荡。"
+      }
+    },
+    {
+      "block_id": "bk_2_param_sim",
+      "type": "param_sim",
+      "intent": "核心探究：滑块改变振幅/阻尼/角频率，画出振动曲线及其上下指数包络",
+      "content_spec": {
+        "params": [
+          { "name": "A", "label": "初始振幅 A", "min": 0.5, "max": 3, "step": 0.1, "default": 2 },
+          { "name": "gamma", "label": "阻尼 γ", "min": 0.05, "max": 1.2, "step": 0.05, "default": 0.3 },
+          { "name": "omega", "label": "角频率 ω", "min": 1, "max": 8, "step": 0.1, "default": 4 }
+        ],
+        "outputs": [
+          { "name": "y", "label": "位移 y(t)=A·e^(−γt)·cos(ωt)", "expr": "A*Math.exp(-gamma*t)*Math.cos(omega*t)" },
+          { "name": "envU", "label": "上包络 +A·e^(−γt)", "expr": "A*Math.exp(-gamma*t)" },
+          { "name": "envL", "label": "下包络 −A·e^(−γt)", "expr": "-A*Math.exp(-gamma*t)" },
+          { "name": "tau", "label": "时间常数 τ = 1/γ", "expr": "1/gamma" }
+        ],
+        "x_range": [0, 12],
+        "explain": "中间剧烈摆动的是位移 y(t)，上下两条光滑曲线是包络 ±A·e^(−γt)。拖动阻尼 γ：γ 越大，包络收口越快、振动越早「平息」；但相邻波峰之间的间距（由 ω 决定的周期）几乎不变。改变 ω 只让摆动变密/变疏，不影响衰减快慢。"
+      },
+      "interaction_spec": {
+        "invariants": [
+          "位移 y 必须始终被夹在 ±A·e^(−γt) 两条包络之间",
+          "增大 γ 时包络衰减更快（同一时刻 |包络| 更小）",
+          "时间常数 τ 必须等于 1/gamma"
+        ]
+      }
+    },
+    {
+      "block_id": "bk_3_step",
+      "type": "step_through",
+      "intent": "分离变量观察：先看纯振荡，再加弱/强阻尼",
+      "content_spec": {
+        "steps": [
+          { "state": "γ = 0.05（几乎无阻尼）", "explain": "包络几乎水平，振幅长时间几乎不变——接近理想的等幅振动 $A\\cos(\\omega t)$。" },
+          { "state": "γ = 0.3（弱阻尼）", "explain": "包络明显向下收口，振动来回好多次后才平息。每过一个周期，振幅都按相同**比例**缩小（不是等量）。" },
+          { "state": "γ = 1.0（强阻尼）", "explain": "包络陡降，振动只摆几下就几乎归零。阻尼越大，能量耗散越快。" },
+          { "state": "改变 ω（固定 γ）", "explain": "增大 ω 让摆动变密（周期变短），但上下包络完全不变——**衰减由 γ 决定，与 ω 无关**。" }
+        ]
+      }
+    },
+    {
+      "block_id": "bk_4_callout",
+      "type": "callout",
+      "intent": "澄清「按比例衰减」与「无限趋近 0」两个误区",
+      "content_spec": {
+        "md": "**衰减是按比例，不是按等量**\n\n指数包络 $e^{-\\gamma t}$ 意味着：每经过相同的时间间隔，振幅就乘以同一个小于 1 的因子（比如每过 $\\tau=1/\\gamma$ 缩小到约 37%）。这和「每次减少固定数值」的线性衰减完全不同。\n\n而且 $e^{-\\gamma t}$ 永远大于 0——理论上振动**无限趋近**于 0 却不会在有限时间精确停下；现实中是因为还有其它效应（静摩擦等）才真正静止。"
+      }
+    },
+    {
+      "block_id": "bk_5_quiz",
+      "type": "quiz",
+      "intent": "检验对包络、阻尼作用、衰减方式的理解",
+      "content_spec": {
+        "title": "阻尼振动诊断",
+        "questions": [
+          {
+            "type": "single",
+            "prompt": "在 $y=A e^{-\\gamma t}\\cos(\\omega t)$ 中，增大阻尼 $\\gamma$ 主要改变什么？",
+            "options": ["振动的周期变长", "振幅衰减得更快", "振幅永远不变", "角频率变大"],
+            "answer": 1,
+            "explain": "γ 控制包络 $e^{-\\gamma t}$ 的衰减速度；γ 越大振幅掉得越快。周期主要由 ω 决定。"
+          },
+          {
+            "type": "single",
+            "prompt": "把振动曲线上下夹住的两条光滑曲线是什么？",
+            "options": [
+              "两条水平直线 ±A",
+              "指数包络 ±A·e^(−γt)",
+              "两条余弦曲线",
+              "两条抛物线"
+            ],
+            "answer": 1,
+            "explain": "包络是 $\\pm A e^{-\\gamma t}$，振荡 $\\cos(\\omega t)$ 在 ±1 之间，故位移被这对指数曲线夹住。"
+          },
+          {
+            "type": "boolean",
+            "prompt": "阻尼振动的振幅是每个周期减少相同的固定数值（线性衰减）。",
+            "answer": false,
+            "explain": "错。指数衰减是按固定**比例**缩小，不是按固定数值——每过等长时间乘以同一个因子。"
+          }
+        ]
+      }
+    }
+  ],
+  "render_target": "html",
+  "version": 1
+}

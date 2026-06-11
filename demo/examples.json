@@ -249,5 +249,49 @@
     },
     "status": "ready",
     "featured": false
+  },
+  {
+    "title": "导数：切线的斜率 f′(x₀)",
+    "file": "derivative_tangent.html",
+    "source": "精选",
+    "kp": "在 y=x² 上移动切点 x₀，切线随之转动，斜率读数恒等于 f′(x₀)=2x₀",
+    "audience": "高中生",
+    "blocks": ["text", "param_sim", "step_through", "callout", "quiz"],
+    "qa": { "render": 5.0, "interact": 5.0, "peda": 5.0, "learn": 5.0, "passed": true },
+    "status": "ready",
+    "featured": true
+  },
+  {
+    "title": "抛体运动：射程与最大高度",
+    "file": "projectile_motion.html",
+    "source": "精选",
+    "kp": "发射角θ与初速v₀如何决定抛物线轨迹，为何45°射程最大、互补角射程相同",
+    "audience": "高中生",
+    "blocks": ["text", "param_sim", "step_through", "callout", "quiz"],
+    "qa": { "render": 5.0, "interact": 5.0, "peda": 5.0, "learn": 5.0, "passed": true },
+    "status": "ready",
+    "featured": false
+  },
+  {
+    "title": "阻尼振动 A·e⁻ᵞᵗcos(ωt)",
+    "file": "damped_oscillation.html",
+    "source": "精选",
+    "kp": "余弦振荡乘指数衰减包络，阻尼γ决定衰减快慢，振幅按比例而非等量缩小",
+    "audience": "高中/本科",
+    "blocks": ["text", "param_sim", "step_through", "callout", "quiz"],
+    "qa": { "render": 5.0, "interact": 5.0, "peda": 5.0, "learn": 5.0, "passed": true },
+    "status": "ready",
+    "featured": false
+  },
+  {
+    "title": "对数函数 y=logₐx 与底数 a",
+    "file": "logarithm_base.html",
+    "source": "精选",
+    "kp": "对数是指数的反函数，所有曲线过(1,0)且在x=a处取1，底数越大越平缓",
+    "audience": "高中生",
+    "blocks": ["text", "param_sim", "step_through", "callout", "quiz"],
+    "qa": { "render": 5.0, "interact": 5.0, "peda": 5.0, "learn": 5.0, "passed": true },
+    "status": "ready",
+    "featured": false
   }
 ]

@@ -1,0 +1,106 @@
+{
+  "knowledge_point_id": "projectile-motion-range-height",
+  "pedagogy": {
+    "hook": "投篮、踢球、喷泉——抛出去的东西都画出同一种弧线：抛物线。为什么 45° 抛得最远？发射角和初速到底如何决定这条弧？",
+    "central_phenomenon": "在重力作用下，抛体轨迹是抛物线 $y = x\\tan\\theta - \\dfrac{g x^2}{2v_0^2\\cos^2\\theta}$；射程 $R=\\dfrac{v_0^2\\sin 2\\theta}{g}$ 在 $\\theta=45°$ 时最大，最大高度 $H$ 随发射角增大而升高。",
+    "misconceptions": [
+      "认为发射角越大射得越远（其实超过 45° 后射程反而减小）",
+      "认为水平速度会随时间减小（忽略重力只改变竖直分量，水平分量恒定）",
+      "把「射得最高」和「射得最远」当成同一个角度（最高是 90°，最远是 45°）"
+    ],
+    "aha_moment": "拖动发射角时，看见射程在 45° 达到峰值、再增大反而变近，而轨迹始终是一条抛物线——把 $\\sin 2\\theta$ 在 45° 取最大值看得明明白白。",
+    "prerequisites": [
+      { "name": "三角函数 $\\sin、\\cos、\\tan$", "why": "发射角通过这三个函数把初速分解成水平/竖直分量并决定轨迹" },
+      { "name": "二次函数与抛物线", "why": "抛体轨迹 y 关于 x 是二次函数，图象就是抛物线" },
+      { "name": "速度的分解（向量分量）", "why": "初速 $v_0$ 沿发射角分成 $v_0\\cos\\theta$ 与 $v_0\\sin\\theta$ 两个独立分量" }
+    ]
+  },
+  "blocks": [
+    {
+      "block_id": "bk_1_hook",
+      "type": "text",
+      "intent": "建立抛体=抛物线，引出发射角与射程的关系",
+      "content_spec": {
+        "md": "忽略空气阻力，任何被抛出的物体都沿**抛物线**飞行。把初速 $v_0$ 按发射角 $\\theta$ 分解：水平方向 $v_0\\cos\\theta$（匀速、不变），竖直方向 $v_0\\sin\\theta$（受重力 $g$ 减速再加速）。消去时间后得到轨迹\n\n$$y = x\\tan\\theta - \\frac{g\\,x^2}{2v_0^2\\cos^2\\theta}.$$\n\n下面拖动发射角 $\\theta$ 与初速 $v_0$，找出「射得最远」的角度。"
+      }
+    },
+    {
+      "block_id": "bk_2_param_sim",
+      "type": "param_sim",
+      "intent": "核心探究：滑块改变发射角与初速，实时看轨迹形状、射程 R 与最大高度 H",
+      "content_spec": {
+        "params": [
+          { "name": "theta", "label": "发射角 θ (弧度)", "min": 0.17, "max": 1.4, "step": 0.01, "default": 0.785 },
+          { "name": "v0", "label": "初速 v₀ (m/s)", "min": 8, "max": 30, "step": 0.5, "default": 20 }
+        ],
+        "outputs": [
+          { "name": "y", "label": "轨迹 y(x)", "expr": "x*Math.tan(theta) - 9.8*x*x/(2*v0*v0*Math.cos(theta)*Math.cos(theta))" },
+          { "name": "R", "label": "射程 R = v₀²·sin2θ / g", "expr": "v0*v0*Math.sin(2*theta)/9.8" },
+          { "name": "H", "label": "最大高度 H", "expr": "v0*v0*Math.sin(theta)*Math.sin(theta)/(2*9.8)" }
+        ],
+        "x_range": [0, 95],
+        "explain": "曲线是飞行轨迹（g=9.8）。固定 v₀，把 θ 从小拖到大：射程 R 先增后减，在 θ≈0.785 弧度（45°）达到最大；继续增大角度，球飞得更高（H 增大）却落得更近。曲线穿过横轴之处即落地点；轴下方部分代表落地后的延伸，无物理意义。"
+      },
+      "interaction_spec": {
+        "invariants": [
+          "射程 R 必须等于 v0*v0*Math.sin(2*theta)/9.8",
+          "固定 v0 时，R 在 theta=π/4 附近取得最大值",
+          "最大高度 H 随 theta 单调增大（在所给范围内）"
+        ]
+      }
+    },
+    {
+      "block_id": "bk_3_step",
+      "type": "step_through",
+      "intent": "用几个发射角对比射程，凸显 45° 最优与对称性",
+      "content_spec": {
+        "steps": [
+          { "state": "θ = 30°，v₀ = 20", "explain": "射程 $R=\\frac{20^2\\sin 60°}{9.8}\\approx 35.3$ m。轨迹低平、飞得快但不够远。" },
+          { "state": "θ = 45°，v₀ = 20", "explain": "$\\sin 2\\theta=\\sin 90°=1$ 取最大，$R\\approx 40.8$ m——**同一初速下射得最远**。" },
+          { "state": "θ = 60°，v₀ = 20", "explain": "射程又回到 $R\\approx 35.3$ m，与 30° 相同！因为 $\\sin 2\\theta$ 关于 45° 对称：30° 和 60° 的 $\\sin 2\\theta$ 相等。但 60° 飞得更高。" },
+          { "state": "θ = 75°，v₀ = 20", "explain": "射程只剩 $R\\approx 20.4$ m，却达到很大高度。角度越接近 90°，越接近「竖直上抛」——原地落回。" }
+        ]
+      }
+    },
+    {
+      "block_id": "bk_4_callout",
+      "type": "callout",
+      "intent": "澄清最远 vs 最高、水平速度恒定两个误区",
+      "content_spec": {
+        "md": "**最远 ≠ 最高**\n\n- 射得**最远**：$\\theta=45°$，因为 $R\\propto\\sin 2\\theta$，而 $\\sin 2\\theta$ 在 $2\\theta=90°$ 时最大。\n- 射得**最高**：$\\theta=90°$（竖直上抛），但此时射程为 0。\n- 互补角的对称：$\\theta$ 与 $90°-\\theta$ 射程相同（如 30° 与 60°）。\n\n另外，水平速度 $v_0\\cos\\theta$ **全程不变**——重力只改变竖直分量。是水平匀速 + 竖直变速的叠加，才画出那条抛物线。"
+      }
+    },
+    {
+      "block_id": "bk_5_quiz",
+      "type": "quiz",
+      "intent": "检验对最优角、对称性、水平速度的理解",
+      "content_spec": {
+        "title": "抛体运动诊断",
+        "questions": [
+          {
+            "type": "single",
+            "prompt": "在初速相同、忽略空气阻力时，下列哪个发射角射程最大？",
+            "options": ["30°", "45°", "60°", "75°"],
+            "answer": 1,
+            "explain": "射程 $R\\propto\\sin 2\\theta$，在 $\\theta=45°$（$2\\theta=90°$）时 $\\sin 2\\theta=1$ 最大。"
+          },
+          {
+            "type": "single",
+            "prompt": "同一初速下，30° 和 60° 发射的射程关系是？",
+            "options": ["30° 更远", "60° 更远", "两者相同", "无法比较"],
+            "answer": 2,
+            "explain": "30° 与 60° 互补，$\\sin 60°=\\sin 120°$，故射程相同；但 60° 飞得更高。"
+          },
+          {
+            "type": "boolean",
+            "prompt": "抛体飞行过程中，水平方向的速度会因重力而逐渐变小。",
+            "answer": false,
+            "explain": "错。重力只作用在竖直方向；水平速度 $v_0\\cos\\theta$ 全程保持不变。"
+          }
+        ]
+      }
+    }
+  ],
+  "render_target": "html",
+  "version": 1
+}
