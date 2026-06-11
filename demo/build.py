@@ -247,18 +247,27 @@ code {{ background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; 
   }}
   function bind(f) {{
     function refit() {{ fit(f); }}
-    f.addEventListener('load', function () {{
+    // Attach live height tracking once the frame's document is ready. Called from
+    // both the load event and the already-loaded fallback so navigation resizes
+    // work either way.
+    function wire() {{
       refit();
       try {{
         var w = f.contentWindow, d = f.contentDocument;
         var target = d.querySelector('.kl-doc');
-        if (w.ResizeObserver && target) {{ new w.ResizeObserver(refit).observe(target); }}
-        d.addEventListener('click', function () {{ setTimeout(refit, 120); setTimeout(refit, 460); }});
-        w.addEventListener('keydown', function () {{ setTimeout(refit, 460); }});
+        if (w.ResizeObserver && target) {{
+          new w.ResizeObserver(refit).observe(target);  // tracks the deck's animated height
+        }} else {{
+          // no ResizeObserver: re-fit after the deck's height animation on nav
+          d.addEventListener('click', function () {{ setTimeout(refit, 120); setTimeout(refit, 460); }});
+          w.addEventListener('keydown', function () {{ setTimeout(refit, 460); }});
+        }}
       }} catch (e) {{}}
       setTimeout(refit, 300); setTimeout(refit, 850);
-    }});
-    if (f.contentDocument && f.contentDocument.readyState === 'complete') refit();
+    }}
+    f.addEventListener('load', wire);
+    // already loaded before this script ran (cache / bfcache restore)
+    try {{ if (f.contentDocument && f.contentDocument.readyState === 'complete') wire(); }} catch (e) {{}}
   }}
   document.querySelectorAll('.frame-wrap iframe').forEach(bind);
   window.addEventListener('resize', function () {{
