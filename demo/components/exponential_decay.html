@@ -175,6 +175,16 @@ button:disabled { opacity: .4; cursor: default; }
 .kl-usernote-area:focus { outline: none; border-color: var(--kl-accent); }
 /* deep_dive */
 .kl-deepdive summary { cursor: pointer; font-weight: 640; }
+/* prerequisites — the guaranteed first card stating what to know first */
+.kl-prereq { border-left: 4px solid var(--kl-accent-2); background: linear-gradient(100deg, #e8f7fe, rgba(232,247,254,.2)); }
+.kl-prereq-title { display: flex; align-items: center; gap: 9px; font-size: 19px; margin: 0 0 6px; }
+.kl-prereq-lead { color: var(--kl-muted); font-size: 14.5px; margin: 0 0 14px; }
+.kl-prereq-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: kl-prereq; }
+.kl-prereq-list li { position: relative; padding: 12px 16px 12px 46px; background: var(--kl-bg); border: 1px solid var(--kl-border); border-radius: 12px; }
+.kl-prereq-list li::before { counter-increment: kl-prereq; content: counter(kl-prereq); position: absolute; left: 12px; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: var(--kl-grad); color: #fff; font-size: 13px; font-weight: 700; display: grid; place-items: center; }
+.kl-prereq-name { font-weight: 660; }
+.kl-prereq-why { display: block; color: var(--kl-muted); font-size: 14px; margin-top: 3px; }
+.kl-prereq-note { color: var(--kl-muted); font-size: 13px; margin: 14px 0 0; }
 /* ── card deck (one block at a time) ── */
 .kl-deck { margin: 20px 0 4px; }
 .kl-deck-viewport { overflow: hidden; transition: height .35s ease; }
@@ -231,6 +241,9 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
+<div class="kl-card"><section class="kl-block kl-prereq"><h2 class="kl-prereq-title"><span>🧭</span>学习之前 · 先备好这些前置知识</h2><p class="kl-prereq-lead">这张卡建立在以下知识点之上。其中有不熟悉的，建议先补上再继续，学起来会顺畅得多。</p><ol class="kl-prereq-list"><li><span class="kl-prereq-name">指数与乘方 a^t</span><span class="kl-prereq-why">衰减是每过单位时间乘以一个固定比例，本质是指数函数</span></li>
+<li><span class="kl-prereq-name">分数与减半 (1/2)^n</span><span class="kl-prereq-why">半衰期模型每过一个 T 就乘以 1/2，需理解反复减半</span></li>
+<li><span class="kl-prereq-name">指数衰减 e^(−t) 的形状</span><span class="kl-prereq-why">半衰期式可改写成 e^(−λt)，二者描述同一条衰减曲线</span></li></ol><p class="kl-prereq-note">都熟悉了？点「下一张」开始学习。</p></section></div>
 <div class="kl-card"><section class="kl-block kl-text" data-block-id="bk1_hook">
 <h2>指数衰减与半衰期</h2>
 <p>很多自然过程（放射性衰变、药物代谢、电容放电）都遵循<strong>指数衰减</strong>：</p>

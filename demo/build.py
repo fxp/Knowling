@@ -30,7 +30,7 @@ EXAMPLES = [
     {"id": "sine_function", "title": "正弦函数 y = A·sin(ωx + φ)",
      "description": "振幅A、角频率ω、相位φ 各自如何改变正弦波形",
      "objectives": "理解A控制振幅,ω控制周期,φ控制水平平移",
-     "audience": "高一学生", "difficulty": "core", "featured": True},
+     "audience": "高一学生", "difficulty": "core"},
     {"id": "quadratic_vertex", "title": "二次函数顶点式 y = a(x−h)² + k",
      "description": "系数 a、顶点坐标 (h, k) 如何决定抛物线的形状与位置",
      "objectives": "理解a控制开口与宽窄,h控制左右平移,k控制上下平移",
@@ -83,7 +83,7 @@ EXAMPLES = [
     {"id": "projectile_motion", "title": "抛体运动：射程与最大高度",
      "description": "发射角θ与初速v₀如何决定抛物线轨迹，为何45°射程最大、互补角射程相同",
      "objectives": "理解轨迹是抛物线,掌握射程R∝sin2θ在45°最大,区分最远与最高",
-     "audience": "高中生", "difficulty": "core", "source": "精选"},
+     "audience": "高中生", "difficulty": "core", "source": "精选", "featured": True},
     {"id": "damped_oscillation", "title": "阻尼振动 A·e⁻ᵞᵗcos(ωt)",
      "description": "余弦振荡乘指数衰减包络，阻尼γ决定衰减快慢，振幅按比例而非等量缩小",
      "objectives": "把阻尼振动拆成振荡×衰减,理解包络夹住振荡,区分比例衰减与线性衰减",
@@ -130,6 +130,45 @@ def _generate() -> None:
     print(f"[gen] wrote {len(manifest)} components + examples.json ({source})")
 
 
+def _recompile() -> None:
+    """Model-free rebuild: recompile every example from its committed blueprint
+    with the current engine (prerequisites page + 4-D QA loop) and rewrite
+    examples.json with fresh scores. No model needed — the specs are the source
+    of truth, so this re-applies the latest engine/template to the whole deck."""
+    from knowling.capabilities.qa import QAConfig
+    from knowling.engine import Config, compile_spec
+    from knowling.schema import KnowledgePoint, KnowlingSpec
+
+    os.makedirs(COMPONENTS, exist_ok=True)
+    cfg = Config(quiet=True, qa=QAConfig(sandbox_name="auto"))
+    manifest = []
+    for ex in EXAMPLES:
+        sp = os.path.join(SPECS, ex["id"] + ".json")
+        if not os.path.exists(sp):
+            print(f"[recompile] skip {ex['id']} (no spec)")
+            continue
+        with open(sp, encoding="utf-8") as f:
+            spec = KnowlingSpec.from_dict(json.load(f))
+        kp = KnowledgePoint(id=spec.knowledge_point_id, title=ex["title"])
+        print(f"[recompile] {ex['title']} …")
+        k = compile_spec(spec, kp, cfg, out_path=os.path.join(COMPONENTS, ex["id"] + ".html"))
+        manifest.append({
+            "title": ex["title"], "file": ex["id"] + ".html",
+            "source": ex.get("source", "离线模板"),
+            "kp": ex["description"], "audience": ex["audience"],
+            "difficulty": ex.get("difficulty", "core"),
+            "blocks": [b.type for b in k.spec.blocks],
+            "prereqs": len(k.spec.pedagogy.prerequisites) if k.spec.pedagogy else 0,
+            "qa": {"render": k.qa.score_render, "interact": k.qa.score_interact,
+                   "peda": k.qa.score_peda, "learn": k.qa.score_learn, "passed": k.qa.passed},
+            "status": k.status, "featured": ex.get("featured", False),
+        })
+        print(f"      status={k.status} qa={manifest[-1]['qa']}")
+    with open(MANIFEST, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+    print(f"[recompile] wrote {len(manifest)} components + examples.json")
+
+
 # ── gallery rendering ─────────────────────────────────────────────────
 
 def _esc(s) -> str:
@@ -138,14 +177,17 @@ def _esc(s) -> str:
 
 def _qa_chips(qa: dict) -> str:
     if not qa or qa.get("render") is None:
-        return '<span class="chip chip-muted">未质检</span>'
-    def chip(label, v):
-        cls = "chip-ok" if (v or 0) >= 3.0 else "chip-warn"
-        return f'<span class="chip {cls}">{label} {v}</span>'
-    chips = chip("渲染", qa["render"]) + chip("交互", qa["interact"]) + chip("教学", qa["peda"])
+        return '<span class="score">未质检</span>'
+    def s(label, v):
+        cls = "ok" if (v or 0) >= 3.0 else "warn"
+        return f'<span class="score {cls}">{label}<b>{v}</b></span>'
+    chips = s("渲染", qa["render"]) + s("交互", qa["interact"]) + s("教学", qa["peda"])
     if qa.get("learn") is not None:
-        chips += chip("可学会", qa["learn"])
+        chips += s("可学会", qa["learn"])
     return chips
+
+
+_DIFF_LABEL = {"intro": "入门", "core": "核心", "advanced": "进阶"}
 
 
 def _card(item: dict) -> str:
@@ -158,22 +200,26 @@ def _card(item: dict) -> str:
     else:
         badge = '<span class="src src-mock">离线模板</span>'
     status = item.get("status", "draft")
-    status_cls = "ready" if status == "ready" else "draft"
-    blocks = "".join(f'<span class="chip chip-block">{_esc(b)}</span>' for b in item["blocks"])
+    ready = status == "ready"
+    status_pill = ('<span class="pill pill-ok">ready ✓</span>' if ready
+                   else f'<span class="pill pill-warn">{_esc(status)}</span>')
+    diff = _DIFF_LABEL.get(item.get("difficulty", ""), item.get("difficulty", ""))
+    diff_pill = f'<span class="pill">{_esc(diff)}</span>' if diff else ""
+    prereqs = item.get("prereqs") or 0
+    prereq_pill = f'<span class="pill pill-pre">前置 {prereqs}</span>' if prereqs else ""
     featured = " card-featured" if item.get("featured") else ""
     return f'''<article class="card{featured}">
   <div class="card-head">
-    <div><h3>{_esc(item["title"])}</h3><p class="kp">{_esc(item["kp"])}</p></div>
+    <div class="card-title"><h3>{_esc(item["title"])}</h3><p class="kp">{_esc(item["kp"])}</p></div>
     {badge}
   </div>
   <div class="meta">
-    <span class="chip chip-status chip-{status_cls}">{_esc(status)}</span>
-    {_qa_chips(item["qa"])}
-    <span class="chip chip-aud">{_esc(item["audience"])}</span>
+    <span class="pill pill-aud">{_esc(item["audience"])}</span>
+    {diff_pill}{prereq_pill}{status_pill}
   </div>
-  <div class="blocks">{blocks}</div>
+  <div class="scores">{_qa_chips(item["qa"])}</div>
   <div class="frame-wrap"><iframe loading="lazy" src="components/{_esc(item["file"])}" title="{_esc(item["title"])}"></iframe></div>
-  <a class="open" href="components/{_esc(item["file"])}" target="_blank" rel="noopener">在新标签打开 ↗</a>
+  <a class="open" href="components/{_esc(item["file"])}" target="_blank" rel="noopener">打开完整卡片 ↗</a>
 </article>'''
 
 
@@ -186,71 +232,86 @@ def _render_index(manifest: list) -> str:
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Knowling — 知识点学习卡片画廊</title>
 <style>
-:root {{ --bg:#0f1117; --panel:#171a21; --fg:#e6e9ef; --muted:#9aa3b2; --accent:#6c8cff;
-  --accent2:#ff8a4c; --border:#262b36; --ok:#3fb950; --warn:#d29922; --radius:14px; }}
+:root {{ --ink:#161b26; --muted:#5c6675; --accent:#4f46e5; --accent2:#0ea5e9;
+  --surface:#ffffff; --border:#e6e9f2; --soft:#f3f5fb; --ok:#0f9d58; --warn:#d9930a;
+  --radius:18px; --grad:linear-gradient(135deg,#4f46e5,#0ea5e9);
+  --shadow:0 1px 2px rgba(16,24,40,.04), 0 10px 30px rgba(16,24,40,.06);
+  --shadow-lg:0 22px 54px rgba(79,70,229,.18); }}
 * {{ box-sizing:border-box; }}
-body {{ margin:0; background:var(--bg); color:var(--fg);
-  font:16px/1.6 -apple-system,"Segoe UI","PingFang SC","Hiragino Sans GB",sans-serif; }}
+body {{ margin:0; color:var(--ink); min-height:100vh; background-attachment:fixed;
+  background:
+    radial-gradient(1200px 620px at 50% -320px, #e7eaff 0%, rgba(231,234,255,0) 60%),
+    linear-gradient(180deg, #fafbff 0%, #eef1f8 100%);
+  font:16px/1.65 -apple-system,"Segoe UI","PingFang SC","Hiragino Sans GB",sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }}
 a {{ color:var(--accent); text-decoration:none; }}
-.wrap {{ max-width:1180px; margin:0 auto; padding:0 20px; }}
-header.hero {{ padding:64px 0 36px; border-bottom:1px solid var(--border);
-  background:radial-gradient(1200px 400px at 50% -120px, rgba(108,140,255,.18), transparent); }}
-.hero h1 {{ font-size:44px; margin:0 0 10px; letter-spacing:-.5px; }}
-.hero h1 .ling {{ background:linear-gradient(90deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text; background-clip:text; color:transparent; }}
-.hero p.tag {{ font-size:19px; color:var(--muted); margin:0 0 26px; max-width:720px; }}
-.pipeline {{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:14px; }}
-.pipeline .step {{ background:var(--panel); border:1px solid var(--border); padding:6px 13px; border-radius:999px; }}
-.pipeline .arrow {{ color:var(--muted); }}
-.pipeline .step.qa {{ border-color:var(--accent); color:var(--accent); }}
-.scope {{ margin-top:22px; font-size:14px; color:var(--muted); }}
-.scope b {{ color:var(--fg); }}
-.gallery {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(440px,1fr)); gap:22px; padding:36px 0 80px; align-items:start; }}
-.card {{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; }}
-.card-featured {{ grid-column:1/-1; border-color:var(--accent); }}
+.wrap {{ max-width:1200px; margin:0 auto; padding:0 22px; }}
+header.hero {{ padding:84px 0 36px; text-align:center; }}
+.hero h1 {{ font-size:60px; margin:0 0 8px; font-weight:820; letter-spacing:-.03em; }}
+.hero h1 .ling {{ background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }}
+.hero .tag {{ font-size:19px; color:var(--muted); max-width:660px; margin:0 auto 28px; }}
+.hero .tag b {{ color:var(--ink); }}
+.pipeline {{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; font-size:13.5px; }}
+.pipeline .step {{ background:var(--surface); border:1px solid var(--border); padding:7px 15px; border-radius:999px; box-shadow:var(--shadow); }}
+.pipeline .step.qa {{ border-color:transparent; background:var(--grad); color:#fff; }}
+.pipeline .arrow {{ color:#aeb6c6; }}
+.scope {{ margin:26px auto 0; max-width:780px; font-size:13.5px; color:var(--muted); }}
+.scope b {{ color:var(--ink); }}
+.gallery {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(450px,1fr)); gap:26px; padding:42px 0 96px; align-items:start; }}
+.card {{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow);
+  transition:transform .16s ease, box-shadow .2s ease; }}
+.card:hover {{ transform:translateY(-3px); box-shadow:var(--shadow-lg); }}
+.card-featured {{ grid-column:1/-1; border-color:rgba(79,70,229,.4); }}
 .card-featured .frame-wrap {{ min-height:600px; }}
-.card-head {{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:18px 18px 10px; }}
-.card-head h3 {{ margin:0 0 4px; font-size:19px; }}
-.kp {{ margin:0; color:var(--muted); font-size:14px; }}
-.src {{ font-size:12px; padding:4px 10px; border-radius:999px; white-space:nowrap; font-weight:600; }}
-.src-glm {{ background:rgba(108,140,255,.16); color:var(--accent); border:1px solid rgba(108,140,255,.4); }}
-.src-mock {{ background:#21262d; color:var(--muted); border:1px solid var(--border); }}
-.src-m2m {{ background:rgba(255,138,76,.16); color:var(--accent2); border:1px solid rgba(255,138,76,.4); }}
-.src-pick {{ background:rgba(63,185,80,.16); color:var(--ok); border:1px solid rgba(63,185,80,.45); }}
-.meta, .blocks {{ display:flex; flex-wrap:wrap; gap:6px; padding:0 18px; }}
-.blocks {{ padding-top:10px; padding-bottom:4px; }}
-.chip {{ font-size:12px; padding:3px 9px; border-radius:999px; background:#21262d; color:var(--muted); border:1px solid var(--border); }}
-.chip-ok {{ color:var(--ok); border-color:rgba(63,185,80,.4); }}
-.chip-warn {{ color:var(--warn); border-color:rgba(210,153,34,.4); }}
-.chip-block {{ color:#b9c2d0; }}
-.chip-status.chip-ready {{ color:var(--ok); border-color:rgba(63,185,80,.4); }}
-.chip-status.chip-draft {{ color:var(--warn); }}
-.chip-aud {{ color:#b9c2d0; }}
-.frame-wrap {{ height:auto; min-height:520px; margin:14px 0 0; background:#fff; border-top:1px solid var(--border); }}
+.card-head {{ display:flex; justify-content:space-between; gap:14px; align-items:flex-start; padding:20px 22px 0; }}
+.card-title h3 {{ margin:0 0 5px; font-size:20px; font-weight:740; letter-spacing:-.01em; }}
+.kp {{ margin:0; color:var(--muted); font-size:14px; line-height:1.5; }}
+.src {{ font-size:11.5px; padding:5px 11px; border-radius:999px; white-space:nowrap; font-weight:650; align-self:flex-start; }}
+.src-glm {{ background:rgba(79,70,229,.1); color:var(--accent); border:1px solid rgba(79,70,229,.28); }}
+.src-mock {{ background:var(--soft); color:var(--muted); border:1px solid var(--border); }}
+.src-m2m {{ background:rgba(249,115,22,.12); color:#c2620e; border:1px solid rgba(249,115,22,.3); }}
+.src-pick {{ background:rgba(15,157,88,.12); color:var(--ok); border:1px solid rgba(15,157,88,.32); }}
+.meta {{ display:flex; flex-wrap:wrap; gap:7px; padding:14px 22px 0; align-items:center; }}
+.pill {{ font-size:12px; padding:4px 11px; border-radius:999px; background:var(--soft); color:var(--muted); border:1px solid var(--border); }}
+.pill-aud {{ color:var(--ink); }}
+.pill-pre {{ color:var(--accent); border-color:rgba(79,70,229,.28); background:rgba(79,70,229,.07); }}
+.pill-ok {{ color:var(--ok); border-color:rgba(15,157,88,.32); background:rgba(15,157,88,.08); font-weight:600; }}
+.pill-warn {{ color:var(--warn); border-color:rgba(217,147,10,.34); background:rgba(217,147,10,.08); }}
+.scores {{ display:flex; flex-wrap:wrap; gap:6px; padding:12px 22px 2px; }}
+.score {{ font-size:11.5px; padding:4px 9px; border-radius:9px; font-variant-numeric:tabular-nums;
+  background:var(--soft); color:var(--muted); border:1px solid var(--border); }}
+.score b {{ margin-left:5px; font-weight:780; }}
+.score.ok {{ color:var(--ok); border-color:rgba(15,157,88,.28); background:rgba(15,157,88,.07); }}
+.score.warn {{ color:var(--warn); border-color:rgba(217,147,10,.3); }}
+.frame-wrap {{ height:auto; min-height:520px; margin:16px 0 0; background:#fff; border-top:1px solid var(--border); }}
 iframe {{ width:100%; min-height:520px; border:0; display:block; }}
-.open {{ padding:12px 18px; font-size:14px; border-top:1px solid var(--border); }}
-footer {{ border-top:1px solid var(--border); padding:24px 0 60px; color:var(--muted); font-size:13px; }}
-code {{ background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; }}
+.open {{ padding:13px 22px; font-size:13.5px; border-top:1px solid var(--border); color:var(--accent); font-weight:600; }}
+.open:hover {{ background:var(--soft); }}
+footer {{ border-top:1px solid var(--border); padding:30px 0 72px; color:var(--muted); font-size:13px; text-align:center; }}
+code {{ background:var(--soft); padding:1px 6px; border-radius:5px; font-size:.9em; }}
+@media (max-width:560px) {{ .hero h1 {{ font-size:44px; }} .gallery {{ grid-template-columns:1fr; }} }}
 </style>
 </head>
 <body>
 <header class="hero"><div class="wrap">
   <h1>Know<span class="ling">ling</span></h1>
-  <p class="tag">输入一个细小的<b style="color:var(--fg)">知识点</b>，输出一张自包含、可交互、经过质检的<b style="color:var(--fg)">学习卡片</b>。每张卡片一次只讲一个部分，逐张推进。</p>
+  <p class="tag">输入一个细小的 <b>知识点</b>，输出一张自包含、可交互、经过质检的 <b>学习卡片</b>。每张卡先讲清前置知识，再逐张推进学习。</p>
   <div class="pipeline">
     <span class="step">知识点</span><span class="arrow">→</span>
     <span class="step">蓝图 Spec</span><span class="arrow">→</span>
+    <span class="step">前置知识页</span><span class="arrow">→</span>
     <span class="step">模板编译</span><span class="arrow">→</span>
     <span class="step qa">四维质检</span><span class="arrow">→</span>
-    <span class="step">知识卡片牌组</span>
+    <span class="step">卡片牌组</span>
   </div>
-  <p class="scope">范围聚焦：<b>只做单个知识点的学习 / Quiz 卡片</b>。四维质检 = 渲染分（GLM-5V 看截图）+ 交互分（校验控件）+ 教学分（含「是否跑题」）+ 可学会分（模拟已掌握前置知识的学习者，只读卡片能否获得该知识点所需知识）。下方 {len(manifest)} 个示例均可直接交互。</p>
+  <p class="scope">下方 <b>{len(manifest)}</b> 张卡片均可直接交互，每张都以「前置知识」开场。四维质检 = 渲染 + 交互 + 教学（含是否跑题）+ <b>可学会</b>（模拟已掌握前置知识的学习者，只读卡片能否学会该知识点）。</p>
 </div></header>
 <main class="wrap"><section class="gallery">
 {cards}
 </section></main>
 <footer><div class="wrap">
-  由 Knowling 生成 · <code>GLM-5</code> 示例为真实模型规划内容、统一模板渲染并通过四维质检 · 每张卡片均为单文件自包含 HTML · 用 <code>knowling serve</code> 可对卡片对话式改写。
+  由 Knowling 生成 · 每张卡片均为单文件自包含 HTML（内联 CSS/JS，无外部依赖）· 用 <code>python3 demo/build.py --recompile</code> 可免模型从蓝图重建全部卡片 · <code>knowling serve</code> 可对卡片对话式改写。
 </div></footer>
 <script>
 /* Size each embedded card to its content so nothing is clipped. The gallery and
@@ -326,6 +387,8 @@ def _rerender() -> None:
 def main() -> None:
     if "--generate" in sys.argv:
         _generate()
+    elif "--recompile" in sys.argv:
+        _recompile()
     elif "--rerender" in sys.argv:
         _rerender()
     if not os.path.exists(MANIFEST):

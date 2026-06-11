@@ -2,9 +2,10 @@
   {
     "title": "正弦函数 y = A·sin(ωx + φ)",
     "file": "sine_function.html",
-    "source": "GLM-5",
+    "source": "离线模板",
     "kp": "振幅A、角频率ω、相位φ 各自如何改变正弦波形",
     "audience": "高一学生",
+    "difficulty": "core",
     "blocks": [
       "text",
       "param_sim",
@@ -13,21 +14,24 @@
       "callout",
       "quiz"
     ],
+    "prereqs": 3,
     "qa": {
-      "render": 4.8,
+      "render": 5.0,
       "interact": 5.0,
-      "peda": 2.0,
-      "passed": false
+      "peda": 5.0,
+      "learn": 5.0,
+      "passed": true
     },
-    "status": "qa_failed",
-    "featured": true
+    "status": "ready",
+    "featured": false
   },
   {
     "title": "二次函数顶点式 y = a(x−h)² + k",
     "file": "quadratic_vertex.html",
-    "source": "GLM-5",
+    "source": "离线模板",
     "kp": "系数 a、顶点坐标 (h, k) 如何决定抛物线的形状与位置",
     "audience": "初中生",
+    "difficulty": "core",
     "blocks": [
       "text",
       "param_sim",
@@ -36,10 +40,12 @@
       "callout",
       "quiz"
     ],
+    "prereqs": 3,
     "qa": {
       "render": 5.0,
       "interact": 5.0,
-      "peda": 4.5,
+      "peda": 5.0,
+      "learn": 5.0,
       "passed": true
     },
     "status": "ready",
@@ -48,9 +54,10 @@
   {
     "title": "二分查找 Binary Search",
     "file": "binary_search.html",
-    "source": "GLM-5",
+    "source": "离线模板",
     "kp": "在有序数组中通过不断对半缩小区间来定位目标值",
     "audience": "编程初学者",
+    "difficulty": "core",
     "blocks": [
       "text",
       "interactive_demo",
@@ -59,10 +66,12 @@
       "quiz",
       "callout"
     ],
+    "prereqs": 3,
     "qa": {
-      "render": 4.8,
+      "render": 5.0,
       "interact": 5.0,
-      "peda": 4.0,
+      "peda": 5.0,
+      "learn": 5.0,
       "passed": true
     },
     "status": "ready",
@@ -71,9 +80,10 @@
   {
     "title": "复利 A = P(1 + r)ⁿ",
     "file": "compound_interest.html",
-    "source": "GLM-5",
+    "source": "离线模板",
     "kp": "本金P、利率r、期数n 如何共同决定最终金额，以及复利与单利的差异",
     "audience": "理财入门",
+    "difficulty": "intro",
     "blocks": [
       "text",
       "param_sim",
@@ -82,76 +92,12 @@
       "callout",
       "quiz"
     ],
-    "qa": {
-      "render": 5.0,
-      "interact": 5.0,
-      "peda": 4.0,
-      "passed": true
-    },
-    "status": "ready",
-    "featured": false
-  },
-  {
-    "title": "傅里叶级数逼近方波",
-    "file": "fourier_square_wave.html",
-    "source": "Math-To-Manim",
-    "kp": "用频率成倍、振幅递减的奇次正弦波叠加出方波，以及吉布斯过冲现象",
-    "audience": "本科生",
-    "blocks": [
-      "text",
-      "param_sim",
-      "step_through",
-      "callout",
-      "quiz"
-    ],
+    "prereqs": 3,
     "qa": {
       "render": 5.0,
       "interact": 5.0,
       "peda": 5.0,
-      "passed": true
-    },
-    "status": "ready",
-    "featured": false
-  },
-  {
-    "title": "泰勒级数逼近 eˣ",
-    "file": "taylor_series_exp.html",
-    "source": "Math-To-Manim",
-    "kp": "用多项式部分和逼近 e^x，项数越多逼近范围越大，以及收敛半径的含义",
-    "audience": "高中/本科",
-    "blocks": [
-      "text",
-      "param_sim",
-      "step_through",
-      "callout",
-      "quiz"
-    ],
-    "qa": {
-      "render": 5.0,
-      "interact": 5.0,
-      "peda": 5.0,
-      "passed": true
-    },
-    "status": "ready",
-    "featured": false
-  },
-  {
-    "title": "圆面积 A = πr²（展开法）",
-    "file": "circle_area.html",
-    "source": "Math-To-Manim",
-    "kp": "把圆拆成同心环、拉直叠成三角形，不用积分推出 πr²，并体会平方关系",
-    "audience": "初中生",
-    "blocks": [
-      "text",
-      "param_sim",
-      "step_through",
-      "callout",
-      "quiz"
-    ],
-    "qa": {
-      "render": 5.0,
-      "interact": 5.0,
-      "peda": 5.0,
+      "learn": 5.0,
       "passed": true
     },
     "status": "ready",
@@ -163,6 +109,7 @@
     "source": "离线模板",
     "kp": "先验P(D)、似然P(+|D)、后验P(D|+) 三者如何随证据更新，及基础率忽视",
     "audience": "初学者",
+    "difficulty": "core",
     "blocks": [
       "text",
       "callout",
@@ -171,11 +118,12 @@
       "callout",
       "quiz"
     ],
+    "prereqs": 3,
     "qa": {
       "render": 5.0,
       "interact": 5.0,
-      "peda": 3.5,
-      "learn": 3.6,
+      "peda": 5.0,
+      "learn": 5.0,
       "passed": true
     },
     "status": "ready",
@@ -187,6 +135,7 @@
     "source": "离线模板",
     "kp": "均值μ控制位置、标准差σ控制胖瘦与峰高，曲线下面积恒为1",
     "audience": "统计入门",
+    "difficulty": "core",
     "blocks": [
       "text",
       "param_sim",
@@ -194,11 +143,12 @@
       "callout",
       "quiz"
     ],
+    "prereqs": 3,
     "qa": {
       "render": 5.0,
       "interact": 5.0,
-      "peda": 3.5,
-      "learn": 3.25,
+      "peda": 5.0,
+      "learn": 5.0,
       "passed": true
     },
     "status": "ready",
@@ -210,6 +160,7 @@
     "source": "离线模板",
     "kp": "半衰期T与初始量N₀如何决定衰减曲线，每过一个T剩余量减半且永不为0",
     "audience": "高中生",
+    "difficulty": "intro",
     "blocks": [
       "text",
       "param_sim",
@@ -217,11 +168,12 @@
       "callout",
       "quiz"
     ],
+    "prereqs": 3,
     "qa": {
       "render": 5.0,
       "interact": 5.0,
-      "peda": 3.5,
-      "learn": 4.3,
+      "peda": 5.0,
+      "learn": 5.0,
       "passed": true
     },
     "status": "ready",
@@ -233,6 +185,7 @@
     "source": "离线模板",
     "kp": "陡峭度k控制S形软硬、中点x₀控制平移，输出恒被挤压在(0,1)",
     "audience": "机器学习入门",
+    "difficulty": "core",
     "blocks": [
       "text",
       "param_sim",
@@ -240,11 +193,87 @@
       "callout",
       "quiz"
     ],
+    "prereqs": 3,
     "qa": {
       "render": 5.0,
       "interact": 5.0,
-      "peda": 3.5,
-      "learn": 3.6,
+      "peda": 5.0,
+      "learn": 5.0,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": false
+  },
+  {
+    "title": "傅里叶级数逼近方波",
+    "file": "fourier_square_wave.html",
+    "source": "Math-To-Manim",
+    "kp": "用频率成倍、振幅递减的奇次正弦波叠加出方波，以及吉布斯过冲现象",
+    "audience": "本科生",
+    "difficulty": "advanced",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "prereqs": 3,
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 5.0,
+      "learn": 5.0,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": false
+  },
+  {
+    "title": "泰勒级数逼近 eˣ",
+    "file": "taylor_series_exp.html",
+    "source": "Math-To-Manim",
+    "kp": "用多项式部分和逼近 e^x，项数越多逼近范围越大，以及收敛半径的含义",
+    "audience": "高中/本科",
+    "difficulty": "advanced",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "prereqs": 4,
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 5.0,
+      "learn": 5.0,
+      "passed": true
+    },
+    "status": "ready",
+    "featured": false
+  },
+  {
+    "title": "圆面积 A = πr²（展开法）",
+    "file": "circle_area.html",
+    "source": "Math-To-Manim",
+    "kp": "把圆拆成同心环、拉直叠成三角形，不用积分推出 πr²，并体会平方关系",
+    "audience": "初中生",
+    "difficulty": "core",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "prereqs": 3,
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 5.0,
+      "learn": 5.0,
       "passed": true
     },
     "status": "ready",
@@ -256,10 +285,24 @@
     "source": "精选",
     "kp": "在 y=x² 上移动切点 x₀，切线随之转动，斜率读数恒等于 f′(x₀)=2x₀",
     "audience": "高中生",
-    "blocks": ["text", "param_sim", "step_through", "callout", "quiz"],
-    "qa": { "render": 5.0, "interact": 5.0, "peda": 5.0, "learn": 5.0, "passed": true },
+    "difficulty": "core",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "prereqs": 3,
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 5.0,
+      "learn": 5.0,
+      "passed": true
+    },
     "status": "ready",
-    "featured": true
+    "featured": false
   },
   {
     "title": "抛体运动：射程与最大高度",
@@ -267,10 +310,24 @@
     "source": "精选",
     "kp": "发射角θ与初速v₀如何决定抛物线轨迹，为何45°射程最大、互补角射程相同",
     "audience": "高中生",
-    "blocks": ["text", "param_sim", "step_through", "callout", "quiz"],
-    "qa": { "render": 5.0, "interact": 5.0, "peda": 5.0, "learn": 5.0, "passed": true },
+    "difficulty": "core",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "prereqs": 3,
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 5.0,
+      "learn": 5.0,
+      "passed": true
+    },
     "status": "ready",
-    "featured": false
+    "featured": true
   },
   {
     "title": "阻尼振动 A·e⁻ᵞᵗcos(ωt)",
@@ -278,8 +335,22 @@
     "source": "精选",
     "kp": "余弦振荡乘指数衰减包络，阻尼γ决定衰减快慢，振幅按比例而非等量缩小",
     "audience": "高中/本科",
-    "blocks": ["text", "param_sim", "step_through", "callout", "quiz"],
-    "qa": { "render": 5.0, "interact": 5.0, "peda": 5.0, "learn": 5.0, "passed": true },
+    "difficulty": "advanced",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "prereqs": 3,
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 5.0,
+      "learn": 5.0,
+      "passed": true
+    },
     "status": "ready",
     "featured": false
   },
@@ -289,8 +360,22 @@
     "source": "精选",
     "kp": "对数是指数的反函数，所有曲线过(1,0)且在x=a处取1，底数越大越平缓",
     "audience": "高中生",
-    "blocks": ["text", "param_sim", "step_through", "callout", "quiz"],
-    "qa": { "render": 5.0, "interact": 5.0, "peda": 5.0, "learn": 5.0, "passed": true },
+    "difficulty": "core",
+    "blocks": [
+      "text",
+      "param_sim",
+      "step_through",
+      "callout",
+      "quiz"
+    ],
+    "prereqs": 3,
+    "qa": {
+      "render": 5.0,
+      "interact": 5.0,
+      "peda": 5.0,
+      "learn": 5.0,
+      "passed": true
+    },
     "status": "ready",
     "featured": false
   }
