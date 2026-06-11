@@ -36,12 +36,17 @@
 # 渲染画廊（从 examples.json + 组件文件，无需模型）
 python3 demo/build.py
 
-# 重新生成组件（需要 GLM key；无 key 则用离线模板）
+# 用最新引擎从蓝图免模型重建全部卡片（前置知识页 + 四维质检），并刷新 examples.json
+python3 demo/build.py --recompile
+
+# 重新生成组件（需要 GLM key；无 key 则用离线模板规划蓝图）
 export ZHIPU_API_KEY=...
 python3 demo/build.py --generate
 ```
 
-要改示例列表：编辑 `demo/build.py` 顶部的 `EXAMPLES`，再 `--generate`。
+- `--recompile`：以 `demo/specs/*.json` 蓝图为准，用当前引擎重新编译每张卡（**不调用模型**），
+  适合引擎/模板升级后整体刷新；产物均以「前置知识」页开场、四维质检全过。
+- 要改示例列表：编辑 `demo/build.py` 顶部的 `EXAMPLES`，再 `--recompile`（或带 key 的 `--generate`）。
 
 ## 对话式改写
 
