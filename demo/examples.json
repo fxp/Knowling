@@ -9,6 +9,7 @@
     "blocks": [
       "text",
       "param_sim",
+      "audio",
       "step_through",
       "step_through",
       "callout",
