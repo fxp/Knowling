@@ -74,6 +74,24 @@ EXAMPLES = [
      "description": "把圆拆成同心环、拉直叠成三角形，不用积分推出 πr²，并体会平方关系",
      "objectives": "理解几何推导,掌握面积随半径平方增长,区分周长与面积公式",
      "audience": "初中生", "difficulty": "core", "source": "Math-To-Manim"},
+
+    # ── 精选 Explorable（最新引擎手写蓝图：前置知识页 + 四维质检全过 5/5/5/5）──
+    {"id": "derivative_tangent", "title": "导数：切线的斜率 f′(x₀)",
+     "description": "在 y=x² 上移动切点 x₀，切线随之转动，斜率读数恒等于 f′(x₀)=2x₀",
+     "objectives": "把导数理解为切线斜率,认识导数是随位置变化的函数,区分割线与切线",
+     "audience": "高中生", "difficulty": "core", "source": "精选"},
+    {"id": "projectile_motion", "title": "抛体运动：射程与最大高度",
+     "description": "发射角θ与初速v₀如何决定抛物线轨迹，为何45°射程最大、互补角射程相同",
+     "objectives": "理解轨迹是抛物线,掌握射程R∝sin2θ在45°最大,区分最远与最高",
+     "audience": "高中生", "difficulty": "core", "source": "精选"},
+    {"id": "damped_oscillation", "title": "阻尼振动 A·e⁻ᵞᵗcos(ωt)",
+     "description": "余弦振荡乘指数衰减包络，阻尼γ决定衰减快慢，振幅按比例而非等量缩小",
+     "objectives": "把阻尼振动拆成振荡×衰减,理解包络夹住振荡,区分比例衰减与线性衰减",
+     "audience": "高中/本科", "difficulty": "advanced", "source": "精选"},
+    {"id": "logarithm_base", "title": "对数函数 y=logₐx 与底数 a",
+     "description": "对数是指数的反函数，所有曲线过(1,0)且在x=a处取1，底数越大越平缓",
+     "objectives": "把对数理解为指数的反问,掌握logₐa=1的几何意义,认清定义域x>0",
+     "audience": "高中生", "difficulty": "core", "source": "精选"},
 ]
 
 
@@ -135,6 +153,8 @@ def _card(item: dict) -> str:
         badge = '<span class="src src-glm">GLM-5 生成</span>'
     elif item["source"] == "Math-To-Manim":
         badge = '<span class="src src-m2m">Math-To-Manim</span>'
+    elif item["source"] == "精选":
+        badge = '<span class="src src-pick">精选 Explorable</span>'
     else:
         badge = '<span class="src src-mock">离线模板</span>'
     status = item.get("status", "draft")
@@ -196,6 +216,7 @@ header.hero {{ padding:64px 0 36px; border-bottom:1px solid var(--border);
 .src-glm {{ background:rgba(108,140,255,.16); color:var(--accent); border:1px solid rgba(108,140,255,.4); }}
 .src-mock {{ background:#21262d; color:var(--muted); border:1px solid var(--border); }}
 .src-m2m {{ background:rgba(255,138,76,.16); color:var(--accent2); border:1px solid rgba(255,138,76,.4); }}
+.src-pick {{ background:rgba(63,185,80,.16); color:var(--ok); border:1px solid rgba(63,185,80,.45); }}
 .meta, .blocks {{ display:flex; flex-wrap:wrap; gap:6px; padding:0 18px; }}
 .blocks {{ padding-top:10px; padding-bottom:4px; }}
 .chip {{ font-size:12px; padding:3px 9px; border-radius:999px; background:#21262d; color:var(--muted); border:1px solid var(--border); }}

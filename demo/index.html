@@ -34,6 +34,7 @@ header.hero { padding:64px 0 36px; border-bottom:1px solid var(--border);
 .src-glm { background:rgba(108,140,255,.16); color:var(--accent); border:1px solid rgba(108,140,255,.4); }
 .src-mock { background:#21262d; color:var(--muted); border:1px solid var(--border); }
 .src-m2m { background:rgba(255,138,76,.16); color:var(--accent2); border:1px solid rgba(255,138,76,.4); }
+.src-pick { background:rgba(63,185,80,.16); color:var(--ok); border:1px solid rgba(63,185,80,.45); }
 .meta, .blocks { display:flex; flex-wrap:wrap; gap:6px; padding:0 18px; }
 .blocks { padding-top:10px; padding-bottom:4px; }
 .chip { font-size:12px; padding:3px 9px; border-radius:999px; background:#21262d; color:var(--muted); border:1px solid var(--border); }
@@ -61,7 +62,7 @@ code { background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; }
     <span class="step qa">四维质检</span><span class="arrow">→</span>
     <span class="step">知识卡片牌组</span>
   </div>
-  <p class="scope">范围聚焦：<b>只做单个知识点的学习 / Quiz 卡片</b>。四维质检 = 渲染分（GLM-5V 看截图）+ 交互分（校验控件）+ 教学分（含「是否跑题」）+ 可学会分（模拟已掌握前置知识的学习者，只读卡片能否获得该知识点所需知识）。下方 11 个示例均可直接交互。</p>
+  <p class="scope">范围聚焦：<b>只做单个知识点的学习 / Quiz 卡片</b>。四维质检 = 渲染分（GLM-5V 看截图）+ 交互分（校验控件）+ 教学分（含「是否跑题」）+ 可学会分（模拟已掌握前置知识的学习者，只读卡片能否获得该知识点所需知识）。下方 15 个示例均可直接交互。</p>
 </div></header>
 <main class="wrap"><section class="gallery">
 <article class="card card-featured">
@@ -77,6 +78,20 @@ code { background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; }
   <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
   <div class="frame-wrap"><iframe loading="lazy" src="components/sine_function.html" title="正弦函数 y = A·sin(ωx + φ)"></iframe></div>
   <a class="open" href="components/sine_function.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
+</article>
+<article class="card card-featured">
+  <div class="card-head">
+    <div><h3>导数：切线的斜率 f′(x₀)</h3><p class="kp">在 y=x² 上移动切点 x₀，切线随之转动，斜率读数恒等于 f′(x₀)=2x₀</p></div>
+    <span class="src src-pick">精选 Explorable</span>
+  </div>
+  <div class="meta">
+    <span class="chip chip-status chip-ready">ready</span>
+    <span class="chip chip-ok">渲染 5.0</span><span class="chip chip-ok">交互 5.0</span><span class="chip chip-ok">教学 5.0</span><span class="chip chip-ok">可学会 5.0</span>
+    <span class="chip chip-aud">高中生</span>
+  </div>
+  <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
+  <div class="frame-wrap"><iframe loading="lazy" src="components/derivative_tangent.html" title="导数：切线的斜率 f′(x₀)"></iframe></div>
+  <a class="open" href="components/derivative_tangent.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
 </article>
 <article class="card">
   <div class="card-head">
@@ -217,6 +232,48 @@ code { background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; }
   <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
   <div class="frame-wrap"><iframe loading="lazy" src="components/sigmoid_function.html" title="Sigmoid 函数 σ(x)=1/(1+e^(−k(x−x₀)))"></iframe></div>
   <a class="open" href="components/sigmoid_function.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
+</article>
+<article class="card">
+  <div class="card-head">
+    <div><h3>抛体运动：射程与最大高度</h3><p class="kp">发射角θ与初速v₀如何决定抛物线轨迹，为何45°射程最大、互补角射程相同</p></div>
+    <span class="src src-pick">精选 Explorable</span>
+  </div>
+  <div class="meta">
+    <span class="chip chip-status chip-ready">ready</span>
+    <span class="chip chip-ok">渲染 5.0</span><span class="chip chip-ok">交互 5.0</span><span class="chip chip-ok">教学 5.0</span><span class="chip chip-ok">可学会 5.0</span>
+    <span class="chip chip-aud">高中生</span>
+  </div>
+  <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
+  <div class="frame-wrap"><iframe loading="lazy" src="components/projectile_motion.html" title="抛体运动：射程与最大高度"></iframe></div>
+  <a class="open" href="components/projectile_motion.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
+</article>
+<article class="card">
+  <div class="card-head">
+    <div><h3>阻尼振动 A·e⁻ᵞᵗcos(ωt)</h3><p class="kp">余弦振荡乘指数衰减包络，阻尼γ决定衰减快慢，振幅按比例而非等量缩小</p></div>
+    <span class="src src-pick">精选 Explorable</span>
+  </div>
+  <div class="meta">
+    <span class="chip chip-status chip-ready">ready</span>
+    <span class="chip chip-ok">渲染 5.0</span><span class="chip chip-ok">交互 5.0</span><span class="chip chip-ok">教学 5.0</span><span class="chip chip-ok">可学会 5.0</span>
+    <span class="chip chip-aud">高中/本科</span>
+  </div>
+  <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
+  <div class="frame-wrap"><iframe loading="lazy" src="components/damped_oscillation.html" title="阻尼振动 A·e⁻ᵞᵗcos(ωt)"></iframe></div>
+  <a class="open" href="components/damped_oscillation.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
+</article>
+<article class="card">
+  <div class="card-head">
+    <div><h3>对数函数 y=logₐx 与底数 a</h3><p class="kp">对数是指数的反函数，所有曲线过(1,0)且在x=a处取1，底数越大越平缓</p></div>
+    <span class="src src-pick">精选 Explorable</span>
+  </div>
+  <div class="meta">
+    <span class="chip chip-status chip-ready">ready</span>
+    <span class="chip chip-ok">渲染 5.0</span><span class="chip chip-ok">交互 5.0</span><span class="chip chip-ok">教学 5.0</span><span class="chip chip-ok">可学会 5.0</span>
+    <span class="chip chip-aud">高中生</span>
+  </div>
+  <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
+  <div class="frame-wrap"><iframe loading="lazy" src="components/logarithm_base.html" title="对数函数 y=logₐx 与底数 a"></iframe></div>
+  <a class="open" href="components/logarithm_base.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
 </article>
 </section></main>
 <footer><div class="wrap">
