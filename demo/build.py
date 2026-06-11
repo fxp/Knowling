@@ -185,10 +185,10 @@ header.hero {{ padding:64px 0 36px; border-bottom:1px solid var(--border);
 .pipeline .step.qa {{ border-color:var(--accent); color:var(--accent); }}
 .scope {{ margin-top:22px; font-size:14px; color:var(--muted); }}
 .scope b {{ color:var(--fg); }}
-.gallery {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:22px; padding:36px 0 80px; }}
+.gallery {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(440px,1fr)); gap:22px; padding:36px 0 80px; align-items:start; }}
 .card {{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; }}
 .card-featured {{ grid-column:1/-1; border-color:var(--accent); }}
-.card-featured .frame-wrap {{ height:560px; }}
+.card-featured .frame-wrap {{ min-height:600px; }}
 .card-head {{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:18px 18px 10px; }}
 .card-head h3 {{ margin:0 0 4px; font-size:19px; }}
 .kp {{ margin:0; color:var(--muted); font-size:14px; }}
@@ -205,8 +205,8 @@ header.hero {{ padding:64px 0 36px; border-bottom:1px solid var(--border);
 .chip-status.chip-ready {{ color:var(--ok); border-color:rgba(63,185,80,.4); }}
 .chip-status.chip-draft {{ color:var(--warn); }}
 .chip-aud {{ color:#b9c2d0; }}
-.frame-wrap {{ height:440px; margin:14px 0 0; background:#fff; border-top:1px solid var(--border); }}
-iframe {{ width:100%; height:100%; border:0; }}
+.frame-wrap {{ height:auto; min-height:520px; margin:14px 0 0; background:#fff; border-top:1px solid var(--border); }}
+iframe {{ width:100%; min-height:520px; border:0; display:block; }}
 .open {{ padding:12px 18px; font-size:14px; border-top:1px solid var(--border); }}
 footer {{ border-top:1px solid var(--border); padding:24px 0 60px; color:var(--muted); font-size:13px; }}
 code {{ background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; }}
@@ -231,6 +231,41 @@ code {{ background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; 
 <footer><div class="wrap">
   由 Knowling 生成 · <code>GLM-5</code> 示例为真实模型规划内容、统一模板渲染并通过四维质检 · 每张卡片均为单文件自包含 HTML · 用 <code>knowling serve</code> 可对卡片对话式改写。
 </div></footer>
+<script>
+/* Size each embedded card to its content so nothing is clipped. The gallery and
+   the components share an origin (GitHub Pages), so we can read the iframe's
+   document height. The card deck animates its own height on navigation; a
+   ResizeObserver inside the frame keeps the iframe matched. */
+(function () {{
+  function fit(f) {{
+    try {{
+      var d = f.contentDocument; if (!d) return;
+      var doc = d.querySelector('.kl-doc') || d.body; if (!doc) return;
+      var h = Math.ceil(doc.getBoundingClientRect().height) + 6;
+      if (h > 60) f.style.height = h + 'px';
+    }} catch (e) {{ /* cross-origin or not ready — keep CSS min-height */ }}
+  }}
+  function bind(f) {{
+    function refit() {{ fit(f); }}
+    f.addEventListener('load', function () {{
+      refit();
+      try {{
+        var w = f.contentWindow, d = f.contentDocument;
+        var target = d.querySelector('.kl-doc');
+        if (w.ResizeObserver && target) {{ new w.ResizeObserver(refit).observe(target); }}
+        d.addEventListener('click', function () {{ setTimeout(refit, 120); setTimeout(refit, 460); }});
+        w.addEventListener('keydown', function () {{ setTimeout(refit, 460); }});
+      }} catch (e) {{}}
+      setTimeout(refit, 300); setTimeout(refit, 850);
+    }});
+    if (f.contentDocument && f.contentDocument.readyState === 'complete') refit();
+  }}
+  document.querySelectorAll('.frame-wrap iframe').forEach(bind);
+  window.addEventListener('resize', function () {{
+    document.querySelectorAll('.frame-wrap iframe').forEach(fit);
+  }});
+}})();
+</script>
 </body>
 </html>'''
 
