@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>正弦函数 y = A·sin(ωx + φ) · Knowling</title>
+<title>傅里叶级数逼近方波 · Knowling</title>
 <style>
 :root {
   --kl-bg: #ffffff; --kl-fg: #14181f; --kl-muted: #5b6573;
@@ -230,61 +230,47 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
 .kl-generic pre { background: var(--kl-soft); padding: 12px; border-radius: 8px; overflow: auto; font-size: 13px; }
 .kl-footer { margin-top: 32px; color: var(--kl-muted); font-size: 12px; text-align: center; }
 </style>
-<script>window.__KNOWLING__=window.__KNOWLING__||{};if(!window.__KNOWLING__.kp_id)window.__KNOWLING__.kp_id="trig-sin-A-omega-phi";</script>
+<script>window.__KNOWLING__=window.__KNOWLING__||{};if(!window.__KNOWLING__.kp_id)window.__KNOWLING__.kp_id="fourier-square-wave-harmonics";</script>
 </head>
 <body>
 <main class="kl-doc">
   <header class="kl-header">
-    <h1>正弦函数 y = A·sin(ωx + φ)</h1>
-    <p class="kl-hook">声音的高低与大小、潮汐的涨落，背后都是正弦波。为什么同一个正弦函数，稍微改个字母，波形就千变万化？</p>
+    <h1>傅里叶级数逼近方波</h1>
+    <p class="kl-hook">一个棱角分明的方波，怎么可能由一堆光滑的正弦波叠加而成？3Blue1Brown 的旋转向量（傅里叶级数）告诉我们：只要把一系列频率成倍、振幅递减的正弦波加起来，方波就会一点点浮现。</p>
   </header>
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
-<div class="kl-card"><section class="kl-block kl-prereq"><h2 class="kl-prereq-title"><span>🧭</span>学习之前 · 先备好这些前置知识</h2><p class="kl-prereq-lead">这张卡建立在以下知识点之上。其中有不熟悉的，建议先补上再继续，学起来会顺畅得多。</p><ol class="kl-prereq-list"><li><span class="kl-prereq-name">基本正弦函数 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>x</mi></mrow></math></span> 的图象</span><span class="kl-prereq-why">本卡是在它之上加入 A、ω、φ 三个参数，先要熟悉它的波形、周期 <span class="kl-math"><math><mrow><mn>2</mn><mi>π</mi></mrow></math></span> 与取值范围</span></li>
-<li><span class="kl-prereq-name">弧度制与 <span class="kl-math"><math><mi>π</mi></math></span></span><span class="kl-prereq-why">周期、相位都用弧度表示，如 <span class="kl-math"><math><mrow><mi>T</mi><mo>=</mo><mn>2</mn><mi>π</mi><mi>/</mi><mi>ω</mi></mrow></math></span>、<span class="kl-math"><math><mrow><mi>ϕ</mi><mo>=</mo><mi>π</mi><mi>/</mi><mn>2</mn></mrow></math></span></span></li>
-<li><span class="kl-prereq-name">函数图象的平移与伸缩</span><span class="kl-prereq-why">A 是纵向伸缩、ω 是横向压缩、φ 是水平平移，需要先有图象变换的概念</span></li></ol><p class="kl-prereq-note">都熟悉了？点「下一张」开始学习。</p></section></div>
+<div class="kl-card"><section class="kl-block kl-prereq"><h2 class="kl-prereq-title"><span>🧭</span>学习之前 · 先备好这些前置知识</h2><p class="kl-prereq-lead">这张卡建立在以下知识点之上。其中有不熟悉的，建议先补上再继续，学起来会顺畅得多。</p><ol class="kl-prereq-list"><li><span class="kl-prereq-name">正弦函数 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mi>A</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>ω</mi><mi>x</mi><mo>+</mo><mi>ϕ</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math></span></span><span class="kl-prereq-why">傅里叶级数的每一项都是不同频率、不同振幅的正弦波，需先理解 A、ω 的含义</span></li>
+<li><span class="kl-prereq-name">函数的叠加（逐点相加）</span><span class="kl-prereq-why">方波是把多条正弦曲线在每个 x 处纵坐标相加得到的</span></li>
+<li><span class="kl-prereq-name">周期与频率、奇偶性的基本概念</span><span class="kl-prereq-why">方波只含奇次谐波正源于它的对称性（奇/偶谐波之分）</span></li></ol><p class="kl-prereq-note">都熟悉了？点「下一张」开始学习。</p></section></div>
 <div class="kl-card"><section class="kl-block kl-text" data-block-id="bk_1_hook">
-<p>我们早就认识了 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mrow><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math></span>，它是如此完美对称。但在现实与工程中，纯正弦波几乎不存在——声音有大小（振幅），频率有高低（周期），起点有先后（相位）。</p>
-<p>这三个维度的变化，被精妙地编码进了三个希腊字母：<strong><span class="kl-math"><math><mi>A</mi></math></span>、<span class="kl-math"><math><mi>ω</mi></math></span>、<span class="kl-math"><math><mi>ϕ</mi></math></span></strong>。接下来，由你亲手拆解它们的魔力。</p>
+<p>傅里叶的惊人主张：<strong>任何</strong>周期信号，都能写成一系列正弦波之和。最经典的例子是<strong>方波</strong>——它棱角分明、上下跳变，却可以只用频率成倍、振幅递减的正弦波拼出来：</p>
+<p><span class="kl-math kl-math-display"><math display="block" class="tml-display" style="display:block math;"><mrow><mi>f</mi><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow><mo>=</mo><mfrac><mn>4</mn><mi>π</mi></mfrac><mrow><mo fence="true" form="prefix" stretchy="true">(</mo><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>x</mi><mo>+</mo><mfrac><mn>1</mn><mn>3</mn></mfrac><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mn>3</mn><mi>x</mi><mo>+</mo><mfrac><mn>1</mn><mn>5</mn></mfrac><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mn>5</mn><mi>x</mi><mo>+</mo><mo>⋯</mo><mspace width="0.1667em"></mspace><mo fence="true" form="postfix" stretchy="true">)</mo></mrow></mrow></math></span></p>
+<p>注意：只用了<strong>奇数倍频率</strong>（<span class="kl-math"><math><mrow><mn>1,3,5</mn><mo separator="true">,</mo><mo>…</mo></mrow></math></span>），振幅按 <span class="kl-math"><math><mrow><mn>1</mn><mi>/</mi><mi>n</mi></mrow></math></span> 衰减。下面亲手加入谐波，看方波如何浮现。</p>
 </section></div>
 <div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bk_2_param_sim">
   <div class="kl-ps-controls">
   <label class="kl-ps-ctl">
-    <span class="kl-ps-name">振幅 A</span>
-    <input type="range" data-param="A"
-           min="-3.0" max="3.0" step="0.1"
+    <span class="kl-ps-name">谐波个数 N</span>
+    <input type="range" data-param="N"
+           min="1.0" max="8.0" step="1.0"
            value="1.0">
-    <output class="kl-ps-val" data-for="A"></output>
-  </label>
-  <label class="kl-ps-ctl">
-    <span class="kl-ps-name">角频率 ω</span>
-    <input type="range" data-param="omega"
-           min="0.5" max="5.0" step="0.1"
-           value="1.0">
-    <output class="kl-ps-val" data-for="omega"></output>
-  </label>
-  <label class="kl-ps-ctl">
-    <span class="kl-ps-name">初相 φ</span>
-    <input type="range" data-param="phi"
-           min="-3.14" max="3.14" step="0.1"
-           value="0.0">
-    <output class="kl-ps-val" data-for="phi"></output>
+    <output class="kl-ps-val" data-for="N"></output>
   </label>
   </div>
   <div class="kl-ps-outputs">
-  <div class="kl-ps-out"><span>周期 T = 2π/|ω|</span><strong data-out="T">—</strong></div>
-  <div class="kl-ps-out"><span>振幅 |A|</span><strong data-out="amp">—</strong></div>
+
   </div>
   <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
-  <p class="kl-ps-explain">拖动滑块改变参数，观察正弦曲线的形态变化。右侧标量输出会实时计算当前的周期与振幅绝对值。注意：当 A&lt;0 时，观察曲线发生了什么翻转。</p>
+  <p class="kl-ps-explain">拖动 N 从 1 加到 8：一条孤独的正弦波（N=1）逐步长出平台与棱角，越来越像那条上下跳变的方波。盯住每个跳变点——它附近始终翘起一个小尖角，且 N 越大尖角越窄却不变矮，这就是吉布斯现象。</p>
   <script>
   (function() {
     var root = document.querySelector('[data-block-id="bk_2_param_sim"]');
-    var params = [{"name": "A", "label": "振幅 A", "min": -3.0, "max": 3.0, "step": 0.1, "default": 1.0}, {"name": "omega", "label": "角频率 ω", "min": 0.5, "max": 5.0, "step": 0.1, "default": 1.0}, {"name": "phi", "label": "初相 φ", "min": -3.14, "max": 3.14, "step": 0.1, "default": 0.0}];
+    var params = [{"name": "N", "label": "谐波个数 N", "min": 1.0, "max": 8.0, "step": 1.0, "default": 1.0}];
     var sweep = {"name": "x", "min": -6.28, "max": 6.28};
-    var curves = [{"name": "y", "label": "y = A·sin(ωx + φ)", "expr": "A*Math.sin(omega*x+phi)"}];
-    var scalars = [{"name": "T", "label": "周期 T = 2π/|ω|", "expr": "2*Math.PI/Math.abs(omega)"}, {"name": "amp", "label": "振幅 |A|", "expr": "Math.abs(A)"}];
+    var curves = [{"name": "partial", "label": "部分和 (前 N 个奇次谐波)", "expr": "(4/Math.PI)*( Math.sin(x) + (N>=2?Math.sin(3*x)/3:0) + (N>=3?Math.sin(5*x)/5:0) + (N>=4?Math.sin(7*x)/7:0) + (N>=5?Math.sin(9*x)/9:0) + (N>=6?Math.sin(11*x)/11:0) + (N>=7?Math.sin(13*x)/13:0) + (N>=8?Math.sin(15*x)/15:0) )"}, {"name": "target", "label": "目标方波 sign(sin x)", "expr": "Math.sign(Math.sin(x))"}];
+    var scalars = [];
     var legacy = false;
     var sliders = {};
     params.forEach(function(p) { sliders[p.name] = root.querySelector('input[data-param="' + p.name + '"]'); });
@@ -423,7 +409,7 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_3_step_omega">
+<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_3_step">
   <div class="kl-st-state"></div>
   <p class="kl-st-explain"></p>
   <div class="kl-st-nav">
@@ -433,8 +419,8 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   </div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="bk_3_step_omega"]');
-    var steps = [{"state": "A=1, omega=1, phi=0", "explain": "基准状态：ω=1，此时周期 T=2π/1=2π。曲线在 [-π, π] 恰好完成一个完整的波浪。"}, {"state": "A=1, omega=2, phi=0", "explain": "将 ω 增大到 2：图像在水平方向被&#x27;压缩&#x27;了。因为自变量被乘以 2，x 只需走一半的路程就能完成一个周期。此时 T=2π/2=π。"}, {"state": "A=1, omega=0.5, phi=0", "explain": "将 ω 减小到 0.5：图像在水平方向被&#x27;拉伸&#x27;了。x 需要走两倍的路程才能完成一个周期。此时 T=2π/0.5=4π。"}];
+    var root = document.querySelector('[data-block-id="bk_3_step"]');
+    var steps = [{"state": "N = 1：仅 sin x", "explain": "只有基波 <span class=\"kl-math\"><math><mrow><mfrac><mn>4<\/mn><mi>π<\/mi><\/mfrac><mrow><mi>sin<\/mi><mo>⁡<\/mo><mspace width=\"0.1667em\"><\/mspace><\/mrow><mi>x<\/mi><\/mrow><\/math><\/span>。一条光滑的正弦曲线，幅度略超过 1，离方波还很远——但已经抓住了「正半周为正、负半周为负」的大势。"}, {"state": "N = 2：加上 (1/3)sin 3x", "explain": "叠加第二个奇次谐波（频率 3 倍、振幅 1/3）。波峰被压平了一些，曲线开始出现「肩膀」，向方波的平顶靠拢。"}, {"state": "N = 3：再加 (1/5)sin 5x", "explain": "第三个谐波让平台更平、边沿更陡。每加一个更高频、更小振幅的谐波，就负责修整一处更精细的棱角。"}, {"state": "N = 8：八个奇次谐波", "explain": "曲线已非常接近方波：平台几乎水平，跳变几乎竖直。唯独每个跳变口仍翘着一个**又窄又高**的小尖——这个约 9% 的过冲不会随 N 增大而消失。"}];
     var i = 0;
     var stateEl = root.querySelector('.kl-st-state');
     var explainEl = root.querySelector('.kl-st-explain');
@@ -454,44 +440,14 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_4_step_phi">
-  <div class="kl-st-state"></div>
-  <p class="kl-st-explain"></p>
-  <div class="kl-st-nav">
-    <button class="kl-st-prev" type="button">‹ 上一步</button>
-    <span class="kl-st-progress"></span>
-    <button class="kl-st-next" type="button">下一步 ›</button>
-  </div>
-  <script>
-  (function() {
-    var root = document.querySelector('[data-block-id="bk_4_step_phi"]');
-    var steps = [{"state": "A=1, omega=1, phi=0", "explain": "基准状态：φ=0，曲线原点过 (0,0) 且处于上升沿。"}, {"state": "A=1, omega=1, phi=1.57", "explain": "φ=+π/2：代数上加了一个正数，但图像整体向**左**平移了 π/2。记忆口诀：&#x27;加左减右&#x27;（针对 x 本身而言，+π/2 等价于 x 提前达到对应值）。"}, {"state": "A=1, omega=1, phi=-1.57", "explain": "φ=-π/2：代数上减了一个正数，图像整体向**右**平移了 π/2。原点处的上升沿被推到了 x=π/2 的位置。"}];
-    var i = 0;
-    var stateEl = root.querySelector('.kl-st-state');
-    var explainEl = root.querySelector('.kl-st-explain');
-    var prog = root.querySelector('.kl-st-progress');
-    var prev = root.querySelector('.kl-st-prev');
-    var next = root.querySelector('.kl-st-next');
-    function render() {
-      stateEl.innerHTML = steps[i].state;
-      explainEl.innerHTML = steps[i].explain || '';
-      prog.textContent = (i + 1) + ' / ' + steps.length;
-      prev.disabled = i === 0;
-      next.disabled = i === steps.length - 1;
-    }
-    prev.addEventListener('click', function() { if (i > 0) { i--; render(); } });
-    next.addEventListener('click', function() { if (i < steps.length - 1) { i++; render(); } });
-    render();
-  })();
-  </script>
-</section></div>
-<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_5_callout">
+<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_4_callout">
   <span class="kl-callout-icon">🛈</span>
-  <div class="kl-callout-body"><p><strong>警惕负振幅！</strong></p>
-<p>当 <span class="kl-math"><math><mrow><mi>A</mi><mo>&lt;</mo><mn>0</mn></mrow></math></span> 时，曲线并非简单下移，而是关于 <span class="kl-math"><math><mi>x</mi></math></span> 轴发生了<strong>翻转（反射）</strong>。例如 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mo form="prefix" stretchy="false">−</mo><mrow><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math></span> 的波峰变成了波谷。在数学严格定义中，振幅始终为正（<span class="kl-math"><math><mrow><mi>|</mi><mi>A</mi><mi>|</mi></mrow></math></span>），负号只代表方向。</p></div>
+  <div class="kl-callout-body"><p><strong>两个反直觉的事实</strong></p>
+<p>1. <strong>只含奇次谐波</strong>：方波关于半周期反对称，所有偶次谐波（<span class="kl-math"><math><mrow><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mn>2</mn><mi>x</mi><mo separator="true">,</mo><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mn>4</mn><mi>x</mi><mo separator="true">,</mo><mo>…</mo></mrow></math></span>）系数恰好为 0，只剩 <span class="kl-math"><math><mrow><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>x</mi><mo separator="true">,</mo><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mn>3</mn><mi>x</mi><mo separator="true">,</mo><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mn>5</mn><mi>x</mi><mo separator="true">,</mo><mo>…</mo></mrow></math></span>。</p>
+<p>2. <strong>吉布斯现象</strong>：无论叠加多少谐波，跳变处的过冲幅度始终约为跳变高度的 <strong>9%</strong>，不会消失——它只是越来越窄。增加谐波改善的是逼近的「宽度」，而非这个尖峰的「高度」。</p></div>
 </aside></div>
-<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_6_quiz">
-  <p class="kl-quiz-title">参数诊断</p>
+<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_5_quiz">
+  <p class="kl-quiz-title">傅里叶级数诊断</p>
   <div class="kl-quiz-head"><span class="kl-quiz-progress"></span></div>
   <p class="kl-quiz-q"></p>
   <div class="kl-quiz-opts"></div>
@@ -503,8 +459,8 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   <div class="kl-quiz-score" hidden></div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="bk_6_quiz"]');
-    var questions = [{"type": "single", "answer": 1, "accept": [], "prompt": "要将 y=sin(x) 的图像在水平方向压缩为原来的一半（周期变为 π），应该修改哪个参数，如何修改？", "options": ["将 A 改为 2", "将 ω 改为 2", "将 ω 改为 0.5", "将 φ 改为 π"], "explain": "周期 T=2π/ω，要使周期减半，需将 ω 翻倍，所以 ω 改为 2。"}, {"type": "single", "answer": 0, "accept": [], "prompt": "函数 y=sin(x+π/3) 的图像是由 y=sin(x) 的图像如何变换得到的？", "options": ["向左平移 π/3 个单位", "向右平移 π/3 个单位", "向上平移 π/3 个单位", "向下平移 π/3 个单位"], "explain": "φ=+π/3，代数上加对应几何向左平移，即&#x27;加左减右&#x27;原则。"}, {"type": "single", "answer": 1, "accept": [], "prompt": "振幅 A 决定了正弦波的横向宽窄，而角频率 ω 决定了纵向高低。", "options": ["正确", "错误"], "explain": "恰好说反了。A 控制纵向高低（振幅），ω 控制横向宽窄（周期）。"}];
+    var root = document.querySelector('[data-block-id="bk_5_quiz"]');
+    var questions = [{"type": "single", "answer": 1, "accept": [], "prompt": "方波的傅里叶级数 <span class=\"kl-math\"><math><mrow><mfrac><mn>4<\/mn><mi>π<\/mi><\/mfrac><mrow><mo fence=\"true\" form=\"prefix\" stretchy=\"false\">(<\/mo><mrow><mi>sin<\/mi><mo>⁡<\/mo><mspace width=\"0.1667em\"><\/mspace><\/mrow><mi>x<\/mi><mo>+<\/mo><mfrac><mn>1<\/mn><mn>3<\/mn><\/mfrac><mrow><mi>sin<\/mi><mo>⁡<\/mo><mspace width=\"0.1667em\"><\/mspace><\/mrow><mn>3<\/mn><mi>x<\/mi><mo>+<\/mo><mo>⋯<\/mo><mspace width=\"0.1667em\"><\/mspace><mo fence=\"true\" form=\"postfix\" stretchy=\"false\">)<\/mo><\/mrow><\/mrow><\/math><\/span> 中，下面哪个谐波**不会**出现？", "options": ["sin x", "sin 2x", "sin 3x", "sin 5x"], "explain": "方波只含奇次谐波，频率为偶数倍的 sin 2x 系数为 0，不出现。"}, {"type": "single", "answer": 1, "accept": [], "prompt": "把叠加的谐波个数 N 增大，跳变处约 9% 的「过冲」会怎样？", "options": ["幅度逐渐减小直到消失", "幅度基本不变，但变得越来越窄", "幅度越来越大", "完全消失，曲线变成理想方波"], "explain": "这就是吉布斯现象：过冲幅度不随 N 减小，只是宽度变窄，永远存在。"}, {"type": "single", "answer": 1, "accept": [], "prompt": "傅里叶级数说明：要拼出尖锐的方波，必须使用各种不同形状的波。", "options": ["正确", "错误"], "explain": "恰恰相反——只用同一种形状的正弦波，靠不同的频率和振幅叠加即可。这正是傅里叶分析的威力。"}];
     var many = questions.length > 1;
     var idx = 0, score = 0, locked = false, selected = null, results = [];
     var qBox = root.querySelector('.kl-quiz-q');
@@ -553,7 +509,7 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
       // Seam ④: report the finished quiz to an embedding host without breaking
       // self-containment. Fires once the whole quiz is done.
       var meta = window.__KNOWLING__ || {};
-      var payload = { type: 'knowling:quiz-result', block_id: 'bk_6_quiz',
+      var payload = { type: 'knowling:quiz-result', block_id: 'bk_5_quiz',
         kp_id: meta.kp_id || '', knowling_id: meta.knowling_id || '',
         total: questions.length, correct: score,
         score: questions.length ? score / questions.length : 0,

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>正弦函数 y = A·sin(ωx + φ) · Knowling</title>
+<title>圆面积 A = πr²（展开法） · Knowling</title>
 <style>
 :root {
   --kl-bg: #ffffff; --kl-fg: #14181f; --kl-muted: #5b6573;
@@ -230,62 +230,48 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
 .kl-generic pre { background: var(--kl-soft); padding: 12px; border-radius: 8px; overflow: auto; font-size: 13px; }
 .kl-footer { margin-top: 32px; color: var(--kl-muted); font-size: 12px; text-align: center; }
 </style>
-<script>window.__KNOWLING__=window.__KNOWLING__||{};if(!window.__KNOWLING__.kp_id)window.__KNOWLING__.kp_id="trig-sin-A-omega-phi";</script>
+<script>window.__KNOWLING__=window.__KNOWLING__||{};if(!window.__KNOWLING__.kp_id)window.__KNOWLING__.kp_id="circle-area-unrolling-pi-r-squared";</script>
 </head>
 <body>
 <main class="kl-doc">
   <header class="kl-header">
-    <h1>正弦函数 y = A·sin(ωx + φ)</h1>
-    <p class="kl-hook">声音的高低与大小、潮汐的涨落，背后都是正弦波。为什么同一个正弦函数，稍微改个字母，波形就千变万化？</p>
+    <h1>圆面积 A = πr²（展开法）</h1>
+    <p class="kl-hook">为什么圆的面积偏偏是 $\pi r^2$？Math-To-Manim 里那段把圆「拆成同心环、再展开成三角形」的动画，给出了不用积分也能信服的答案。</p>
   </header>
   <div class="kl-deck" data-deck>
     <div class="kl-deck-viewport">
       <div class="kl-deck-track">
-<div class="kl-card"><section class="kl-block kl-prereq"><h2 class="kl-prereq-title"><span>🧭</span>学习之前 · 先备好这些前置知识</h2><p class="kl-prereq-lead">这张卡建立在以下知识点之上。其中有不熟悉的，建议先补上再继续，学起来会顺畅得多。</p><ol class="kl-prereq-list"><li><span class="kl-prereq-name">基本正弦函数 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>x</mi></mrow></math></span> 的图象</span><span class="kl-prereq-why">本卡是在它之上加入 A、ω、φ 三个参数，先要熟悉它的波形、周期 <span class="kl-math"><math><mrow><mn>2</mn><mi>π</mi></mrow></math></span> 与取值范围</span></li>
-<li><span class="kl-prereq-name">弧度制与 <span class="kl-math"><math><mi>π</mi></math></span></span><span class="kl-prereq-why">周期、相位都用弧度表示，如 <span class="kl-math"><math><mrow><mi>T</mi><mo>=</mo><mn>2</mn><mi>π</mi><mi>/</mi><mi>ω</mi></mrow></math></span>、<span class="kl-math"><math><mrow><mi>ϕ</mi><mo>=</mo><mi>π</mi><mi>/</mi><mn>2</mn></mrow></math></span></span></li>
-<li><span class="kl-prereq-name">函数图象的平移与伸缩</span><span class="kl-prereq-why">A 是纵向伸缩、ω 是横向压缩、φ 是水平平移，需要先有图象变换的概念</span></li></ol><p class="kl-prereq-note">都熟悉了？点「下一张」开始学习。</p></section></div>
+<div class="kl-card"><section class="kl-block kl-prereq"><h2 class="kl-prereq-title"><span>🧭</span>学习之前 · 先备好这些前置知识</h2><p class="kl-prereq-lead">这张卡建立在以下知识点之上。其中有不熟悉的，建议先补上再继续，学起来会顺畅得多。</p><ol class="kl-prereq-list"><li><span class="kl-prereq-name">圆的周长公式 <span class="kl-math"><math><mrow><mi>C</mi><mo>=</mo><mn>2</mn><mi>π</mi><mi>r</mi></mrow></math></span></span><span class="kl-prereq-why">每个半径为 <span class="kl-math"><math><mi>t</mi></math></span> 的薄环拉直后，长度正是它的周长 <span class="kl-math"><math><mrow><mn>2</mn><mi>π</mi><mi>t</mi></mrow></math></span></span></li>
+<li><span class="kl-prereq-name">三角形面积 <span class="kl-math"><math><mrow><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>×</mo></mrow></math></span>底<span class="kl-math"><math><mo form="prefix" stretchy="false" lspace="0em" rspace="0em">×</mo></math></span>高</span><span class="kl-prereq-why">把所有细条叠成三角形后，就用这个公式算出 <span class="kl-math"><math><mrow><mi>π</mi><msup><mi>r</mi><mn class="tml-sml-pad">2</mn></msup></mrow></math></span></span></li>
+<li><span class="kl-prereq-name"><span class="kl-math"><math><mi>π</mi></math></span> 的含义（圆周率）</span><span class="kl-prereq-why">它把圆的半径与周长、面积联系起来</span></li></ol><p class="kl-prereq-note">都熟悉了？点「下一张」开始学习。</p></section></div>
 <div class="kl-card"><section class="kl-block kl-text" data-block-id="bk_1_hook">
-<p>我们早就认识了 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mrow><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math></span>，它是如此完美对称。但在现实与工程中，纯正弦波几乎不存在——声音有大小（振幅），频率有高低（周期），起点有先后（相位）。</p>
-<p>这三个维度的变化，被精妙地编码进了三个希腊字母：<strong><span class="kl-math"><math><mi>A</mi></math></span>、<span class="kl-math"><math><mi>ω</mi></math></span>、<span class="kl-math"><math><mi>ϕ</mi></math></span></strong>。接下来，由你亲手拆解它们的魔力。</p>
+<p>圆的面积公式 <span class="kl-math"><math><mrow><mi>A</mi><mo>=</mo><mi>π</mi><msup><mi>r</mi><mn class="tml-sml-pad">2</mn></msup></mrow></math></span> 人人会背，但它<strong>从哪来</strong>？</p>
+<p>一个不用微积分的漂亮办法：把圆切成许多很薄的<strong>同心圆环</strong>，再把每个环剪开、拉直。半径为 <span class="kl-math"><math><mi>t</mi></math></span> 的环拉直后是一根长 <span class="kl-math"><math><mrow><mn>2</mn><mi>π</mi><mi>t</mi></mrow></math></span> 的细条。把这些细条按长短叠起来，竟拼成一个<strong>三角形</strong>——底是最外圈周长 <span class="kl-math"><math><mrow><mn>2</mn><mi>π</mi><mi>r</mi></mrow></math></span>，高是半径 <span class="kl-math"><math><mi>r</mi></math></span>。下面先动手感受面积如何随 <span class="kl-math"><math><mi>r</mi></math></span> 变化。</p>
 </section></div>
 <div class="kl-card"><section class="kl-block kl-paramsim" data-block-id="bk_2_param_sim">
   <div class="kl-ps-controls">
   <label class="kl-ps-ctl">
-    <span class="kl-ps-name">振幅 A</span>
-    <input type="range" data-param="A"
-           min="-3.0" max="3.0" step="0.1"
+    <span class="kl-ps-name">半径 r</span>
+    <input type="range" data-param="r"
+           min="0.0" max="5.0" step="0.1"
            value="1.0">
-    <output class="kl-ps-val" data-for="A"></output>
-  </label>
-  <label class="kl-ps-ctl">
-    <span class="kl-ps-name">角频率 ω</span>
-    <input type="range" data-param="omega"
-           min="0.5" max="5.0" step="0.1"
-           value="1.0">
-    <output class="kl-ps-val" data-for="omega"></output>
-  </label>
-  <label class="kl-ps-ctl">
-    <span class="kl-ps-name">初相 φ</span>
-    <input type="range" data-param="phi"
-           min="-3.14" max="3.14" step="0.1"
-           value="0.0">
-    <output class="kl-ps-val" data-for="phi"></output>
+    <output class="kl-ps-val" data-for="r"></output>
   </label>
   </div>
   <div class="kl-ps-outputs">
-  <div class="kl-ps-out"><span>周期 T = 2π/|ω|</span><strong data-out="T">—</strong></div>
-  <div class="kl-ps-out"><span>振幅 |A|</span><strong data-out="amp">—</strong></div>
+  <div class="kl-ps-out"><span>面积 A = π·r²</span><strong data-out="area">—</strong></div>
+  <div class="kl-ps-out"><span>周长 C = 2π·r</span><strong data-out="circumference">—</strong></div>
   </div>
   <canvas class="kl-ps-canvas" width="640" height="240"></canvas>
-  <p class="kl-ps-explain">拖动滑块改变参数，观察正弦曲线的形态变化。右侧标量输出会实时计算当前的周期与振幅绝对值。注意：当 A&lt;0 时，观察曲线发生了什么翻转。</p>
+  <p class="kl-ps-explain">拖动半径 r，观察面积曲线（A=πr²）的弯曲上扬：这是一条抛物线，而周长 2πr 只是直线。把 r 从 1 拖到 2，面积读数会变成约 4 倍（不是 2 倍）——因为面积正比于 r 的平方。</p>
   <script>
   (function() {
     var root = document.querySelector('[data-block-id="bk_2_param_sim"]');
-    var params = [{"name": "A", "label": "振幅 A", "min": -3.0, "max": 3.0, "step": 0.1, "default": 1.0}, {"name": "omega", "label": "角频率 ω", "min": 0.5, "max": 5.0, "step": 0.1, "default": 1.0}, {"name": "phi", "label": "初相 φ", "min": -3.14, "max": 3.14, "step": 0.1, "default": 0.0}];
-    var sweep = {"name": "x", "min": -6.28, "max": 6.28};
-    var curves = [{"name": "y", "label": "y = A·sin(ωx + φ)", "expr": "A*Math.sin(omega*x+phi)"}];
-    var scalars = [{"name": "T", "label": "周期 T = 2π/|ω|", "expr": "2*Math.PI/Math.abs(omega)"}, {"name": "amp", "label": "振幅 |A|", "expr": "Math.abs(A)"}];
-    var legacy = false;
+    var params = [{"name": "r", "label": "半径 r", "min": 0.0, "max": 5.0, "step": 0.1, "default": 1.0}];
+    var sweep = {"name": "r", "min": 0.0, "max": 5.0};
+    var curves = [{"name": "area", "label": "面积 A = π·r²", "expr": "Math.PI*r*r"}];
+    var scalars = [{"name": "area", "label": "面积 A = π·r²", "expr": "Math.PI*r*r"}, {"name": "circumference", "label": "周长 C = 2π·r", "expr": "2*Math.PI*r"}];
+    var legacy = true;
     var sliders = {};
     params.forEach(function(p) { sliders[p.name] = root.querySelector('input[data-param="' + p.name + '"]'); });
 
@@ -423,7 +409,7 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_3_step_omega">
+<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_3_step">
   <div class="kl-st-state"></div>
   <p class="kl-st-explain"></p>
   <div class="kl-st-nav">
@@ -433,8 +419,8 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   </div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="bk_3_step_omega"]');
-    var steps = [{"state": "A=1, omega=1, phi=0", "explain": "基准状态：ω=1，此时周期 T=2π/1=2π。曲线在 [-π, π] 恰好完成一个完整的波浪。"}, {"state": "A=1, omega=2, phi=0", "explain": "将 ω 增大到 2：图像在水平方向被&#x27;压缩&#x27;了。因为自变量被乘以 2，x 只需走一半的路程就能完成一个周期。此时 T=2π/2=π。"}, {"state": "A=1, omega=0.5, phi=0", "explain": "将 ω 减小到 0.5：图像在水平方向被&#x27;拉伸&#x27;了。x 需要走两倍的路程才能完成一个周期。此时 T=2π/0.5=4π。"}];
+    var root = document.querySelector('[data-block-id="bk_3_step"]');
+    var steps = [{"state": "第 1 步：切成同心圆环", "explain": "把半径为 <span class=\"kl-math\"><math><mi>r<\/mi><\/math><\/span> 的圆盘看成无数个套在一起的**薄圆环**。最里面的环很短，最外面的环最长，长度（周长）为 <span class=\"kl-math\"><math><mrow><mn>2<\/mn><mi>π<\/mi><mi>r<\/mi><\/mrow><\/math><\/span>。"}, {"state": "第 2 步：把每个环剪开拉直", "explain": "半径为 <span class=\"kl-math\"><math><mi>t<\/mi><\/math><\/span> 的环剪开后是一根近似的细长条，长 <span class=\"kl-math\"><math><mrow><mo>=<\/mo><mn>2<\/mn><mi>π<\/mi><mi>t<\/mi><\/mrow><\/math><\/span>（它的周长），高就是环的厚度。半径越大的环，拉直后越长。"}, {"state": "第 3 步：从短到长叠成三角形", "explain": "把这些细条按长度从短到长依次堆叠：最短的（来自圆心附近）在顶，最长的 <span class=\"kl-math\"><math><mrow><mn>2<\/mn><mi>π<\/mi><mi>r<\/mi><\/mrow><\/math><\/span> 在底。叠出来恰好是一个**三角形**——底 <span class=\"kl-math\"><math><mrow><mo>=<\/mo><mn>2<\/mn><mi>π<\/mi><mi>r<\/mi><\/mrow><\/math><\/span>，高 <span class=\"kl-math\"><math><mrow><mo>=<\/mo><mi>r<\/mi><\/mrow><\/math><\/span>。"}, {"state": "第 4 步：算三角形面积", "explain": "三角形面积 <span class=\"kl-math\"><math><mrow><mo>=<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mo>×<\/mo><\/mrow><\/math><\/span>底<span class=\"kl-math\"><math><mo form=\"prefix\" stretchy=\"false\" lspace=\"0em\" rspace=\"0em\">×<\/mo><\/math><\/span>高 <span class=\"kl-math\"><math><mrow><mo>=<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mo>×<\/mo><mrow><mo fence=\"true\" form=\"prefix\" stretchy=\"false\">(<\/mo><mn>2<\/mn><mi>π<\/mi><mi>r<\/mi><mo fence=\"true\" form=\"postfix\" stretchy=\"false\">)<\/mo><\/mrow><mo>×<\/mo><mi>r<\/mi><mo>=<\/mo><mi>π<\/mi><msup><mi>r<\/mi><mn class=\"tml-sml-pad\">2<\/mn><\/msup><\/mrow><\/math><\/span>。这就是圆面积公式的来历——无需积分。"}];
     var i = 0;
     var stateEl = root.querySelector('.kl-st-state');
     var explainEl = root.querySelector('.kl-st-explain');
@@ -454,44 +440,17 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   })();
   </script>
 </section></div>
-<div class="kl-card"><section class="kl-block kl-stepthrough" data-block-id="bk_4_step_phi">
-  <div class="kl-st-state"></div>
-  <p class="kl-st-explain"></p>
-  <div class="kl-st-nav">
-    <button class="kl-st-prev" type="button">‹ 上一步</button>
-    <span class="kl-st-progress"></span>
-    <button class="kl-st-next" type="button">下一步 ›</button>
-  </div>
-  <script>
-  (function() {
-    var root = document.querySelector('[data-block-id="bk_4_step_phi"]');
-    var steps = [{"state": "A=1, omega=1, phi=0", "explain": "基准状态：φ=0，曲线原点过 (0,0) 且处于上升沿。"}, {"state": "A=1, omega=1, phi=1.57", "explain": "φ=+π/2：代数上加了一个正数，但图像整体向**左**平移了 π/2。记忆口诀：&#x27;加左减右&#x27;（针对 x 本身而言，+π/2 等价于 x 提前达到对应值）。"}, {"state": "A=1, omega=1, phi=-1.57", "explain": "φ=-π/2：代数上减了一个正数，图像整体向**右**平移了 π/2。原点处的上升沿被推到了 x=π/2 的位置。"}];
-    var i = 0;
-    var stateEl = root.querySelector('.kl-st-state');
-    var explainEl = root.querySelector('.kl-st-explain');
-    var prog = root.querySelector('.kl-st-progress');
-    var prev = root.querySelector('.kl-st-prev');
-    var next = root.querySelector('.kl-st-next');
-    function render() {
-      stateEl.innerHTML = steps[i].state;
-      explainEl.innerHTML = steps[i].explain || '';
-      prog.textContent = (i + 1) + ' / ' + steps.length;
-      prev.disabled = i === 0;
-      next.disabled = i === steps.length - 1;
-    }
-    prev.addEventListener('click', function() { if (i > 0) { i--; render(); } });
-    next.addEventListener('click', function() { if (i < steps.length - 1) { i++; render(); } });
-    render();
-  })();
-  </script>
-</section></div>
-<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_5_callout">
+<div class="kl-card"><aside class="kl-block kl-callout kl-callout-note" data-block-id="bk_4_callout">
   <span class="kl-callout-icon">🛈</span>
-  <div class="kl-callout-body"><p><strong>警惕负振幅！</strong></p>
-<p>当 <span class="kl-math"><math><mrow><mi>A</mi><mo>&lt;</mo><mn>0</mn></mrow></math></span> 时，曲线并非简单下移，而是关于 <span class="kl-math"><math><mi>x</mi></math></span> 轴发生了<strong>翻转（反射）</strong>。例如 <span class="kl-math"><math><mrow><mi>y</mi><mo>=</mo><mo form="prefix" stretchy="false">−</mo><mrow><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix" stretchy="false">(</mo><mi>x</mi><mo fence="true" form="postfix" stretchy="false">)</mo></mrow></mrow></math></span> 的波峰变成了波谷。在数学严格定义中，振幅始终为正（<span class="kl-math"><math><mrow><mi>|</mi><mi>A</mi><mi>|</mi></mrow></math></span>），负号只代表方向。</p></div>
+  <div class="kl-callout-body"><p><strong>别把周长和面积搞混</strong></p>
+<ul>
+<li>周长 <span class="kl-math"><math><mrow><mi>C</mi><mo>=</mo><mn>2</mn><mi>π</mi><mi>r</mi></mrow></math></span>：与半径成<strong>正比</strong>，<span class="kl-math"><math><mi>r</mi></math></span> 翻倍周长翻倍。</li>
+<li>面积 <span class="kl-math"><math><mrow><mi>A</mi><mo>=</mo><mi>π</mi><msup><mi>r</mi><mn class="tml-sml-pad">2</mn></msup></mrow></math></span>：与半径的<strong>平方</strong>成正比，<span class="kl-math"><math><mi>r</mi></math></span> 翻倍面积变 <strong>4 倍</strong>，<span class="kl-math"><math><mi>r</mi></math></span> 变 3 倍面积变 <strong>9 倍</strong>。</li>
+</ul>
+<p>几何上，面积是「二维」的量，所以随长度的平方放大；这也是为什么大披萨往往比两个小披萨更划算。</p></div>
 </aside></div>
-<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_6_quiz">
-  <p class="kl-quiz-title">参数诊断</p>
+<div class="kl-card"><section class="kl-block kl-quiz" data-block-id="bk_5_quiz">
+  <p class="kl-quiz-title">圆面积诊断</p>
   <div class="kl-quiz-head"><span class="kl-quiz-progress"></span></div>
   <p class="kl-quiz-q"></p>
   <div class="kl-quiz-opts"></div>
@@ -503,8 +462,8 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
   <div class="kl-quiz-score" hidden></div>
   <script>
   (function() {
-    var root = document.querySelector('[data-block-id="bk_6_quiz"]');
-    var questions = [{"type": "single", "answer": 1, "accept": [], "prompt": "要将 y=sin(x) 的图像在水平方向压缩为原来的一半（周期变为 π），应该修改哪个参数，如何修改？", "options": ["将 A 改为 2", "将 ω 改为 2", "将 ω 改为 0.5", "将 φ 改为 π"], "explain": "周期 T=2π/ω，要使周期减半，需将 ω 翻倍，所以 ω 改为 2。"}, {"type": "single", "answer": 0, "accept": [], "prompt": "函数 y=sin(x+π/3) 的图像是由 y=sin(x) 的图像如何变换得到的？", "options": ["向左平移 π/3 个单位", "向右平移 π/3 个单位", "向上平移 π/3 个单位", "向下平移 π/3 个单位"], "explain": "φ=+π/3，代数上加对应几何向左平移，即&#x27;加左减右&#x27;原则。"}, {"type": "single", "answer": 1, "accept": [], "prompt": "振幅 A 决定了正弦波的横向宽窄，而角频率 ω 决定了纵向高低。", "options": ["正确", "错误"], "explain": "恰好说反了。A 控制纵向高低（振幅），ω 控制横向宽窄（周期）。"}];
+    var root = document.querySelector('[data-block-id="bk_5_quiz"]');
+    var questions = [{"type": "single", "answer": 2, "accept": [], "prompt": "把圆的半径从 r 增大到 2r，面积会变成原来的多少倍？", "options": ["2 倍", "3 倍", "4 倍", "π 倍"], "explain": "<span class=\"kl-math\"><math><mrow><mi>A<\/mi><mo>=<\/mo><mi>π<\/mi><msup><mi>r<\/mi><mn class=\"tml-sml-pad\">2<\/mn><\/msup><\/mrow><\/math><\/span>，半径翻倍则 <span class=\"kl-math\"><math><mrow><msup><mi>A<\/mi><mo lspace=\"0em\" rspace=\"0em\" class=\"tml-prime tml-lrg-pad\">′<\/mo><\/msup><mo>=<\/mo><mi>π<\/mi><msup><mrow><mo fence=\"true\" form=\"prefix\" stretchy=\"false\">(<\/mo><mn>2<\/mn><mi>r<\/mi><mo fence=\"true\" form=\"postfix\" stretchy=\"false\">)<\/mo><\/mrow><mn>2<\/mn><\/msup><mo>=<\/mo><mn>4<\/mn><mi>π<\/mi><msup><mi>r<\/mi><mn class=\"tml-sml-pad\">2<\/mn><\/msup><\/mrow><\/math><\/span>，是原来的 4 倍。面积随半径平方增长。"}, {"type": "single", "answer": 1, "accept": [], "prompt": "在『拆环展开』推导中，叠成的三角形的底和高分别是什么？", "options": ["底 = r，高 = 2πr", "底 = 2πr，高 = r", "底 = πr，高 = r", "底 = 2πr，高 = 2πr"], "explain": "最外圈周长 2πr 是底，半径 r 是高，面积 = ½·(2πr)·r = πr²。"}, {"type": "single", "answer": 1, "accept": [], "prompt": "圆的面积与半径成正比，半径翻倍面积也翻倍。", "options": ["正确", "错误"], "explain": "错。面积与半径的平方成正比，半径翻倍面积变为 4 倍。与半径成正比的是周长。"}];
     var many = questions.length > 1;
     var idx = 0, score = 0, locked = false, selected = null, results = [];
     var qBox = root.querySelector('.kl-quiz-q');
@@ -553,7 +512,7 @@ math { font-family: "Latin Modern Math", "STIX Two Math", "Cambria Math", math, 
       // Seam ④: report the finished quiz to an embedding host without breaking
       // self-containment. Fires once the whole quiz is done.
       var meta = window.__KNOWLING__ || {};
-      var payload = { type: 'knowling:quiz-result', block_id: 'bk_6_quiz',
+      var payload = { type: 'knowling:quiz-result', block_id: 'bk_5_quiz',
         kp_id: meta.kp_id || '', knowling_id: meta.knowling_id || '',
         total: questions.length, correct: score,
         score: questions.length ? score / questions.length : 0,

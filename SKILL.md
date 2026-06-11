@@ -62,7 +62,8 @@ python3 -m knowling.cli serve "链式法则" --objectives "能对复合函数求
 
 ## KnowlingSpec 摘要（审批门 / 唯一可 diff 层）
 ```
-{ knowledge_point_id, pedagogy:{hook, central_phenomenon, misconceptions[], aha_moment},
+{ knowledge_point_id, pedagogy:{hook, central_phenomenon, misconceptions[], aha_moment,
+    prerequisites:[{name, why}]  // 前置知识点；自动渲染成整张卡的第一页「学习之前」},
   blocks:[ { block_id, type, intent, content_spec, interaction_spec? } ],
   render_target:"html"|"react", version }
 ```

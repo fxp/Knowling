@@ -184,6 +184,16 @@ button:disabled { opacity: .4; cursor: default; }
 .kl-usernote-area:focus { outline: none; border-color: var(--kl-accent); }
 /* deep_dive */
 .kl-deepdive summary { cursor: pointer; font-weight: 640; }
+/* prerequisites — the guaranteed first card stating what to know first */
+.kl-prereq { border-left: 4px solid var(--kl-accent-2); background: linear-gradient(100deg, #e8f7fe, rgba(232,247,254,.2)); }
+.kl-prereq-title { display: flex; align-items: center; gap: 9px; font-size: 19px; margin: 0 0 6px; }
+.kl-prereq-lead { color: var(--kl-muted); font-size: 14.5px; margin: 0 0 14px; }
+.kl-prereq-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: kl-prereq; }
+.kl-prereq-list li { position: relative; padding: 12px 16px 12px 46px; background: var(--kl-bg); border: 1px solid var(--kl-border); border-radius: 12px; }
+.kl-prereq-list li::before { counter-increment: kl-prereq; content: counter(kl-prereq); position: absolute; left: 12px; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: var(--kl-grad); color: #fff; font-size: 13px; font-weight: 700; display: grid; place-items: center; }
+.kl-prereq-name { font-weight: 660; }
+.kl-prereq-why { display: block; color: var(--kl-muted); font-size: 14px; margin-top: 3px; }
+.kl-prereq-note { color: var(--kl-muted); font-size: 13px; margin: 14px 0 0; }
 /* ── card deck (one block at a time) ── */
 .kl-deck { margin: 20px 0 4px; }
 .kl-deck-viewport { overflow: hidden; transition: height .35s ease; }
@@ -293,10 +303,41 @@ _DECK_JS = """
 """
 
 
+def _prereq_card(prerequisites: List[dict]) -> str:
+    """Render the 'know this first' card from ``pedagogy.prerequisites``.
+
+    Guaranteed to lead every deck when prerequisites are declared, so a learner
+    sees what the card builds on before any new content. Math in names/why is
+    rendered via the same Temml/MathML path as blocks.
+    """
+    from .blocks._common import mathspan  # lazy: blocks import schema only
+
+    items = []
+    for p in prerequisites:
+        name = mathspan(p.get("name", ""))
+        why = p.get("why")
+        why_html = f'<span class="kl-prereq-why">{mathspan(why)}</span>' if why else ""
+        items.append(f'<li><span class="kl-prereq-name">{name}</span>{why_html}</li>')
+    lis = "\n".join(items)
+    return (
+        '<section class="kl-block kl-prereq">'
+        '<h2 class="kl-prereq-title"><span>🧭</span>学习之前 · 先备好这些前置知识</h2>'
+        '<p class="kl-prereq-lead">这张卡建立在以下知识点之上。其中有不熟悉的，'
+        '建议先补上再继续，学起来会顺畅得多。</p>'
+        f'<ol class="kl-prereq-list">{lis}</ol>'
+        '<p class="kl-prereq-note">都熟悉了？点「下一张」开始学习。</p>'
+        '</section>'
+    )
+
+
 def assemble_html(spec: KnowlingSpec, fragments: List[str], title: str) -> str:
     """Assemble block fragments into a single self-contained knowledge-card deck."""
     hook = spec.pedagogy.hook if spec.pedagogy else ""
-    cards = "\n".join(f'<div class="kl-card">{frag}</div>' for frag in fragments)
+    # Prepend a prerequisites card (if declared) so every deck states what it
+    # builds on before teaching anything new.
+    prereqs = spec.pedagogy.prerequisites if spec.pedagogy else []
+    deck_frags = ([_prereq_card(prereqs)] if prereqs else []) + list(fragments)
+    cards = "\n".join(f'<div class="kl-card">{frag}</div>' for frag in deck_frags)
     hook_html = f'<p class="kl-hook">{_html.escape(hook)}</p>' if hook else ""
     # Seam ④: expose the unit's kp_id so the (self-contained) quiz block can
     # report its result to an embedding host. A host may pre-set window.__KNOWLING__

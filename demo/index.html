@@ -33,6 +33,7 @@ header.hero { padding:64px 0 36px; border-bottom:1px solid var(--border);
 .src { font-size:12px; padding:4px 10px; border-radius:999px; white-space:nowrap; font-weight:600; }
 .src-glm { background:rgba(108,140,255,.16); color:var(--accent); border:1px solid rgba(108,140,255,.4); }
 .src-mock { background:#21262d; color:var(--muted); border:1px solid var(--border); }
+.src-m2m { background:rgba(255,138,76,.16); color:var(--accent2); border:1px solid rgba(255,138,76,.4); }
 .meta, .blocks { display:flex; flex-wrap:wrap; gap:6px; padding:0 18px; }
 .blocks { padding-top:10px; padding-bottom:4px; }
 .chip { font-size:12px; padding:3px 9px; border-radius:999px; background:#21262d; color:var(--muted); border:1px solid var(--border); }
@@ -60,7 +61,7 @@ code { background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; }
     <span class="step qa">四维质检</span><span class="arrow">→</span>
     <span class="step">知识卡片牌组</span>
   </div>
-  <p class="scope">范围聚焦：<b>只做单个知识点的学习 / Quiz 卡片</b>。四维质检 = 渲染分（GLM-5V 看截图）+ 交互分（校验控件）+ 教学分（含「是否跑题」）+ 可学会分（模拟已掌握前置知识的学习者，只读卡片能否获得该知识点所需知识）。下方 8 个示例均可直接交互。</p>
+  <p class="scope">范围聚焦：<b>只做单个知识点的学习 / Quiz 卡片</b>。四维质检 = 渲染分（GLM-5V 看截图）+ 交互分（校验控件）+ 教学分（含「是否跑题」）+ 可学会分（模拟已掌握前置知识的学习者，只读卡片能否获得该知识点所需知识）。下方 11 个示例均可直接交互。</p>
 </div></header>
 <main class="wrap"><section class="gallery">
 <article class="card card-featured">
@@ -118,6 +119,48 @@ code { background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; }
   <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">interactive_demo</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
   <div class="frame-wrap"><iframe loading="lazy" src="components/compound_interest.html" title="复利 A = P(1 + r)ⁿ"></iframe></div>
   <a class="open" href="components/compound_interest.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
+</article>
+<article class="card">
+  <div class="card-head">
+    <div><h3>傅里叶级数逼近方波</h3><p class="kp">用频率成倍、振幅递减的奇次正弦波叠加出方波，以及吉布斯过冲现象</p></div>
+    <span class="src src-m2m">Math-To-Manim</span>
+  </div>
+  <div class="meta">
+    <span class="chip chip-status chip-ready">ready</span>
+    <span class="chip chip-ok">渲染 5.0</span><span class="chip chip-ok">交互 5.0</span><span class="chip chip-ok">教学 5.0</span>
+    <span class="chip chip-aud">本科生</span>
+  </div>
+  <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
+  <div class="frame-wrap"><iframe loading="lazy" src="components/fourier_square_wave.html" title="傅里叶级数逼近方波"></iframe></div>
+  <a class="open" href="components/fourier_square_wave.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
+</article>
+<article class="card">
+  <div class="card-head">
+    <div><h3>泰勒级数逼近 eˣ</h3><p class="kp">用多项式部分和逼近 e^x，项数越多逼近范围越大，以及收敛半径的含义</p></div>
+    <span class="src src-m2m">Math-To-Manim</span>
+  </div>
+  <div class="meta">
+    <span class="chip chip-status chip-ready">ready</span>
+    <span class="chip chip-ok">渲染 5.0</span><span class="chip chip-ok">交互 5.0</span><span class="chip chip-ok">教学 5.0</span>
+    <span class="chip chip-aud">高中/本科</span>
+  </div>
+  <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
+  <div class="frame-wrap"><iframe loading="lazy" src="components/taylor_series_exp.html" title="泰勒级数逼近 eˣ"></iframe></div>
+  <a class="open" href="components/taylor_series_exp.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
+</article>
+<article class="card">
+  <div class="card-head">
+    <div><h3>圆面积 A = πr²（展开法）</h3><p class="kp">把圆拆成同心环、拉直叠成三角形，不用积分推出 πr²，并体会平方关系</p></div>
+    <span class="src src-m2m">Math-To-Manim</span>
+  </div>
+  <div class="meta">
+    <span class="chip chip-status chip-ready">ready</span>
+    <span class="chip chip-ok">渲染 5.0</span><span class="chip chip-ok">交互 5.0</span><span class="chip chip-ok">教学 5.0</span>
+    <span class="chip chip-aud">初中生</span>
+  </div>
+  <div class="blocks"><span class="chip chip-block">text</span><span class="chip chip-block">param_sim</span><span class="chip chip-block">step_through</span><span class="chip chip-block">callout</span><span class="chip chip-block">quiz</span></div>
+  <div class="frame-wrap"><iframe loading="lazy" src="components/circle_area.html" title="圆面积 A = πr²（展开法）"></iframe></div>
+  <a class="open" href="components/circle_area.html" target="_blank" rel="noopener">在新标签打开 ↗</a>
 </article>
 <article class="card">
   <div class="card-head">

@@ -59,6 +59,13 @@ class MockProvider(LLMProvider):
         title = kp.get("title", "知识点")
         desc = kp.get("description", "")
         objectives = kp.get("learning_objectives", [])
+        # Prefer the KnowledgePoint's declared prerequisites; else a generic one.
+        kp_prereqs = kp.get("prerequisites") or []
+        prerequisites = (
+            [{"name": str(p), "why": f"学习「{title}」前需要先掌握它"} for p in kp_prereqs]
+            if kp_prereqs
+            else [{"name": "本主题的基础概念与记号", "why": f"它们是理解「{title}」的起点"}]
+        )
         return {
             "knowledge_point_id": kp.get("id", "kp.unknown"),
             "pedagogy": {
@@ -66,6 +73,7 @@ class MockProvider(LLMProvider):
                 "central_phenomenon": f"调整参数时，{title} 的结果如何随之变化。",
                 "misconceptions": ["以为结果与输入无关", "把相关当成因果"],
                 "aha_moment": f"亲眼看到改变输入立刻改变了 {title} 的输出。",
+                "prerequisites": prerequisites,
             },
             "blocks": [
                 {
