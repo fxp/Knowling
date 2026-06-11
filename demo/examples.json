@@ -37,6 +37,7 @@
     "blocks": [
       "text",
       "param_sim",
+      "manim",
       "step_through",
       "step_through",
       "callout",
@@ -65,6 +66,7 @@
       "interactive_demo",
       "step_through",
       "param_sim",
+      "manim",
       "quiz",
       "callout"
     ],
@@ -89,6 +91,7 @@
     "blocks": [
       "text",
       "param_sim",
+      "manim",
       "step_through",
       "interactive_demo",
       "callout",
@@ -116,6 +119,7 @@
       "text",
       "callout",
       "param_sim",
+      "manim",
       "step_through",
       "callout",
       "quiz"
@@ -141,6 +145,7 @@
     "blocks": [
       "text",
       "param_sim",
+      "manim",
       "step_through",
       "callout",
       "quiz"
@@ -166,6 +171,7 @@
     "blocks": [
       "text",
       "param_sim",
+      "manim",
       "step_through",
       "callout",
       "quiz"
@@ -191,6 +197,7 @@
     "blocks": [
       "text",
       "param_sim",
+      "manim",
       "step_through",
       "callout",
       "quiz"
@@ -216,6 +223,7 @@
     "blocks": [
       "text",
       "param_sim",
+      "manim",
       "step_through",
       "callout",
       "quiz"
@@ -345,6 +353,7 @@
     "blocks": [
       "text",
       "param_sim",
+      "manim",
       "step_through",
       "callout",
       "quiz"
@@ -370,6 +379,7 @@
     "blocks": [
       "text",
       "param_sim",
+      "manim",
       "step_through",
       "callout",
       "quiz"
