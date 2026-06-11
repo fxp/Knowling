@@ -224,6 +224,7 @@ def compile_spec(
             "render": cfg.provider("render_vlm"),
             "gui": cfg.provider("gui"),
             "judge": cfg.provider("judge"),
+            "learn": cfg.provider("judge"),
         }
         best_html, qa_report, fragments = qa_loop(
             spec, kp, fragments, providers, cfg.qa, grounding=grounding,

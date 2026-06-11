@@ -10,7 +10,7 @@
 
 ## 已实现（P0 + P1 + P2，设计文档 §12）
 
-跑通完整闭环 **`知识点 →(RAG grounding)→ 蓝图(KnowlingSpec) → 块编译 → 三维质检 → 自包含 HTML`**：
+跑通完整闭环 **`知识点 →(RAG grounding)→ 蓝图(KnowlingSpec) → 块编译 → 四维质检 → 自包含 HTML`**：
 
 **P0 骨架**
 - **Spec-first 管线**（`knowling/engine.py`）：Retrieve → Plan → Approval(auto) → Compile → QA → Assemble，每阶段发出进度事件。
@@ -22,9 +22,9 @@
 
 **P1 质检闭环**（护城河，扩展自 WebGen-Agent）
 - **沙箱**（`knowling/sandbox/`）：Playwright headless Chromium 渲染+截图+console 捕获；无浏览器时自动回退 `StaticSandbox`，QA 仍可离线跑。
-- **三维质检**（`knowling/capabilities/qa/`）：① 渲染分（GLM-4V / 启发式）→ ② 交互分（校验块 `qa_assertions`）→ ③ 教学分（强 LLM 锚定 Explorable Explanations）。按序短路，便宜的先跑。
-- **回溯 + 选优 + 重编译失败块**（`qa/loop.py`）：连续渲染报错回退最佳前序；选优 peda→interact→render→recency；只重编译失败块并注入质检建议。
-- **状态闸门**：三维全过才标 `status="ready"`，否则 `qa_failed`（未过质检不得 ready）。`--no-qa` 可跳过（停留 `draft`）。
+- **四维质检**（`knowling/capabilities/qa/`）：① 渲染分（GLM-4V / 启发式）→ ② 交互分（校验块 `qa_assertions`）→ ③ 教学分（强 LLM 锚定 Explorable Explanations）→ ④ **可学会分**（强 LLM 模拟一名已掌握全部前置知识的学习者，**只读卡片内容**，逐条判定每个学习目标所需的知识能否由卡片本身获得；常识但卡片没讲出来的不算）。按序短路，便宜的先跑。
+- **回溯 + 选优 + 重编译失败块**（`qa/loop.py`）：连续渲染报错回退最佳前序；选优 learn→peda→interact→render→recency；只重编译失败块并注入质检建议（含可学会维指出的「缺什么」）。
+- **状态闸门**：四维全过才标 `status="ready"`，否则 `qa_failed`（未过质检不得 ready）。`--no-qa` 可跳过（停留 `draft`）。
 
 **P2 全块 + RAG**
 - **全 13 类块**实现完毕（重心 `step_through` / `interactive_demo`；`concept_graph` 用内联 canvas 保持自包含）。
@@ -95,7 +95,7 @@ knowling/
 ├── capabilities/
 │   ├── spec_planner.py  # 知识点 → 蓝图
 │   ├── block_compiler.py# 蓝图块 → 自包含 HTML 片段
-│   └── qa/              # 三维质检: render_vlm / gui_agent / pedagogy_judge / loop
+│   └── qa/              # 四维质检: render_vlm / gui_agent / pedagogy_judge / learn_judge / loop
 ├── sandbox/             # 渲染沙箱: playwright + static 回退
 ├── blocks/              # 块注册表: text / quiz / param_sim / generic (+qa_assertions)
 ├── providers/           # LLM 抽象: zhipu(GLM) + mock + factory

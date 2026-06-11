@@ -14,6 +14,9 @@ class QAConfig:
     render_threshold: float = 3.0
     interact_threshold: float = 3.5
     pedagogy_threshold: float = 3.0
+    # learnability: a (strong-LLM) learner simulation reading only the card; same
+    # run-to-run variance as the other LLM dimensions, so it shares their bar.
+    learn_threshold: float = 3.0
     max_qa_steps: int = 4
     backtrack_after_render_errors: int = 5
     sandbox_name: str = "auto"
@@ -50,6 +53,7 @@ class StepFeedback:
     render: Optional[DimensionFeedback] = None
     interact: Optional[DimensionFeedback] = None
     pedagogy: Optional[DimensionFeedback] = None
+    learn: Optional[DimensionFeedback] = None
 
     @property
     def scores(self) -> Dict[str, Optional[float]]:
@@ -57,6 +61,7 @@ class StepFeedback:
             "render": self.render.score if self.render else None,
             "interact": self.interact.score if self.interact else None,
             "peda": self.pedagogy.score if self.pedagogy else None,
+            "learn": self.learn.score if self.learn else None,
         }
 
     def all_pass(self) -> bool:
@@ -64,14 +69,14 @@ class StepFeedback:
 
     @property
     def suggestions(self) -> List[str]:
-        for dim in (self.render, self.interact, self.pedagogy):
+        for dim in (self.render, self.interact, self.pedagogy, self.learn):
             if dim and not dim.passed:
                 return dim.suggestions
         return []
 
     @property
     def failed_block_ids(self) -> List[str]:
-        for dim in (self.interact, self.render, self.pedagogy):
+        for dim in (self.interact, self.render, self.pedagogy, self.learn):
             if dim and dim.failed_block_ids:
                 return dim.failed_block_ids
         return []
@@ -83,4 +88,5 @@ class StepFeedback:
             "render": self.render.to_dict() if self.render else None,
             "interact": self.interact.to_dict() if self.interact else None,
             "pedagogy": self.pedagogy.to_dict() if self.pedagogy else None,
+            "learn": self.learn.to_dict() if self.learn else None,
         }

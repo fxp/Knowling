@@ -71,7 +71,7 @@ def make_emitter(fmt: str):
                     return "—" if v is None else f"{v:.1f}"
                 print(c("dim", f"    qa step {payload.get('i')}: stage={payload.get('stage')} "
                                f"render={fnum(s.get('render'))} interact={fnum(s.get('interact'))} "
-                               f"peda={fnum(s.get('peda'))}"))
+                               f"peda={fnum(s.get('peda'))} learn={fnum(s.get('learn'))}"))
             elif ev == "recompile":
                 print(c("yellow", f"    ↻ recompile {payload.get('blocks')} ({payload.get('stage')})"))
             elif ev == "backtrack":
@@ -94,7 +94,7 @@ def make_emitter(fmt: str):
             if qa.get("score_render") is not None or qa.get("score_peda") is not None:
                 print(c("dim", f"  qa: render={qa.get('score_render')} "
                                f"interact={qa.get('score_interact')} peda={qa.get('score_peda')} "
-                               f"passed={qa.get('passed')}"))
+                               f"learn={qa.get('score_learn')} passed={qa.get('passed')}"))
             if payload.get("entry"):
                 print(c("dim", "  artifact: ") + payload["entry"])
 

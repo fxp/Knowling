@@ -43,6 +43,22 @@ EXAMPLES = [
      "description": "本金P、利率r、期数n 如何共同决定最终金额，以及复利与单利的差异",
      "objectives": "理解复利随期数指数增长,体会利率与时间的威力",
      "audience": "理财入门", "difficulty": "intro"},
+    {"id": "bayes_theorem", "title": "贝叶斯定理：证据如何更新信念",
+     "description": "先验P(D)、似然P(+|D)、后验P(D|+) 三者如何随证据更新，及基础率忽视",
+     "objectives": "分清似然与后验,理解先验如何影响后验,看懂后验公式",
+     "audience": "初学者", "difficulty": "core"},
+    {"id": "normal_distribution", "title": "正态分布：μ 与 σ 如何决定钟形曲线",
+     "description": "均值μ控制位置、标准差σ控制胖瘦与峰高，曲线下面积恒为1",
+     "objectives": "理解μ控制位置,理解σ控制分散与峰高,理解面积守恒为1",
+     "audience": "统计入门", "difficulty": "core"},
+    {"id": "exponential_decay", "title": "指数衰减与半衰期 N = N₀·(1/2)^(t/T)",
+     "description": "半衰期T与初始量N₀如何决定衰减曲线，每过一个T剩余量减半且永不为0",
+     "objectives": "理解每过半衰期减半,理解T控制衰减快慢,区分指数衰减与线性减少",
+     "audience": "高中生", "difficulty": "intro"},
+    {"id": "sigmoid_function", "title": "Sigmoid 函数 σ(x)=1/(1+e^(−k(x−x₀)))",
+     "description": "陡峭度k控制S形软硬、中点x₀控制平移，输出恒被挤压在(0,1)",
+     "objectives": "理解输出恒在0到1之间,理解k控制陡缓,理解x₀控制中点位置",
+     "audience": "机器学习入门", "difficulty": "core"},
 
     # ── Math-To-Manim 系列（手写蓝图，灵感来自 HarleyCoops/Math-To-Manim
     #    与 3Blue1Brown 的可视化；用 --rerender 从 demo/specs 免模型重编译）──
@@ -87,7 +103,7 @@ def _generate() -> None:
             "kp": ex["description"], "audience": ex["audience"],
             "blocks": [b.type for b in k.spec.blocks],
             "qa": {"render": k.qa.score_render, "interact": k.qa.score_interact,
-                   "peda": k.qa.score_peda, "passed": k.qa.passed},
+                   "peda": k.qa.score_peda, "learn": k.qa.score_learn, "passed": k.qa.passed},
             "status": k.status, "featured": ex.get("featured", False),
         })
         print(f"      status={k.status} qa={manifest[-1]['qa']}")
@@ -108,7 +124,10 @@ def _qa_chips(qa: dict) -> str:
     def chip(label, v):
         cls = "chip-ok" if (v or 0) >= 3.0 else "chip-warn"
         return f'<span class="chip {cls}">{label} {v}</span>'
-    return chip("渲染", qa["render"]) + chip("交互", qa["interact"]) + chip("教学", qa["peda"])
+    chips = chip("渲染", qa["render"]) + chip("交互", qa["interact"]) + chip("教学", qa["peda"])
+    if qa.get("learn") is not None:
+        chips += chip("可学会", qa["learn"])
+    return chips
 
 
 def _card(item: dict) -> str:
@@ -201,16 +220,16 @@ code {{ background:#21262d; padding:1px 6px; border-radius:5px; font-size:.9em; 
     <span class="step">知识点</span><span class="arrow">→</span>
     <span class="step">蓝图 Spec</span><span class="arrow">→</span>
     <span class="step">模板编译</span><span class="arrow">→</span>
-    <span class="step qa">三维质检</span><span class="arrow">→</span>
+    <span class="step qa">四维质检</span><span class="arrow">→</span>
     <span class="step">知识卡片牌组</span>
   </div>
-  <p class="scope">范围聚焦：<b>只做单个知识点的学习 / Quiz 卡片</b>。三维质检 = 渲染分（GLM-5V 看截图）+ 交互分（校验控件）+ 教学分（含「是否跑题」）。下方 {len(manifest)} 个示例均可直接交互。</p>
+  <p class="scope">范围聚焦：<b>只做单个知识点的学习 / Quiz 卡片</b>。四维质检 = 渲染分（GLM-5V 看截图）+ 交互分（校验控件）+ 教学分（含「是否跑题」）+ 可学会分（模拟已掌握前置知识的学习者，只读卡片能否获得该知识点所需知识）。下方 {len(manifest)} 个示例均可直接交互。</p>
 </div></header>
 <main class="wrap"><section class="gallery">
 {cards}
 </section></main>
 <footer><div class="wrap">
-  由 Knowling 生成 · <code>GLM-5</code> 示例为真实模型规划内容、统一模板渲染并通过三维质检 · 每张卡片均为单文件自包含 HTML · 用 <code>knowling serve</code> 可对卡片对话式改写。
+  由 Knowling 生成 · <code>GLM-5</code> 示例为真实模型规划内容、统一模板渲染并通过四维质检 · 每张卡片均为单文件自包含 HTML · 用 <code>knowling serve</code> 可对卡片对话式改写。
 </div></footer>
 </body>
 </html>'''

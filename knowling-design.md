@@ -25,7 +25,7 @@
 | D1 | **以「知识点 → 单个自包含组件」为原子单位**，而非「主题 → 整门课」 | 用户诉求是细小知识点的精品组件，组件可被宿主系统自由组合 | 区别于 OpenMAIC/DeepTutor 的整书/整课定位 |
 | D2 | **引入中间表示 `KnowlingSpec`（蓝图），与最终渲染代码解耦** | 蓝图可被人/agent 审阅、增量编辑，避免「doc-code drift」；蓝图层是 approval gate | VIVIDOC 的 DocSpec |
 | D3 | **生成后必须过「质检闭环」才算完成** | 纯代码执行无法捕捉视觉与交互质量，学习组件尤其依赖这两者 | WebGen-Agent 的多级视觉反馈 |
-| D4 | **质检用三维信号：渲染分 + 交互分 + 教学分**，比通用建站多一维 | 学习组件正确性 ≠ 能跑，还要教学有效 | WebGen-Agent(2维) + 本设计扩展教学维 |
+| D4 | **质检用四维信号：渲染分 + 交互分 + 教学分 + 可学会分**，比通用建站多两维 | 学习组件正确性 ≠ 能跑，还要教学有效、且知识能真正被学会 | WebGen-Agent(2维) + 本设计扩展教学维 + 可学会维 |
 | D5 | **成本分离**：强 LLM 做规划+编码，小 VLM 做截图质检，中模型驱动 GUI 测试 | WebGen-Agent 验证小 VLM 足以做质检，可大幅降本 | WebGen-Agent |
 | D6 | **块（Block）化组装**，组件 = 若干可交互块的有序集合 | 复用、可测、可单块重生成 | DeepTutor 13-block 体系 |
 | D7 | **可选 RAG grounding**，知识点可锚定到用户知识库 | 防幻觉，支持企业私有知识 | DeepTutor(LlamaIndex) |
@@ -69,7 +69,7 @@
 - **效果**：Claude-3.5-Sonnet 的准确率从 26.4% → 51.9%，外观分 3.0 → 3.9。
 - （可选进阶）**Step-GRPO**：把 `Score_shot + Score_gui` 作为 step-level reward 训练小模型，让 7B 模型逼近闭源模型。Knowling 若要训练自有质检/生成模型，可复用此 reward 设计。
 
-**为 Knowling 的扩展**：通用建站只需「好看 + 能用」两维；学习组件要再加一维**教学分** `F_peda`（准确性 / 是否引导注意力 / 是否有 explorable 探索价值）。
+**为 Knowling 的扩展**：通用建站只需「好看 + 能用」两维；学习组件要再加**教学分** `F_peda`（准确性 / 是否引导注意力 / 是否有 explorable 探索价值），以及**可学会分** `F_learn`（模拟一名已掌握全部前置知识的学习者，只读卡片内容能否真正获得该知识点所需知识——传递充分性，是 `ready` 的最终闸门）。
 
 ### 2.3 Concept Explorer — 知识点拆解与依赖图
 
@@ -300,7 +300,7 @@ def generate_knowling(kp: KnowledgePoint, cfg: Config) -> Knowling:
     blocks = [block_compiler.compile(b, kp, grounding, cfg.llm) for b in spec.blocks]
     candidate = assemble_artifact(blocks, spec.render_target)
 
-    # ⑤ QA LOOP — 质检闭环 (来源: WebGen-Agent, 三维扩展)
+    # ⑤ QA LOOP — 质检闭环 (来源: WebGen-Agent, 四维扩展)
     candidate = qa_loop(candidate, spec, cfg)
 
     # ⑥ ASSEMBLE — 挂载知识图谱 (来源: Concept Explorer)
@@ -323,9 +323,9 @@ def generate_knowling(kp: KnowledgePoint, cfg: Config) -> Knowling:
 
 ## 6. 质检闭环（Knowling 的护城河）
 
-> 在 WebGen-Agent 的「渲染分 + 交互分」基础上加入**教学分**，三维质检。
+> 在 WebGen-Agent 的「渲染分 + 交互分」基础上加入**教学分**与**可学会分**，四维质检。
 
-### 6.1 单轮质检的三个信号
+### 6.1 单轮质检的四个信号
 
 ```python
 def qa_step(artifact, spec) -> StepFeedback:
@@ -357,27 +357,39 @@ def qa_step(artifact, spec) -> StepFeedback:
     #   - 是否达成 learning_objectives
     #   = { score_peda(0-5), suggestions[] }
 
-    return StepFeedback(stage="pedagogy", **F_peda)
+    if F_peda.score_peda < cfg.pedagogy_threshold:
+        return StepFeedback(stage="pedagogy", **F_peda)
+
+    # F4. 可学会反馈 — 强 LLM (学习者模拟) : 知识到底有没有"教进去"
+    F_learn = judge_llm.assess_learnability(artifact_text, spec, kp)
+    #   设定: 扮演一名已掌握 kp.prerequisites 全部前置知识、但尚未学过本点的学习者,
+    #         只能用卡片内容学习 —— 卡片没讲/无法由卡片推导的, 即便是常识也不算学会.
+    #   逐条判定每个 learning_objective: covered / partial / missing + 缺什么(gap).
+    #   与教学分的区别: 教学分看"讲得好不好"(聚焦/准确/探索价值), 可学会分看
+    #                   "够不够把知识传授出去"(传递充分性). 是 ready 的最终闸门.
+    #   = { score_learn(0-5), suggestions[] }   # suggestions 含各 missing 目标的 gap
+
+    return StepFeedback(stage="learn", **F_learn)
 ```
 
 ### 6.2 回溯与选优（来源 WebGen-Agent）
 
 ```python
 def qa_loop(candidate, spec, cfg) -> Knowling:
-    memory = []                      # [(state, score_render, score_interact, score_peda)]
+    memory = []                      # [(state, score_render, score_interact, score_peda, score_learn)]
     state = candidate
     for step in range(cfg.max_qa_steps):
         fb = qa_step(state, spec)
         memory.append((state, fb.scores))
-        if fb.all_pass():            # 三维全部达标
+        if fb.all_pass():            # 四维全部达标
             break
         # 只重编译 fb 指出的失败块
         failed = locate_failed_blocks(fb, spec)
         state = recompile_blocks(state, failed, fb.suggestions, cfg.llm)
         if consecutive_render_errors(memory) >= 5:   # 回溯
             state = backtrack_to_best(memory)
-    # 选优: 先 peda 最高 → 再 interact → 再 render → 仍并列取最新
-    best = select_best(memory, keys=["peda", "interact", "render", "recency"])
+    # 选优: 先 learn 最高 → 再 peda → 再 interact → 再 render → 仍并列取最新
+    best = select_best(memory, keys=["learn", "peda", "interact", "render", "recency"])
     return best
 ```
 
@@ -390,6 +402,7 @@ def qa_loop(candidate, spec, cfg) -> Knowling:
 | 截图质检 | 小 VLM | GLM-4V / Qwen-VL | 多×/轮 |
 | GUI 交互测试 | 中模型 | GLM-4-Air | 1×/轮(达标后) |
 | 教学评审 | 强 LLM | GLM-4.6 / Claude | 1×/轮(前两维过后) |
+| 可学会评审 | 强 LLM | GLM-4.6 / Claude | 1×/轮(前三维过后) |
 
 > WebGen-Agent 已证明小 VLM 做视觉质检足够；把最贵的强 LLM 限制在规划/编码/终审，单 Knowling 成本可压到 < $0.1。
 
