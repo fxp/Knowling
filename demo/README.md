@@ -19,7 +19,11 @@
 **Math-To-Manim 系列**（手写蓝图，灵感来自 [HarleyCoops/Math-To-Manim](https://github.com/HarleyCoops/Math-To-Manim) 与 3Blue1Brown 的可视化）
 - **傅里叶级数逼近方波** — 滑块加入奇次谐波，看方波浮现 + 吉布斯过冲
 - **泰勒级数逼近 eˣ** — 滑块控制项数，多项式逐段咬住 e^x（收敛半径）
-- **圆面积 A = πr²（展开法）** — 同心环拉直叠成三角形，不用积分推出 πr²
+- **圆面积 A = πr²（展开法）** — 同心环拉直叠成三角形，不用积分推出 πr²；**内嵌一段真实渲染的 manim 教学视频**（3Blue1Brown 风格的「圆环→三角形」动画，已 base64 内联，单文件自包含）
+
+**多媒体块示例**
+- **正弦函数** 卡片含一个 `audio` 块：Web Audio 发声，音高跟随 ω、响度跟随 A，把参数「听」出来。
+- **圆面积** 卡片含一个 `manim` 块：编译期用 manim 工具链渲染 Scene → 内联 MP4。视频已**烘焙进蓝图**（`demo/specs/circle_area.json` 的 `content_spec.video`），故 `--recompile` 离线也能复现，无需重装工具链。重新渲染该视频才需要 `[manim]` 工具链（`.venv-manim` + ffmpeg）。
 
 **精选 Explorable**（用最新引擎手写蓝图：每张以「前置知识」开场，四维质检 5/5/5/5 全过）
 - **导数：切线的斜率 f′(x₀)** — 移动切点看切线转动，斜率读数恒为 2x₀

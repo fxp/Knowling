@@ -188,12 +188,16 @@ button:disabled { opacity: .4; cursor: default; }
 .kl-prereq { border-left: 4px solid var(--kl-accent-2); background: linear-gradient(100deg, #e8f7fe, rgba(232,247,254,.2)); }
 .kl-prereq-title { display: flex; align-items: center; gap: 9px; font-size: 19px; margin: 0 0 6px; }
 .kl-prereq-lead { color: var(--kl-muted); font-size: 14.5px; margin: 0 0 14px; }
-.kl-prereq-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: kl-prereq; }
-.kl-prereq-list li { position: relative; padding: 12px 16px 12px 46px; background: var(--kl-bg); border: 1px solid var(--kl-border); border-radius: 12px; }
-.kl-prereq-list li::before { counter-increment: kl-prereq; content: counter(kl-prereq); position: absolute; left: 12px; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: var(--kl-grad); color: #fff; font-size: 13px; font-weight: 700; display: grid; place-items: center; }
+.kl-prereq-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.kl-prereq-item { display: flex; gap: 13px; align-items: flex-start; padding: 13px 16px; background: var(--kl-bg); border: 1px solid var(--kl-border); border-radius: 12px; cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s; }
+.kl-prereq-item:hover { border-color: #bcd9ee; box-shadow: var(--kl-shadow); }
+.kl-prereq-check { width: 20px; height: 20px; flex: none; margin: 1px 0 0; accent-color: var(--kl-accent); cursor: pointer; }
+.kl-prereq-item:has(.kl-prereq-check:checked) { border-color: var(--kl-ok); background: var(--kl-ok-soft); }
+.kl-prereq-body { display: flex; flex-direction: column; }
 .kl-prereq-name { font-weight: 660; }
 .kl-prereq-why { display: block; color: var(--kl-muted); font-size: 14px; margin-top: 3px; }
-.kl-prereq-note { color: var(--kl-muted); font-size: 13px; margin: 14px 0 0; }
+.kl-prereq-gate { margin: 16px 0 0; font-size: 13.5px; font-weight: 640; color: var(--kl-warm); }
+.kl-prereq-gate.is-ok { color: var(--kl-ok); }
 /* ── card deck (one block at a time) ── */
 .kl-deck { margin: 20px 0 4px; }
 .kl-deck-viewport { overflow: hidden; transition: height .35s ease; }
@@ -261,6 +265,26 @@ _DECK_JS = """
   var n = cards.length, idx = 0;
   if (n <= 1) { if (nav) nav.style.display = 'none'; return; }
 
+  // ── prerequisite gate: the gate card blocks advancing past it until every
+  //    checkbox is ticked (user must confirm all prerequisites first) ──
+  var gateEl = deck.querySelector('[data-gate]');
+  var gateCard = gateEl ? gateEl.closest('.kl-card') : null;
+  var gateIdx = gateCard ? cards.indexOf(gateCard) : -1;
+  function gateBoxes() {
+    return gateEl ? Array.prototype.slice.call(gateEl.querySelectorAll('.kl-prereq-check')) : [];
+  }
+  function gatePassed() {
+    return gateIdx < 0 || gateBoxes().every(function (b) { return b.checked; });
+  }
+  function updateGate() {
+    if (!gateEl) return;
+    var note = gateEl.querySelector('[data-prereq-gate]');
+    if (!note) return;
+    var left = gateBoxes().filter(function (b) { return !b.checked; }).length;
+    if (left === 0) { note.textContent = '✓ 已确认全部前置知识，点「下一张」开始学习'; note.classList.add('is-ok'); }
+    else { note.textContent = '还需勾选 ' + left + ' 项 — 确认你都已掌握后才能开始学习'; note.classList.remove('is-ok'); }
+  }
+
   var dots = cards.map(function (_, i) {
     var d = document.createElement('button');
     d.className = 'kl-deck-dot'; d.type = 'button';
@@ -274,8 +298,13 @@ _DECK_JS = """
     track.style.transform = 'translateX(-' + (idx * 100) + '%)';
     prog.textContent = (idx + 1) + ' / ' + n;
     prev.disabled = idx === 0;
-    next.textContent = idx === n - 1 ? '完成 ✓' : '下一张 ›';
-    dots.forEach(function (d, i) { d.classList.toggle('is-active', i === idx); });
+    var locked = !gatePassed();
+    if (idx === n - 1) { next.textContent = '完成 ✓'; next.disabled = false; }
+    else { next.textContent = '下一张 ›'; next.disabled = (idx === gateIdx && locked); }
+    dots.forEach(function (d, i) {
+      d.classList.toggle('is-active', i === idx);
+      d.disabled = (gateIdx >= 0 && locked && i > gateIdx);  // can't jump past the gate
+    });
     setHeight();
   }
   function stopMedia() {
@@ -284,7 +313,11 @@ _DECK_JS = """
     try { window.dispatchEvent(new CustomEvent('knowling:stop-media')); } catch (e) {}
     deck.querySelectorAll('audio, video').forEach(function (m) { try { m.pause(); } catch (e) {} });
   }
-  function go(i) { if (i !== idx) stopMedia(); idx = Math.max(0, Math.min(n - 1, i)); render(); }
+  function go(i) {
+    if (gateIdx >= 0 && !gatePassed() && i > gateIdx) i = gateIdx;  // gated: stay until confirmed
+    if (i !== idx) stopMedia();
+    idx = Math.max(0, Math.min(n - 1, i)); render();
+  }
 
   prev.addEventListener('click', function () { go(idx - 1); });
   next.addEventListener('click', function () { if (idx < n - 1) go(idx + 1); });
@@ -292,11 +325,15 @@ _DECK_JS = """
     if (e.key === 'ArrowLeft') go(idx - 1);
     else if (e.key === 'ArrowRight') go(idx + 1);
   });
+  gateBoxes().forEach(function (b) {
+    b.addEventListener('change', function () { updateGate(); render(); });
+  });
   window.addEventListener('resize', setHeight);
   if (window.ResizeObserver) {
     var ro = new ResizeObserver(function () { setHeight(); });
     cards.forEach(function (c) { ro.observe(c); });
   }
+  updateGate();
   render();
   setTimeout(setHeight, 60); setTimeout(setHeight, 320);
 })();
@@ -317,15 +354,20 @@ def _prereq_card(prerequisites: List[dict]) -> str:
         name = mathspan(p.get("name", ""))
         why = p.get("why")
         why_html = f'<span class="kl-prereq-why">{mathspan(why)}</span>' if why else ""
-        items.append(f'<li><span class="kl-prereq-name">{name}</span>{why_html}</li>')
+        items.append(
+            '<label class="kl-prereq-item">'
+            '<input type="checkbox" class="kl-prereq-check">'
+            f'<span class="kl-prereq-body"><span class="kl-prereq-name">{name}</span>{why_html}</span>'
+            '</label>'
+        )
     lis = "\n".join(items)
     return (
-        '<section class="kl-block kl-prereq">'
-        '<h2 class="kl-prereq-title"><span>🧭</span>学习之前 · 先备好这些前置知识</h2>'
-        '<p class="kl-prereq-lead">这张卡建立在以下知识点之上。其中有不熟悉的，'
-        '建议先补上再继续，学起来会顺畅得多。</p>'
-        f'<ol class="kl-prereq-list">{lis}</ol>'
-        '<p class="kl-prereq-note">都熟悉了？点「下一张」开始学习。</p>'
+        '<section class="kl-block kl-prereq" data-gate="prereq">'
+        '<h2 class="kl-prereq-title"><span>🧭</span>学习之前 · 先确认这些前置知识</h2>'
+        '<p class="kl-prereq-lead">这张卡建立在以下知识点之上。<b>请逐项勾选你已掌握的</b>，'
+        '全部确认后即可开始学习；若有不熟悉的，建议先补上再继续。</p>'
+        f'<div class="kl-prereq-list">{lis}</div>'
+        '<p class="kl-prereq-gate" data-prereq-gate></p>'
         '</section>'
     )
 
