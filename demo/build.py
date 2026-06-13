@@ -255,7 +255,7 @@ header.hero {{ padding:84px 0 36px; text-align:center; }}
 .pipeline .step {{ background:var(--surface); border:1px solid var(--border); padding:7px 15px; border-radius:999px; box-shadow:var(--shadow); }}
 .pipeline .step.qa {{ border-color:transparent; background:var(--grad); color:#fff; }}
 .pipeline .arrow {{ color:#aeb6c6; }}
-.ghbtn {{ margin:22px 0 0; }}
+.ghbtn {{ margin:24px 0 34px; }}
 .ghbtn a {{ display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:999px;
   background:var(--ink); color:#fff; font-size:14px; font-weight:620; box-shadow:var(--shadow);
   transition:transform .14s ease, box-shadow .2s ease; }}
